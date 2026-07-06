@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    # URL подключения: postgres_db заменяем на localhost, так как приложение стучится извне докера
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    username: myuser
+    password: mysecretpassword
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    # database-platform указывает Hibernate генерировать SQL конкретно под PostgreSQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      # ddl-auto: update автоматически создаст таблицы в БД на основе ваших Java-сущностей (Entity)
+      ddl-auto: update
+    show-sql: true # Показывать генерируемые SQL-запросы в консоли IDEA (очень удобно при разработке)
+    properties:
+      hibernate:
+        format_sql: true
