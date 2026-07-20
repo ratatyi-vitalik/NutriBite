@@ -38,8 +38,14 @@
             </div>
 
             <div class="d-flex gap-3 fs-5 pt-2">
-                <button class="btn p-0" aria-label="Share"><i class="bi bi-upload"></i></button>
-                <button class="btn p-0" aria-label="Bookmark"><i class="bi bi-bookmark"></i></button>
+                <button id="fav-btn"
+                        class="btn p-0"
+                        aria-label="Bookmark"
+                        th:data-recipe-id="${recipe.id}">
+                    <i class="bi"
+                       th:classappend="${user != null && recipe.saved.contains(user)} ? 'bi-bookmark-fill text-warning' : 'bi-bookmark'">
+                    </i>
+                </button>
             </div>
         </div>
 
@@ -269,7 +275,6 @@
 <!-- likes -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Находим все кнопки лайков на странице
         const likeButtons = document.querySelectorAll(".js-like-btn");
 
         likeButtons.forEach(button => {
@@ -327,6 +332,50 @@
                     });
             });
         });
+    });
+</script>
+
+<!-- favs -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const favButton = document.getElementById("fav-btn");
+
+        if (favButton) {
+            favButton.addEventListener("click", function () {
+                const recipeId = this.getAttribute("data-recipe-id");
+                const icon = this.querySelector("i");
+
+                fetch(`/save-recipe?recipeId=${recipeId}`, {
+                    method: 'POST'
+                })
+                    .then(response => {
+                        if (response.status === 401) {
+                            alert("Please, sign in to save recipe!");
+                            throw new Error("Unauthorized");
+                        }
+                        if (response.status === 404) {
+                            alert("Recipe not found");
+                            throw new Error("Recipe not found");
+                        }
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.saved) {
+                            icon.classList.remove("bi-bookmark");
+                            icon.classList.add("bi-bookmark-fill", "text-warning");
+                        } else {
+                            icon.classList.remove("bi-bookmark-fill", "text-warning");
+                            icon.classList.add("bi-bookmark");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+            });
+        }
     });
 </script>
 

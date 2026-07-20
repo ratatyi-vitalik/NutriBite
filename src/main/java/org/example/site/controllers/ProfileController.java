@@ -2,6 +2,7 @@ package org.example.site.controllers;
 
 import jakarta.servlet.http.HttpSession;
 import org.example.site.persistent.entity.User;
+import org.example.site.persistent.entity.recipes.Recipe;
 import org.example.site.persistent.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.ui.Model;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 
 @RestController
 public class ProfileController {
@@ -39,6 +41,24 @@ public class ProfileController {
 
         model.addObject("user", currentUser);
 
+        return model;
+    }
+
+    @GetMapping("/profile/favourites")
+    public ModelAndView favourites(HttpSession session) {
+        ModelAndView model = new ModelAndView("favourites");
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return new ModelAndView("redirect:/");
+        } else {
+            try {
+                user = userRepository.findById(user.getId()).get();
+            } catch (Exception e) {
+                return new ModelAndView("redirect:/");
+            }
+        }
+        model.addObject("user", user);
+        model.addObject("recipes", user.getSaved());
         return model;
     }
 

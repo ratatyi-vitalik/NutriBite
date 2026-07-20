@@ -1,5 +1,7 @@
 package org.example.site.controllers;
 
+import jakarta.servlet.http.HttpSession;
+import org.example.site.persistent.entity.User;
 import org.example.site.persistent.entity.recipes.Category;
 import org.example.site.persistent.entity.recipes.Recipe;
 import org.example.site.persistent.repository.CategoryRepository;
@@ -29,8 +31,14 @@ public class SearchController {
     }
 
     @GetMapping("/search-results")
-    public ModelAndView searchResultsPage() {
-        return new ModelAndView("searchResults");
+    public ModelAndView searchResultsPage(HttpSession session) {
+        ModelAndView model = new ModelAndView("searchResults");
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return new ModelAndView("redirect:/");
+        }
+        model.addObject("user", user);
+        return model;
     }
 
     @GetMapping("/search")

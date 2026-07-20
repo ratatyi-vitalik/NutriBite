@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import org.example.site.persistent.entity.User;
 import org.example.site.persistent.entity.comments.Comment;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "recipes")
@@ -58,10 +60,16 @@ public class Recipe {
     @OrderColumn(name = "step_order") // Гарантирует правильный порядок шагов (iterStat.count)
     private List<InstructionStep> instructions;
 
+    @ManyToMany
+    @JoinTable(
+            name = "recipe-favs",
+            joinColumns = @JoinColumn(name = "recipe_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> saved = new HashSet<>();
+
     public Recipe() {
     }
-
-    // Геттеры и Сеттеры
 
     public Long getId() {
         return id;
@@ -165,5 +173,13 @@ public class Recipe {
 
     public void setInstructions(List<InstructionStep> instructions) {
         this.instructions = instructions;
+    }
+
+    public  Set<User> getSaved() {
+        return saved;
+    }
+
+    public void setSaved(Set<User> saved) {
+        this.saved = saved;
     }
 }

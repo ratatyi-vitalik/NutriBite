@@ -1,6 +1,12 @@
 package org.example.site.persistent.entity;
 
 import jakarta.persistence.*;
+import org.example.site.persistent.entity.recipes.Recipe;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -28,6 +34,9 @@ public class User {
     @Column
     private String avatarPath;
 
+    @ManyToMany(mappedBy = "saved")
+    private List<Recipe> saved = new ArrayList<>();
+
     public User() {
     }
 
@@ -36,6 +45,19 @@ public class User {
         this.email = email;
         this.password = password;
         this.subscribed = false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id != null && id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
     public Long getId() {
@@ -92,5 +114,13 @@ public class User {
 
     public void setAvatarPath(String avatarPath) {
         this.avatarPath = avatarPath;
+    }
+
+    public List<Recipe> getSaved() {
+        return saved;
+    }
+
+    public void setSaved(List<Recipe> saved) {
+        this.saved = saved;
     }
 }

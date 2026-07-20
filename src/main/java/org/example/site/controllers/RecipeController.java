@@ -137,4 +137,36 @@ public class RecipeController {
             return ResponseEntity.ok((Map.of("likes", likes.size(), "liked", true)));
         }
     }
+
+    @PostMapping("/save-recipe")
+    public ResponseEntity<?> saveRecipe(@RequestParam Long recipeId, HttpSession session) {
+        User user = (User)session.getAttribute("user");
+        if (user != null) {
+            user = userRepository.findById(user.getId()).get();
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sign in");
+        }
+        Optional<Recipe> optRecipe = recipeRepository.findById(recipeId);
+        if (optRecipe.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Recipe not found!");
+        }
+
+        Recipe recipe = optRecipe.get();
+        boolean saved;
+
+        Set<User> savedByUsers = recipe.getSaved();
+        if (savedByUsers.contains(user)) {
+            savedByUsers.remove(user);
+            saved = false;
+        } else {
+            savedByUsers.add(user);
+            saved = true;
+        }
+
+        recipe.setSaved(savedByUsers);
+        recipeRepository.save(recipe);
+
+        return ResponseEntity.ok(Map.of("saved", saved));
+    }
 }
