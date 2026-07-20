@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Tastebite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: navbar}"></div>
+
+<section class="category-recipes-section">
+    <div class="container">
+        <h1 class="search-page-title">Search results</h1>
+
+        <!-- Верхняя поисковая строка с результатами из макета -->
+        <div class="search-input-container">
+            <input type="text" id="pageSearchInput" class="search-main-input" placeholder="Type to search...">
+            <span class="search-stats" id="searchStats">(0 Recipes)</span>
+            <button class="clear-search-btn" id="pageSearchClearBtn"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Контейнер сетки результатов (4 колонки на больших экранах) -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="searchResultsGrid">
+            <!-- Сюда динамически рендерятся рецепты -->
+        </div>
+
+        <div class="text-center mt-5 d-none" id="loadMoreContainer">
+            <button class="btn-load-more" id="loadMoreBtn">Load More</button>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/header :: modalSignUp}"></div>
+<div th:replace="~{fragments/header :: modalRegister}"></div>
+<div th:replace="~{fragments/header :: searchScript}"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const pageSearchInput = document.getElementById("pageSearchInput");
+        const pageSearchClearBtn = document.getElementById("pageSearchClearBtn");
+        const searchStats = document.getElementById("searchStats");
+        const searchResultsGrid = document.getElementById("searchResultsGrid");
+        const loadMoreContainer = document.getElementById("loadMoreContainer");
+        const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+        let currentQuery = "";
+        let currentPage = 0;
+        const pageSize = 20;
+
+        // Извлекаем query параметр из URL при первой загрузке страницы
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryParam = urlParams.get('query');
+
+        if (queryParam) {
+            currentQuery = queryParam.trim();
+            pageSearchInput.value = currentQuery;
+            executeSearch(currentQuery, false);
+        }
+
+        // Кнопка Load More
+        loadMoreBtn.addEventListener("click", function () {
+            currentPage++;
+            executeSearch(currentQuery, true); // true означает дозагрузку (append)
+        });
+
+        // Очистить строку
+        pageSearchClearBtn.addEventListener("click", function() {
+            pageSearchInput.value = "";
+            searchResultsGrid.innerHTML = "";
+            searchStats.textContent = "(0 Recipes)";
+            loadMoreContainer.classList.add("d-none");
+            currentQuery = "";
+        });
+
+        // Живой поиск прямо на этой странице с дебаунсом
+        function debounce(func, delay = 400) {
+            let timeoutId;
+            return (...args) => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => { func.apply(this, args); }, delay);
+            };
+        }
+
+        pageSearchInput.addEventListener("input", debounce(function() {
+            const query = pageSearchInput.value.trim();
+            if (query === currentQuery) return;
+
+            currentQuery = query;
+            currentPage = 0; // Сбрасываем страницу на первую при новом поиске
+
+            if (currentQuery.length === 0) {
+                searchResultsGrid.innerHTML = "";
+                searchStats.textContent = "(0 Recipes)";
+                loadMoreContainer.classList.add("d-none");
+                return;
+            }
+
+            executeSearch(currentQuery, false);
+        }));
+
+        function executeSearch(query, appendMode) {
+            fetch(`/search-page?query=${encodeURIComponent(query)}&page=${currentPage}`)
+                .then(response => response.json())
+                .then(data => {
+                    renderPageResults(data, appendMode);
+                })
+                .catch(err => console.error("Error fetching search results:", err));
+        }
+
+        function renderPageResults(data, appendMode) {
+            if (!appendMode) {
+                searchResultsGrid.innerHTML = "";
+            }
+
+            const recipes = data.recipes || [];
+            const totalRecipes = data.totalRecipes || 0;
+            const totalPages = data.totalPages || 0;
+
+            searchStats.textContent = `(${totalRecipes} ${totalRecipes === 1 ? 'Recipe' : 'Recipes'})`;
+
+            if (recipes.length === 0 && !appendMode) {
+                searchResultsGrid.innerHTML = `<div class="col-12 text-center text-muted py-5">No recipes found matching your criteria.</div>`;
+                loadMoreContainer.classList.add("d-none");
+                return;
+            }
+
+            // Рендер карточек рецептов в сетку по стилям recipe-card-link
+            recipes.forEach(recipe => {
+                const col = document.createElement("div");
+                col.className = "col";
+                col.innerHTML = `
+                    <a href="/recipe?recipeId=${recipe.id}" class="recipe-card-link">
+                        <div class="recipe-card-img-wrapper">
+                            <img src="${recipe.imagePath ? recipe.imagePath : '/icons/avatar.png'}" class="recipe-card-img" alt="${recipe.title}">
+                        </div>
+                        <h3 class="recipe-card-title">${recipe.title}</h3>
+                    </a>
+                `;
+                searchResultsGrid.appendChild(col);
+            });
+
+            if (currentPage + 1 < totalPages) {
+                loadMoreContainer.classList.remove("d-none");
+            } else {
+                loadMoreContainer.classList.add("d-none");
+            }
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

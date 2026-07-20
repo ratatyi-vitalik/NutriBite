@@ -1,15 +1,31 @@
 package org.example.site.controllers;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import jakarta.servlet.http.HttpSession;
+import org.example.site.persistent.entity.recipes.Category;
+import org.example.site.persistent.repository.CategoryRepository;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
-@Controller
+import java.util.List;
+
+@RestController
 public class HomeController {
+    private final CategoryRepository categoryRepository;
 
-    @GetMapping("/") // Обрабатываем переход на главную страницу
-    public String home(Model model) {
+    public HomeController(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
 
-        return "index";
+    @GetMapping("/")
+    public ModelAndView home(HttpSession session) {
+        ModelAndView model = new ModelAndView("index"); // указываем имя HTML-шаблона
+
+        Object user = session.getAttribute("user");
+        model.addObject("user", user);
+
+        List<Category> categories = categoryRepository.findTop6ByOrderByIdAsc();
+        model.addObject("categories", categories);
+        return model;
     }
 }

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${recipe.title}"></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="recipe-section">
+    <div class="container">
+
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1 class="recipe-title" th:text="${recipe.title}"></h1>
+
+                <div class="recipe-meta flex-wrap">
+                    <span><i class="bi bi-person me-1"></i> <span
+                            th:text="${!#strings.isEmpty(recipe.author?.fullName)} ? ${recipe.author.fullName} : ${recipe.author?.name}"></span></span>
+                    <span><i class="bi bi-calendar3 me-1"></i> <span th:text="${recipe.date}"></span></span>
+                    <span><i class="bi bi-chat-left me-1"></i> <span th:text="${#lists.size(recipe.comments)}"></span></span>
+                    <span class="recipe-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 fs-5 pt-2">
+                <button class="btn p-0" aria-label="Share"><i class="bi bi-upload"></i></button>
+                <button class="btn p-0" aria-label="Bookmark"><i class="bi bi-bookmark"></i></button>
+            </div>
+        </div>
+
+        <p class="recipe-description" th:text="${recipe.description}"></p>
+
+        <div class="recipe-media-container">
+            <img th:src="@{{path}(path=${recipe.imagePath})}" alt="Recipe Image" class="recipe-main-img">
+        </div>
+
+        <div class="d-flex align-items-center mb-5 border-bottom pb-4">
+            <div class="recipe-time-card">
+                <div class="recipe-time-label">Prep Time</div>
+                <div class="recipe-time-value" th:text="${recipe.prepTime}"></div>
+            </div>
+            <div class="recipe-time-card">
+                <div class="recipe-time-label">Cook Time</div>
+                <div class="recipe-time-value" th:text="${recipe.cookTime}"></div>
+            </div>
+            <div class="recipe-time-card">
+                <div class="recipe-time-label">Servings</div>
+                <div class="recipe-time-value" th:text="${recipe.servings}"></div>
+            </div>
+        </div>
+
+        <div class="row g-5 mb-5">
+            <div class="col-lg-7">
+                <h2 class="recipe-subtitle">Ingredients</h2>
+
+                <div th:each="section : ${recipe.ingredientSections}">
+                    <h3 class="ingredient-section-title" th:text="${section.title}">For the crust</h3>
+
+                    <div class="ingredient-item" th:each="ingredient : ${section.ingredients}">
+                        <div class="ingredient-checkbox"></div>
+                        <span th:text="${ingredient.amount + ' ' + ingredient.name}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Блок Nutrition Facts (справа, занимает 5/12 ширины) -->
+            <div class="col-lg-5">
+                <div class="nutrition-card">
+                    <h2 class="nutrition-title">Nutrition Facts</h2>
+
+                    <div class="nutrition-row">
+                        <span class="nutrition-label">Calories</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.calories}"></span>
+                    </div>
+                    <div class="nutrition-row">
+                        <span class="nutrition-label">Total Fat</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.totalFat}"></span>
+                    </div>
+                    <div class="nutrition-row">
+                        <span class="nutrition-label">Saturated Fat</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.saturatedFat}"></span>
+                    </div>
+                    <div class="nutrition-row">
+                        <span class="nutrition-label">Cholesterol</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.cholesterol}"></span>
+                    </div>
+                    <div class="nutrition-row">
+                        <span class="nutrition-label">Sodium</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.sodium}"></span>
+                    </div>
+                    <div class="nutrition-row">
+                        <span class="nutrition-label">Protein</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.protein}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-5" style="color: #E8E8E8;">
+
+        <div class="row">
+            <div class="col-12">
+                <h2 class="recipe-subtitle">Instructions</h2>
+
+                <div class="instructions-list">
+                    <div class="instruction-step" th:each="step, iterStat : ${recipe.instructions}">
+                        <div class="step-number" th:text="${iterStat.count}">1</div>
+                        <p class="step-text" th:text="${step.text}"></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <section class="comments-section">
+        <div class="container">
+
+            <h2 class="comments-header">
+                Comments <span class="comments-count" th:text="'(' + ${#lists.size(recipe.comments)} + ')'">(0)</span>
+            </h2>
+
+            <div class="comments-list">
+
+                <div class="comment-container" th:each="comment : ${recipe.comments}">
+                    <div class="d-flex gap-3">
+                        <img th:src="${comment.author.avatarPath != null ? comment.author.avatarPath : '/icons/avatar.png'}"
+                             alt="Avatar" class="comment-avatar">
+
+                        <div class="flex-grow-1">
+                            <div class="d-flex flex-column">
+                                <h4 class="comment-author-name"
+                                    th:text="${comment.author.fullName != null ? comment.author.fullName : comment.author.name}">
+                                    Jelanee Sen</h4>
+                                <span class="comment-date"
+                                      th:text="${#temporals.format(comment.date, 'dd.MM.yyyy HH:mm')}"></span>
+                            </div>
+
+                            <p class="comment-text" th:text="${comment.text}"></p>
+
+                            <div class="comment-actions">
+                                <button class="comment-action-btn js-reply-btn" type="button"
+                                        th:data-comment-id="${comment.id}"
+                                        th:data-author-name="${comment.author.fullName != null ? comment.author.fullName : comment.author.name}"
+                                        th:data-comment-text="${comment.text}">
+                                    <i class="bi bi-chat-left"></i>
+                                    Reply <span th:text="'(' + ${#lists.size(comment.replies)} + ')'"></span>
+                                </button>
+
+                                <button class="comment-action-btn js-like-btn" type="button"
+                                        th:data-comment-id="${comment.id}"
+                                        th:classappend="${user != null && comment.likes.contains(user)} ? 'text-danger' : ''">
+
+                                    <i class="bi" th:classappend="${user != null && comment.likes.contains(user)} ? 'bi-heart-fill' : 'bi-heart'"></i>
+
+                                    <span class="likes-count" th:text="${comment.getLikes().size()}">0</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="replies-wrapper" th:if="${not #lists.isEmpty(comment.replies)}">
+
+                        <div class="reply-container" th:each="reply : ${comment.replies}">
+                            <div class="d-flex gap-3">
+                                <img th:src="${reply.author.avatarPath != null ? reply.author.avatarPath : '/icons/avatar.png'}"
+                                     alt="Avatar" class="reply-avatar">
+
+                                <div class="flex-grow-1">
+                                    <div class="d-flex flex-column">
+                                        <h4 class="comment-author-name"
+                                            th:text="${reply.author.fullName != null ? reply.author.fullName : reply.author.name}">
+                                            Qiu Xun</h4>
+                                        <span class="comment-date"
+                                              th:text="${#temporals.format(reply.date, 'dd.MM.yyyy HH:mm')}"></span>
+                                    </div>
+
+                                    <p class="comment-text" th:text="${reply.text}"></p>
+
+                                    <div class="comment-actions">
+                                        <button class="comment-action-btn js-reply-btn" type="button"
+                                                th:data-comment-id="${comment.id}"
+                                                th:data-author-name="${reply.author.fullName != null ? reply.author.fullName : reply.author.name}"
+                                                th:data-comment-text="${reply.text}">
+                                            <i class="bi bi-chat-left"></i>
+                                            Reply <span th:text="'(' + ${#lists.size(comment.replies)} + ')'"></span>
+                                        </button>
+
+                                        <button class="comment-action-btn js-like-btn" type="button"
+                                                th:data-comment-id="${comment.id}"
+                                                th:classappend="${user != null && comment.likes.contains(user)} ? 'text-danger' : ''">
+
+                                            <i class="bi" th:classappend="${user != null && comment.likes.contains(user)} ? 'bi-heart-fill' : 'bi-heart'"></i>
+
+                                            <span class="likes-count" th:text="${comment.getLikes().size()}">0</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <section class="write-comment-section" th:if="${user != null}">
+            <div class="container">
+
+                <div class="write-comment-header">
+                    <h3 class="write-comment-title">Write a comment</h3>
+                </div>
+
+                <div id="reply-status-container" class="reply-status-alert d-none flex-column gap-1 mb-2 p-2 px-3 rounded" style="background-color: #f1f3f5; border-left: 4px solid #adb5bd;">
+                    <div class="d-flex align-items-center justify-content-between w-100">
+        <span class="text-secondary small">
+            Replying to <strong id="reply-target-name" class="text-dark">Denis</strong>
+        </span>
+                        <button id="cancel-reply-btn" type="button" class="btn btn-sm btn-link text-danger p-0 text-decoration-none small">
+                            <i class="bi bi-x-circle-fill me-1"></i>Cancel
+                        </button>
+                    </div>
+                    <div id="reply-target-text" class="text-muted small text-truncate" style="max-width: 100%;"></div>
+                </div>
+
+                <form th:action="@{/comment-post}" method="POST" class="comment-form-card">
+            <textarea id="comment-textarea" name="text" class="comment-textarea"
+                      placeholder="Write your comment here..." required></textarea>
+
+                    <input name="recipeId" th:value="${recipe.id}" style="display: none;">
+
+                    <input id="commentId" name="commentId" type="hidden" value="">
+
+                    <div class="d-flex justify-content-end">
+                        <button id="post-button" type="submit" class="btn post-comment-btn">Post comment</button>
+                    </div>
+                </form>
+
+            </div>
+        </section>
+    </section>
+</main>
+
+<div th:replace="~{fragments/header :: modalSignUp}"></div>
+
+<div th:replace="~{fragments/header :: modalRegister}"></div>
+
+<script th:replace="~{fragments/header :: searchScript}"></script>
+
+<!-- likes -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Находим все кнопки лайков на странице
+        const likeButtons = document.querySelectorAll(".js-like-btn");
+
+        likeButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                const commentId = this.getAttribute("data-comment-id");
+                const icon = this.querySelector("i");
+                const countSpan = this.querySelector(".likes-count");
+
+                // Отправляем запрос на ваш новый эндпоинт
+                fetch(`/like-comment?commentId=${commentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                    .then(response => {
+                        // Если сервер ответил 401 (не авторизован)
+                        if (response.status === 401) {
+                            // Здесь в будущем вызовите открытие вашего модального окна регистрации/входа, например:
+                            // openAuthModal();
+                            alert("Пожалуйста, войдите в аккаунт, чтобы ставить лайки!");
+                            throw new Error("Unauthorized");
+                        }
+
+                        // Если сервер ответил 404 (комментарий удален)
+                        if (response.status === 404) {
+                            alert("Этот комментарий больше не существует.");
+                            throw new Error("Comment not found");
+                        }
+
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok");
+                        }
+
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Извлекаем "likes" и "liked" из вашей мапы
+                        countSpan.textContent = data.likes;
+
+                        if (data.liked) {
+                            // Если лайк успешно поставлен
+                            this.classList.add("text-danger");
+                            icon.classList.remove("bi-heart");
+                            icon.classList.add("bi-heart-fill");
+                        } else {
+                            // Если лайк успешно убран
+                            this.classList.remove("text-danger");
+                            icon.classList.remove("bi-heart-fill");
+                            icon.classList.add("bi-heart");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Ошибка при отправке лайка:", error);
+                    });
+            });
+        });
+    });
+</script>
+
+<!-- replies -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const replyButtons = document.querySelectorAll(".js-reply-btn");
+        const commentIdInput = document.getElementById("commentId");
+
+        const replyStatusContainer = document.getElementById("reply-status-container");
+        const replyTargetName = document.getElementById("reply-target-name");
+        const replyTargetText = document.getElementById("reply-target-text"); // Добавлено
+        const cancelReplyBtn = document.getElementById("cancel-reply-btn");
+        const commentTextarea = document.getElementById("comment-textarea");
+
+        replyButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                const commentId = this.getAttribute("data-comment-id");
+                const authorName = this.getAttribute("data-author-name");
+                const commentText = this.getAttribute("data-comment-text"); // Добавлено
+
+                if (commentIdInput) {
+                    commentIdInput.value = commentId || "";
+                }
+
+                if (replyStatusContainer && replyTargetName) {
+                    replyTargetName.textContent = authorName;
+
+                    // Подставляем текст комментария в плашку
+                    if (replyTargetText) {
+                        replyTargetText.textContent = commentText;
+                    }
+
+                    replyStatusContainer.classList.remove("d-none");
+                    replyStatusContainer.classList.add("d-flex");
+                }
+
+                if (commentTextarea) {
+                    const mention = `@${authorName}, `;
+
+                    if (!commentTextarea.value.startsWith(mention)) {
+                        commentTextarea.value = mention + commentTextarea.value.replace(/^@[^,]+,\s*/, '');
+                    }
+
+                    commentTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    commentTextarea.focus();
+                }
+            });
+        });
+
+        function cancelReply() {
+            if (commentIdInput) commentIdInput.value = "";
+
+            if (replyStatusContainer) {
+                replyStatusContainer.classList.add("d-none");
+                replyStatusContainer.classList.remove("d-flex");
+            }
+
+            // Очищаем текст в плашке при отмене
+            if (replyTargetText) {
+                replyTargetText.textContent = "";
+            }
+
+            if (commentTextarea) {
+                commentTextarea.value = commentTextarea.value.replace(/^@[^,]+,\s*/, '');
+            }
+        }
+
+        if (cancelReplyBtn) {
+            cancelReplyBtn.addEventListener("click", cancelReply);
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

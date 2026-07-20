@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Profile</title>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: navbar}"></div>
+
+<main class="profile-section">
+    <div class="container">
+
+        <form th:action="@{/profile}" th:object="${user}" method="POST" class="profile-form" enctype="multipart/form-data">
+
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <h1 class="profile-header-title m-0">Profile</h1>
+            </div>
+
+            <hr class="mb-5" style="color: #E8E8E8;">
+
+            <div class="d-flex align-items-center gap-4 mb-5">
+                <img th:src="${user.avatarPath != null ? user.avatarPath : '/icons/avatar.png'}"
+                     alt="Avatar" class="profile-avatar-lg">
+
+                <div class="d-flex gap-3">
+                    <input type="file" id="pfpInput" name="file" accept="image/png, image/jpeg" style="display: none;" onchange="this.form.action='/changePFP'; this.form.submit();">
+                    <button type="button" class="btn btn-tb-orange" onclick="document.getElementById('pfpInput').click()">Change photo</button>
+                    <button onclick="this.form.action='/deletePFP'; this.form.submit();" type="button" class="btn btn-tb-outline">Delete</button>
+                </div>
+            </div>
+
+            <div class="row col-lg-12">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-top">Full Name</label>
+                    <div class="input-group-custom form-group-custom">
+                        <i class="bi bi-person"></i>
+                        <input type="text" class="form-control-custom" id="profileName" name="name"
+                               th:value="${user.fullName}" th:data-original="${user.fullName}"
+                               placeholder="Full Name" required oninput="checkChanges('profileName', 'btnName')">
+                        <button id="btnName" class="field-link btn btn-link" disabled
+                                onclick="this.form.action='/saveName'; this.form.submit();">Save</button>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-top">Username</label>
+                    <div class="input-group-custom form-group-custom">
+                        <i class="bi bi-at"></i>
+                        <input type="text" class="form-control-custom" id="profileUsername" name="username"
+                               th:value="${user.name}" th:data-original="${user.name}"
+                               placeholder="Username" oninput="checkChanges('profileUsername', 'btnUsername')">
+                        <button id="btnUsername" class="field-link btn btn-link" disabled
+                                onclick="this.form.action='/saveUsername'; this.form.submit();">Save</button>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-top">Email</label>
+                    <div class="input-group-custom form-group-custom">
+                        <i class="bi bi-envelope"></i>
+                        <input type="email" class="form-control-custom" id="profileEmail" name="email"
+                               th:value="${user.email}" placeholder="Email" required>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-top">Password</label>
+                    <div class="input-group-custom form-group-custom">
+                        <i class="bi bi-envelope"></i>
+                        <input type="password" class="form-control-custom text-muted" value="•••••••" readonly>
+                        <a class="field-link" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change</a>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
+        <!--<div class="row col-lg-10">
+            <div class="col-12">
+                <h3 class="profile-subsection-title">Connected Accounts</h3>
+
+                <div class="account-row d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="account-brand-logo fb">facebook</div>
+                        <div class="account-user-info" th:text="${user.fbName != null ? user.fbName : 'Not connected'}">Suzan Miller</div>
+                    </div>
+                    <button type="button" class="btn-disconnect">Disconnect</button>
+                </div>
+
+                <div class="account-row d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="account-brand-logo google">Google</div>
+                        <div class="account-user-info" th:text="${user.email}">suzan@gmail.com</div>
+                    </div>
+                    <button type="button" class="btn-disconnect">Disconnect</button>
+                </div>
+            </div>
+        </div>-->
+
+        <div class="row col-lg-12 mb-5">
+            <div class="col-12">
+                <h3 class="profile-subsection-title">Newsletter</h3>
+                <div class="newsletter-box d-flex justify-content-between align-items-center" th:if="${user.subscribed}">
+                    <span class="text-muted font-size-14">You are currently subscribed to our newsletter</span>
+                    <form th:action="@{/unsubscribe}" method="post">
+                        <button class="btn btn-tb-outline">Unsubscribe</button>
+                    </form>
+                </div>
+                <div class="newsletter-box d-flex justify-content-between align-items-center" th:unless="${user.subscribed}">
+                    <span class="text-muted font-size-14">You are not currently subscribed to our newsletter</span>
+                    <form th:action="@{/subscribe}" method="post">
+                        <button class="btn btn-tb-orange">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row col-lg-12 pt-2">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <form th:action="@{/logout}" method="POST" class="m-0">
+                    <button type="submit" class="btn-signout d-flex align-items-center gap-2">
+                        <i class="bi bi-box-arrow-left fs-5"></i> Sign out
+                    </button>
+                </form>
+                <a href="/profile/delete" class="btn-delete-acc">Delete Account</a>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div class="modal fade custom-modal" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">CHANGE PASSWORD</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div th:if="${ChangePassError}" class="alert alert-danger">
+                <p style="margin: 0;" th:text="${ChangePassError}"></p>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/profile/change-password}" method="POST">
+
+                    <div class="input-group-custom">
+                        <i class="bi bi-shield-lock"></i>
+                        <input type="password" class="form-control-custom" id="oldPassword" name="oldPassword" required placeholder="Old Password">
+                    </div>
+
+                    <div class="input-group-custom">
+                        <i class="bi bi-lock"></i>
+                        <input type="password" class="form-control-custom" id="newPassword" name="newPassword" required placeholder="New Password">
+                    </div>
+
+                    <div class="input-group-custom">
+                        <i class="bi bi-lock"></i>
+                        <input type="password" class="form-control-custom" id="confirmPassword" name="confirmPassword" required placeholder="Confirm New Password">
+                    </div>
+
+                    <button type="submit" class="btn btn-orange">Change</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="alert alert-success m-0 flex-nowrap justify-content-between">
+            <span th:text="${Success}"></span>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="ErrorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="alert alert-danger m-0 flex-nowrap justify-content-between">
+            <span th:text="${Error}"></span>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<script th:replace="~{fragments/header :: searchScript}"></script>
+
+<script th:if="${Success}">
+    document.addEventListener("DOMContentLoaded", function() {
+        var toastEl = document.getElementById('successToast');
+        var toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+        toast.show();
+    });
+</script>
+
+<script th:if="${Error}">
+    document.addEventListener("DOMContentLoaded", function() {
+        var toastEl = document.getElementById('ErrorToast');
+        var toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+        toast.show();
+    });
+</script>
+
+<script th:if="${ChangePassError}">
+    document.addEventListener("DOMContentLoaded", function() {
+        var myModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+        myModal.show();
+    });
+</script>
+
+<script>
+    function checkChanges(inputId, buttonId) {
+        const input = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+        const originalValue = input.getAttribute('data-original');
+        button.disabled = (input.value.trim() === originalValue.trim());
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
