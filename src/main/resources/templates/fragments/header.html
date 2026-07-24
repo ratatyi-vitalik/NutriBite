@@ -86,7 +86,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form th:action="@{/login}" method="POST">
+                <form id="login-form" th:action="@{/login}" method="POST">
                     <div class="input-group-custom">
                         <i class="bi bi-envelope"></i>
                         <input type="email" class="form-control-custom" id="loginEmail" name="email" required placeholder="Email">

@@ -1097,3 +1097,28 @@ body {
     color: #ffffff;
     border-color: var(--tb-black);
 }
+
+/* звёздочки */
+.stars-outer {
+    display: inline-block;
+    position: relative;
+    font-family: 'bootstrap-icons';
+    color: #e4e5e9;
+}
+
+.stars-outer::before {
+    content: "\F588 \F588 \F588 \F588 \F588"; /* 5 иконок bi-star в формате Unicode */
+}
+
+.stars-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #ffc107; /* Цвет закрашенных звёзд */
+}
+
+.stars-inner::before {
+    content: "\F586 \F586 \F586 \F586 \F586"; /* 5 иконок bi-star-fill в формате Unicode */
+}

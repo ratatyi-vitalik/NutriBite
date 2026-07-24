@@ -27,13 +27,12 @@
                             th:text="${!#strings.isEmpty(recipe.author?.fullName)} ? ${recipe.author.fullName} : ${recipe.author?.name}"></span></span>
                     <span><i class="bi bi-calendar3 me-1"></i> <span th:text="${recipe.date}"></span></span>
                     <span><i class="bi bi-chat-left me-1"></i> <span th:text="${#lists.size(recipe.comments)}"></span></span>
-                    <span class="recipe-stars">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                    </span>
+                    <div class="d-inline-flex align-items-center gap-1" th:with="ratingPercent=${(recipe.averageRating / 5.0) * 100}">
+                        <div class="stars-outer fs-5">
+                            <div class="stars-inner" th:style="'width: ' + ${ratingPercent} + '%'"></div>
+                        </div>
+                        <span class="text-muted small ms-1" th:text="${#numbers.formatDecimal(recipe.averageRating, 1, 1)}">4.5</span>
+                    </div>
                 </div>
             </div>
 
@@ -161,17 +160,31 @@
                             <p class="comment-text" th:text="${comment.text}"></p>
 
                             <div class="comment-actions">
+                                <button class="comment-action-btn" type="button"
+                                        data-bs-toggle="modal" data-bs-target="#loginModal"
+                                        th:if="${user == null}">
+                                    <i class="bi bi-chat-left"></i>
+                                    Reply <span th:text="'(' + ${#lists.size(comment.replies)} + ')'"></span>
+                                </button>
                                 <button class="comment-action-btn js-reply-btn" type="button"
                                         th:data-comment-id="${comment.id}"
                                         th:data-author-name="${comment.author.fullName != null ? comment.author.fullName : comment.author.name}"
-                                        th:data-comment-text="${comment.text}">
+                                        th:data-comment-text="${comment.text}"
+                                        th:unless="${user == null}">
                                     <i class="bi bi-chat-left"></i>
                                     Reply <span th:text="'(' + ${#lists.size(comment.replies)} + ')'"></span>
                                 </button>
 
+                                <button class="comment-action-btn" type="button"
+                                        data-bs-toggle="modal" data-bs-target="#loginModal"
+                                        th:if="${user == null}">
+                                    <i class="bi bi-heart"></i>
+                                    <span class="likes-count" th:text="${comment.getLikes().size()}">0</span>
+                                </button>
                                 <button class="comment-action-btn js-like-btn" type="button"
                                         th:data-comment-id="${comment.id}"
-                                        th:classappend="${user != null && comment.likes.contains(user)} ? 'text-danger' : ''">
+                                        th:classappend="${user != null && comment.likes.contains(user)} ? 'text-danger' : ''"
+                                        th:unless="${user == null}">
 
                                     <i class="bi" th:classappend="${user != null && comment.likes.contains(user)} ? 'bi-heart-fill' : 'bi-heart'"></i>
 
@@ -200,20 +213,33 @@
                                     <p class="comment-text" th:text="${reply.text}"></p>
 
                                     <div class="comment-actions">
+                                        <button class="comment-action-btn" type="button"
+                                                data-bs-toggle="modal" data-bs-target="#loginModal"
+                                                th:if="${user == null}">
+                                            <i class="bi bi-chat-left"></i>
+                                            Reply <span th:text="'(' + ${#lists.size(comment.replies)} + ')'"></span>
+                                        </button>
                                         <button class="comment-action-btn js-reply-btn" type="button"
                                                 th:data-comment-id="${comment.id}"
                                                 th:data-author-name="${reply.author.fullName != null ? reply.author.fullName : reply.author.name}"
-                                                th:data-comment-text="${reply.text}">
+                                                th:data-comment-text="${reply.text}"
+                                                th:unless="${user == null}">
                                             <i class="bi bi-chat-left"></i>
                                             Reply <span th:text="'(' + ${#lists.size(comment.replies)} + ')'"></span>
                                         </button>
 
+                                        <button class="comment-action-btn" type="button"
+                                                data-bs-toggle="modal" data-bs-target="#loginModal"
+                                                th:if="${user == null}">
+                                            <i class="bi bi-heart"></i>
+                                            <span class="likes-count" th:text="${comment.getLikes().size()}">0</span>
+                                        </button>
                                         <button class="comment-action-btn js-like-btn" type="button"
                                                 th:data-comment-id="${comment.id}"
-                                                th:classappend="${user != null && comment.likes.contains(user)} ? 'text-danger' : ''">
+                                                th:classappend="${user != null && comment.likes.contains(user)} ? 'text-danger' : ''"
+                                                th:unless="${user == null}">
 
                                             <i class="bi" th:classappend="${user != null && comment.likes.contains(user)} ? 'bi-heart-fill' : 'bi-heart'"></i>
-
                                             <span class="likes-count" th:text="${comment.getLikes().size()}">0</span>
                                         </button>
                                     </div>
@@ -229,7 +255,25 @@
 
         </div>
 
-        <section class="write-comment-section" th:if="${user != null}">
+        <section class="rating-section my-4">
+            <div class="container">
+                <div class="card p-4 text-center border-0 shadow-sm">
+                    <h4 class="mb-2">Rate this recipe</h4>
+                    <p class="text-muted small mb-3">Leave your rating to help others!</p>
+
+                    <div class="user-rating-stars d-flex justify-content-center gap-2 fs-3 text-warning cursor-pointer"
+                         th:data-recipe-id="${recipe.id}">
+                        <i class="bi bi-star js-star" data-score="1"></i>
+                        <i class="bi bi-star js-star" data-score="2"></i>
+                        <i class="bi bi-star js-star" data-score="3"></i>
+                        <i class="bi bi-star js-star" data-score="4"></i>
+                        <i class="bi bi-star js-star" data-score="5"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="write-comment-section">
             <div class="container">
 
                 <div class="write-comment-header">
@@ -248,18 +292,27 @@
                     <div id="reply-target-text" class="text-muted small text-truncate" style="max-width: 100%;"></div>
                 </div>
 
-                <form th:action="@{/comment-post}" method="POST" class="comment-form-card">
-            <textarea id="comment-textarea" name="text" class="comment-textarea"
-                      placeholder="Write your comment here..." required></textarea>
+                <form th:if="${user != null}" th:action="@{/comment-post}" method="post" class="comment-form-card">
+    <textarea id="comment-textarea" name="text" class="comment-textarea"
+              placeholder="Write your comment here..." required></textarea>
 
                     <input name="recipeId" th:value="${recipe.id}" style="display: none;">
-
                     <input id="commentId" name="commentId" type="hidden" value="">
 
                     <div class="d-flex justify-content-end">
-                        <button id="post-button" type="submit" class="btn post-comment-btn">Post comment</button>
+                        <button type="submit" class="btn post-comment-btn">Post comment</button>
                     </div>
                 </form>
+
+                <div th:unless="${user != null}" class="comment-form-card">
+                    <textarea id="draft-comment" class="comment-textarea" placeholder="Write your comment here..."></textarea>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="button" data-bs-toggle="modal" data-bs-target="#loginModal" class="btn post-comment-btn">
+                            Post comment
+                        </button>
+                    </div>
+                </div>
 
             </div>
         </section>
@@ -269,6 +322,17 @@
 <div th:replace="~{fragments/header :: modalSignUp}"></div>
 
 <div th:replace="~{fragments/header :: modalRegister}"></div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+    <div id="ratingToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex alert alert-success m-0 p-0">
+            <div class="toast-body d-flex align-items-center gap-2">
+                <span id="toastMessage"></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
 
 <script th:replace="~{fragments/header :: searchScript}"></script>
 
@@ -447,6 +511,113 @@
         if (cancelReplyBtn) {
             cancelReplyBtn.addEventListener("click", cancelReply);
         }
+    });
+</script>
+
+<!-- textarea -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const DRAFT_KEY = 'pending_comment_draft';
+
+        const loginForm = document.getElementById('login-form');
+        const draftTextarea = document.getElementById('draft-comment');
+        const authCommentTextarea = document.getElementById('comment-textarea');
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', function () {
+                if (draftTextarea && draftTextarea.value.trim() !== '') {
+                    localStorage.setItem(DRAFT_KEY, draftTextarea.value);
+                }
+            });
+        }
+
+        const savedComment = localStorage.getItem(DRAFT_KEY);
+
+        if (savedComment) {
+            if (authCommentTextarea) {
+                authCommentTextarea.value = savedComment;
+                localStorage.removeItem(DRAFT_KEY);
+
+                authCommentTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                authCommentTextarea.focus();
+            }
+            else if (draftTextarea) {
+                draftTextarea.value = savedComment;
+                draftTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+</script>
+
+<!-- rating -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ratingContainer = document.querySelector(".user-rating-stars");
+        if (!ratingContainer) return;
+
+        const stars = ratingContainer.querySelectorAll(".js-star");
+        const recipeId = ratingContainer.getAttribute("data-recipe-id");
+
+        // Функция отрисовки звёзд
+        function renderStars(score) {
+            stars.forEach((star) => {
+                const starScore = parseInt(star.getAttribute("data-score"));
+                if (starScore <= score) {
+                    star.classList.remove("bi-star");
+                    star.classList.add("bi-star-fill");
+                } else {
+                    star.classList.remove("bi-star-fill");
+                    star.classList.add("bi-star");
+                }
+            });
+        }
+
+        // При наведении — подсвечиваем звёзды до текущей
+        stars.forEach((star) => {
+            star.addEventListener("mouseover", function () {
+                const score = parseInt(this.getAttribute("data-score"));
+                renderStars(score);
+            });
+
+            // Отправка оценки на сервер
+            star.addEventListener("click", function () {
+                const score = parseInt(this.getAttribute("data-score"));
+
+                fetch(`/rate-recipe?recipeId=${recipeId}&score=${score}`, {
+                    method: 'POST'
+                })
+                    .then(response => {
+                        if (response.status === 401) {
+                            const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+                            modal.show();
+                            throw new Error("Unauthorized");
+                        }
+                        if (!response.ok) throw new Error("Rating error");
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Обновляем сохраненную оценку пользователя в атрибуте
+                        ratingContainer.setAttribute("data-user-score", data.userScore);
+                        renderStars(data.userScore);
+
+                        const toastElement = document.getElementById('ratingToast');
+                        const toastMessage = document.getElementById("toastMessage")
+
+                        if (toastElement) {
+                            toastMessage.textContent = `Your rating has been saved!`;
+                            const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+                            toast.show();
+                        }
+                    })
+                    .catch(err => console.error(err));
+            });
+        });
+
+        // Когда убираем курсор — возвращаем сохраненную оценку пользователя
+        ratingContainer.addEventListener("mouseleave", function () {
+            const currentUserScore = parseInt(this.getAttribute("data-user-score")) || 0;
+            renderStars(currentUserScore);
+        });
     });
 </script>
 
