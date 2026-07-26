@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<footer class="site-footer" th:fragment="footer">
+    <div class="container">
+        <div class="row gy-4 mb-2 justify-content-between">
+
+            <div class="col-lg-5 col-md-12">
+                <a href="/" class="footer-logo-link">
+                    <img th:src="@{/icons/Logo.svg}" src="/icons/Logo.svg" alt="Tastebite" class="footer-logo">
+                </a>
+                <p class="footer-description">
+                    On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment
+                </p>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="row">
+                    <div class="col-4">
+                        <h6 class="footer-heading">Tastebite</h6>
+                        <ul class="list-unstyled footer-links">
+                            <li><a href="/about">About us</a></li>
+                            <li><a href="/careers">Careers</a></li>
+                            <li><a href="/contact">Contact Us</a></li>
+                            <li><a href="/feedback">Feedback</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="col-4">
+                        <h6 class="footer-heading">Legal</h6>
+                        <ul class="list-unstyled footer-links">
+                            <li><a href="/terms">Terms</a></li>
+                            <li><a href="/conditions">Conditions</a></li>
+                            <li><a href="/cookies">Cookies</a></li>
+                            <li><a href="/copyright">Copyright</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="col-4">
+                        <h6 class="footer-heading">Follow</h6>
+                        <ul class="list-unstyled footer-links">
+                            <li><a href="https://facebook.com" target="_blank" rel="noopener">Facebook</a></li>
+                            <li><a href="https://twitter.com" target="_blank" rel="noopener">Twitter</a></li>
+                            <li><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></li>
+                            <li><a href="https://youtube.com" target="_blank" rel="noopener">Youtube</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <hr class="footer-divider">
+
+        <div class="footer-bottom d-flex flex-column flex-sm-row justify-content-between align-items-center pt-2 pb-2">
+            <p class="copyright-text m-0 mb-3 mb-sm-0">
+                &copy; 2020 Tastebite - All rights reserved
+            </p>
+            <div class="footer-social-icons d-flex gap-4">
+                <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="bi bi-twitter"></i></a>
+                <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="https://youtube.com" target="_blank" aria-label="Youtube"><i class="bi bi-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

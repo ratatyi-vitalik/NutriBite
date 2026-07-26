@@ -319,9 +319,7 @@
     </section>
 </main>
 
-<div th:replace="~{fragments/header :: modalSignUp}"></div>
-
-<div th:replace="~{fragments/header :: modalRegister}"></div>
+<div th:replace="~{fragments/footer :: footer}"></div>
 
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
     <div id="ratingToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
@@ -333,6 +331,12 @@
         </div>
     </div>
 </div>
+
+<div th:replace="~{fragments/header :: modalSignUp}"></div>
+
+<div th:replace="~{fragments/header :: modalRegister}"></div>
+
+<div th:replace="~{fragments/header :: modalForgot}"></div>
 
 <script th:replace="~{fragments/header :: searchScript}"></script>
 
