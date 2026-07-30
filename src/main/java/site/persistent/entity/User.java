@@ -3,6 +3,7 @@ package site.persistent.entity;
 import jakarta.persistence.*;
 import site.persistent.entity.recipes.Recipe;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,9 @@ public class User {
 
     @Column
     private String avatarPath;
+
+    @Column
+    private LocalDateTime lastProposeRecipe;
 
     @ManyToMany(mappedBy = "saved")
     private List<Recipe> saved = new ArrayList<>();
@@ -112,6 +116,14 @@ public class User {
 
     public void setAvatarPath(String avatarPath) {
         this.avatarPath = avatarPath;
+    }
+
+    public LocalDateTime getLastProposeRecipe() {
+        return lastProposeRecipe;
+    }
+
+    public void setLastProposeRecipe(LocalDateTime lastProposeRecipe) {
+        this.lastProposeRecipe = lastProposeRecipe;
     }
 
     public List<Recipe> getSaved() {

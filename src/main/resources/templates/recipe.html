@@ -50,8 +50,18 @@
 
         <p class="recipe-description" th:text="${recipe.description}"></p>
 
-        <div class="recipe-media-container">
-            <img th:src="@{{path}(path=${recipe.imagePath})}" alt="Recipe Image" class="recipe-main-img">
+        <div th:if="${recipe.videoPath != null and !#strings.isEmpty(recipe.videoPath)}" class="ratio ratio-16x9 mb-4">
+            <video controls
+                   class="w-100 rounded"
+                   th:src="@{${recipe.videoPath}}"
+                   th:poster="@{${recipe.imagePath}}">
+            </video>
+        </div>
+
+        <div th:unless="${recipe.videoPath != null and !#strings.isEmpty(recipe.videoPath)}" class="mb-4">
+            <img th:src="@{${recipe.imagePath}}"
+                 alt="Recipe Image"
+                 class="img-fluid rounded w-100 object-fit-cover">
         </div>
 
         <div class="d-flex align-items-center mb-5 border-bottom pb-4">
@@ -93,20 +103,12 @@
                         <span class="nutrition-value" th:text="${recipe.nutrition.calories}"></span>
                     </div>
                     <div class="nutrition-row">
-                        <span class="nutrition-label">Total Fat</span>
-                        <span class="nutrition-value" th:text="${recipe.nutrition.totalFat}"></span>
+                        <span class="nutrition-label">Carbs</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.carbs}"></span>
                     </div>
                     <div class="nutrition-row">
-                        <span class="nutrition-label">Saturated Fat</span>
-                        <span class="nutrition-value" th:text="${recipe.nutrition.saturatedFat}"></span>
-                    </div>
-                    <div class="nutrition-row">
-                        <span class="nutrition-label">Cholesterol</span>
-                        <span class="nutrition-value" th:text="${recipe.nutrition.cholesterol}"></span>
-                    </div>
-                    <div class="nutrition-row">
-                        <span class="nutrition-label">Sodium</span>
-                        <span class="nutrition-value" th:text="${recipe.nutrition.sodium}"></span>
+                        <span class="nutrition-label">Fat</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.fat}"></span>
                     </div>
                     <div class="nutrition-row">
                         <span class="nutrition-label">Protein</span>

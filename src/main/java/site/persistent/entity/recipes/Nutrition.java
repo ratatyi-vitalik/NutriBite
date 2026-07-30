@@ -13,22 +13,24 @@ public class Nutrition {
     @Column
     private String calories;
     
-    @Column(name = "total_fat")
-    private String totalFat;
+    @Column()
+    private String carbs;
 
-    @Column(name = "saturated_fat")
-    private String saturatedFat;
+    @Column()
+    private String fat;
 
-    @Column
-    private String cholesterol;
-
-    @Column
-    private String sodium;
 
     @Column
     private String protein;
 
     public Nutrition() {
+    }
+
+    public Nutrition(String calories, String carbs, String fat, String protein) {
+        this.calories = calories;
+        this.carbs = carbs;
+        this.fat = fat;
+        this.protein = protein;
     }
 
     public Long getId() {
@@ -47,36 +49,20 @@ public class Nutrition {
         this.calories = calories;
     }
 
-    public String getTotalFat() {
-        return totalFat;
+    public String getCarbs() {
+        return carbs;
     }
 
-    public void setTotalFat(String totalFat) {
-        this.totalFat = totalFat;
+    public void setCarbs(String carbs) {
+        this.carbs = carbs;
     }
 
-    public String getSaturatedFat() {
-        return saturatedFat;
+    public String getFat() {
+        return fat;
     }
 
-    public void setSaturatedFat(String saturatedFat) {
-        this.saturatedFat = saturatedFat;
-    }
-
-    public String getCholesterol() {
-        return cholesterol;
-    }
-
-    public void setCholesterol(String cholesterol) {
-        this.cholesterol = cholesterol;
-    }
-
-    public String getSodium() {
-        return sodium;
-    }
-
-    public void setSodium(String sodium) {
-        this.sodium = sodium;
+    public void setFat(String fat) {
+        this.fat = fat;
     }
 
     public String getProtein() {

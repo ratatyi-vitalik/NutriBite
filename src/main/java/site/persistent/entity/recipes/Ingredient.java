@@ -19,6 +19,11 @@ public class Ingredient {
     public Ingredient() {
     }
 
+    public Ingredient(String amount, String name) {
+        this.amount = amount;
+        this.name = name;
+    }
+
     public Long getId() {
         return id;
     }

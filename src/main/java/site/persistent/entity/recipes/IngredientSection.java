@@ -21,6 +21,11 @@ public class IngredientSection {
     public IngredientSection() {
     }
 
+    public IngredientSection(String title, List<Ingredient> ingredients) {
+        this.title = title;
+        this.ingredients = ingredients;
+    }
+
     public Long getId() {
         return id;
     }

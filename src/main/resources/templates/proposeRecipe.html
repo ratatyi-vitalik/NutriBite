@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Recipe - Tastebite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<!-- Шапка -->
+<div th:replace="~{fragments/header :: navbar}"></div>
+
+<!-- Основной контент -->
+<!-- Основной контент -->
+<main class="flex-grow-1 py-5 bg-white">
+    <div class="container" style="max-width: 800px;">
+
+        <div class="text-center mb-5">
+            <h1 class="profile-header-title">Create New Recipe</h1>
+            <p class="text-muted mt-2">Share your delicious recipe with the community!</p>
+        </div>
+
+        <form th:action="@{/recipe/propose}" method="POST" enctype="multipart/form-data" class="profile-form">
+
+            <!-- Основные сведения -->
+            <div class="card p-4 mb-4 border-0 rounded-3 bg-tb-light">
+                <h4 class="mb-4 fw-bold font-serif">Basic Information</h4>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Recipe Title *</label>
+                    <input type="text" class="form-control form-control-tb" required placeholder="e.g. Classic Creamy Carbonara">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Description</label>
+                    <textarea class="form-control form-control-tb" rows="4" placeholder="Briefly describe your dish..."></textarea>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Prep Time</label>
+                        <input type="text" class="form-control form-control-tb" placeholder="15 mins">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Cook Time</label>
+                        <input type="text" class="form-control form-control-tb" placeholder="20 mins">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Servings</label>
+                        <input type="text" class="form-control form-control-tb" placeholder="4 servings">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Загрузка Медиа -->
+            <div class="card p-4 mb-4 border-0 rounded-3 bg-tb-light">
+                <h4 class="mb-4 fw-bold font-serif">Media Files</h4>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Recipe Photo *</label>
+                    <input type="file" class="form-control form-control-tb" name="imageFile" accept="image/*" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Recipe Video (Optional)</label>
+                    <input type="file" class="form-control form-control-tb" name="videoFile"
+                           accept="video/mp4,video/webm,.mp4,.webm">
+                    <div class="form-text">Supported formats: MP4, WebM</div>
+                </div>
+            </div>
+
+            <!-- Пищевая ценность (Nutrition) -->
+            <div class="card p-4 mb-4 border-0 rounded-3 bg-tb-light">
+                <h4 class="mb-4 fw-bold font-serif">Nutrition Facts (Per Serving)</h4>
+
+                <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                        <label class="form-label fw-semibold">Calories</label>
+                        <input type="text" class="form-control form-control-tb" name="calories" placeholder="450 kcal">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label fw-semibold">Carbs</label>
+                        <input type="text" class="form-control form-control-tb" name="carbs" placeholder="25g">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label fw-semibold">Protein</label>
+                        <input type="text" class="form-control form-control-tb" name="protein" placeholder="18g">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label fw-semibold">Fat</label>
+                        <input type="text" class="form-control form-control-tb" name="fat" placeholder="12g">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ингредиенты -->
+            <div class="card p-4 mb-4 border-0 rounded-3 bg-tb-light">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold font-serif m-0">Ingredients</h4>
+                    <button type="button" class="btn btn-tb-outline btn-sm rounded-pill" onclick="addSection()">
+                        <i class="bi bi-plus-lg me-1"></i> Add Section
+                    </button>
+                </div>
+
+                <div id="sections-container">
+                    <!-- Первая секция по умолчанию -->
+                    <div class="card p-3 mb-3 border ingredient-section" data-section-index="0">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <input type="text" class="form-control form-control-tb me-2 fw-bold"
+                                   name="sections[0].title" placeholder="Section Title" value="Main Ingredients" required>
+                            <button type="button" class="btn btn-link text-danger p-0" onclick="removeSection(this)">
+                                <i class="bi bi-trash fs-5"></i>
+                            </button>
+                        </div>
+
+                        <div class="ingredients-list">
+                            <!-- Строка ингредиента -->
+                            <div class="row g-2 mb-2 ingredient-row align-items-center">
+                                <div class="col-4">
+                                    <input type="text" class="form-control form-control-tb"
+                                           name="sections[0].ingredients[0].amount" placeholder="200g">
+                                </div>
+                                <div class="col-7">
+                                    <input type="text" class="form-control form-control-tb"
+                                           name="sections[0].ingredients[0].name" placeholder="Spaghetti" required>
+                                </div>
+                                <div class="col-1 text-end">
+                                    <button type="button" class="btn btn-link text-danger p-0" onclick="removeIngredient(this)">
+                                        <i class="bi bi-trash fs-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addIngredientToSection(this)">
+                            + Add Ingredient
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Инструкции (Шаги приготовления) -->
+            <div class="card p-4 mb-4 border-0 rounded-3 bg-tb-light">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold font-serif m-0">Instructions</h4>
+                    <button type="button" class="btn btn-tb-outline btn-sm rounded-pill" onclick="addStep()">
+                        <i class="bi bi-plus-lg me-1"></i> Add Step
+                    </button>
+                </div>
+
+                <div id="instructions-container">
+                    <!-- Первый шаг -->
+                    <div class="mb-3 instruction-step">
+                        <label class="form-label fw-semibold step-title">Step 1</label>
+                        <div class="d-flex gap-2">
+                            <textarea class="form-control form-control-tb" name="stepDescriptions" rows="2" placeholder="Describe this step..." required></textarea>
+                            <button type="button" class="btn btn-link text-danger align-self-start p-1" onclick="removeStep(this)">
+                                <i class="bi bi-trash fs-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки отправки -->
+            <div class="d-flex justify-content-end gap-3 mt-4">
+                <div id="cooldown-alert" class="alert alert-warning d-none mb-4" role="alert">
+                    <i class="bi bi-clock-history me-2"></i>
+                    Please wait <span id="cooldown-timer" class="fw-bold">00:00</span> before submitting a new recipe.
+                </div>
+                <button type="submit" class="btn btn-tb-orange px-5 py-2">Publish Recipe</button>
+            </div>
+
+        </form>
+    </div>
+</main>
+
+<!-- Подключение футера -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<div th:replace="~{fragments/header :: modalSignUp}"></div>
+
+<div th:replace="~{fragments/header :: modalRegister}"></div>
+
+<div th:replace="~{fragments/header :: modalForgot}"></div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3" th:if="${message != null}">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="alert alert-success m-0 flex-nowrap justify-content-between">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3" th:if="${error}">
+    <div id="ErrorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="alert alert-danger m-0 flex-nowrap justify-content-between">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<script th:replace="~{fragments/header :: searchScript}"></script>
+
+<!-- Скрипт динамического добавления ингредиентов и шагов -->
+<script>
+    let sectionCounter = 1;
+
+    function addSection() {
+        const container = document.getElementById('sections-container');
+        const sectionIndex = sectionCounter++;
+
+        const div = document.createElement('div');
+        div.className = 'card p-3 mb-3 border ingredient-section';
+        div.setAttribute('data-section-index', sectionIndex);
+        div.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <input type="text" class="form-control form-control-tb me-2 fw-bold"
+                   name="sections[${sectionIndex}].title" placeholder="Section Title (e.g. For Sauce)" required>
+            <button type="button" class="btn btn-link text-danger p-0" onclick="removeSection(this)">
+                <i class="bi bi-trash fs-5"></i>
+            </button>
+        </div>
+
+        <div class="ingredients-list">
+            <div class="row g-2 mb-2 ingredient-row align-items-center">
+                <div class="col-4">
+                    <input type="text" class="form-control form-control-tb"
+                           name="sections[${sectionIndex}].ingredients[0].amount" placeholder="e.g. 2 tbsp">
+                </div>
+                <div class="col-7">
+                    <input type="text" class="form-control form-control-tb"
+                           name="sections[${sectionIndex}].ingredients[0].name" placeholder="e.g. Olive oil" required>
+                </div>
+                <div class="col-1 text-end">
+                    <button type="button" class="btn btn-link text-danger p-0" onclick="removeIngredient(this)">
+                        <i class="bi bi-trash fs-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addIngredientToSection(this)">
+            + Add Ingredient
+        </button>
+    `;
+        container.appendChild(div);
+    }
+
+    function addIngredientToSection(btn) {
+        const section = btn.closest('.ingredient-section');
+        const sectionIndex = section.getAttribute('data-section-index');
+        const ingredientsList = section.querySelector('.ingredients-list');
+        const ingredientIndex = ingredientsList.children.length;
+
+        const div = document.createElement('div');
+        div.className = 'row g-2 mb-2 ingredient-row align-items-center';
+        div.innerHTML = `
+        <div class="col-4">
+            <input type="text" class="form-control form-control-tb"
+                   name="sections[${sectionIndex}].ingredients[${ingredientIndex}].amount" placeholder="Amount">
+        </div>
+        <div class="col-7">
+            <input type="text" class="form-control form-control-tb"
+                   name="sections[${sectionIndex}].ingredients[${ingredientIndex}].name" placeholder="Ingredient name" required>
+        </div>
+        <div class="col-1 text-end">
+            <button type="button" class="btn btn-link text-danger p-0" onclick="removeIngredient(this)">
+                <i class="bi bi-trash fs-5"></i>
+            </button>
+        </div>
+    `;
+        ingredientsList.appendChild(div);
+    }
+
+    function removeIngredient(btn) {
+        const list = btn.closest('.ingredients-list');
+        if (list.children.length > 1) {
+            btn.closest('.ingredient-row').remove();
+        }
+    }
+
+    function removeSection(btn) {
+        const container = document.getElementById('sections-container');
+        if (container.children.length > 1) {
+            btn.closest('.ingredient-section').remove();
+        }
+    }
+
+    function addStep() {
+        const container = document.getElementById('instructions-container');
+        const stepCount = container.children.length + 1;
+
+        const div = document.createElement('div');
+        div.className = 'mb-3 instruction-step';
+        div.innerHTML = `
+            <label class="form-label fw-semibold step-title">Step ${stepCount}</label>
+            <div class="d-flex gap-2">
+                <textarea class="form-control" name="stepDescriptions" rows="2" placeholder="Describe this step..." required></textarea>
+                <button type="button" class="btn btn-link text-danger align-self-start p-1" onclick="removeStep(this)">
+                    <i class="bi bi-trash fs-5"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    function removeStep(btn) {
+        const container = document.getElementById('instructions-container');
+        if (container.children.length > 1) {
+            btn.closest('.instruction-step').remove();
+            updateStepNumbers();
+        }
+    }
+
+    function updateStepNumbers() {
+        const steps = document.querySelectorAll('#instructions-container .instruction-step');
+        steps.forEach((step, index) => {
+            step.querySelector('.step-title').textContent = `Step ${index + 1}`;
+        });
+    }
+</script>
+
+<script th:inline="javascript">
+    let secondsToWait = /*[[${secondsToWait}]]*/ 0;
+
+    if (secondsToWait > 0) {
+        const submitBtn = document.getElementById('submit-btn');
+        const cooldownAlert = document.getElementById('cooldown-alert');
+        const timerDisplay = document.getElementById('cooldown-timer');
+
+        // Блокируем кнопку отправки
+        submitBtn.disabled = true;
+        cooldownAlert.classList.remove('d-none');
+
+        const interval = setInterval(() => {
+            secondsToWait--;
+
+            if (secondsToWait <= 0) {
+                clearInterval(interval);
+                submitBtn.disabled = false;
+                cooldownAlert.classList.add('d-none');
+            } else {
+                const mins = Math.floor(secondsToWait / 60);
+                const secs = secondsToWait % 60;
+                timerDisplay.textContent =
+                    `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+        }, 1000);
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

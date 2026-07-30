@@ -43,6 +43,9 @@ public class Recipe {
     @Column
     private String servings;
 
+    @Column(name = "video_path")
+    private String videoPath;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "nutrition_id", referencedColumnName = "id")
     private Nutrition nutrition;
@@ -168,6 +171,14 @@ public class Recipe {
 
     public void setServings(String servings) {
         this.servings = servings;
+    }
+
+    public String getVideoPath() {
+        return videoPath;
+    }
+
+    public void setVideoPath(String videoPath) {
+        this.videoPath = videoPath;
     }
 
     public Nutrition getNutrition() {

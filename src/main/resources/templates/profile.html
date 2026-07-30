@@ -134,13 +134,13 @@
                 <h3 class="profile-subsection-title">Newsletter</h3>
                 <div class="newsletter-box d-flex justify-content-between align-items-center" th:if="${user.subscribed}">
                     <span class="text-muted font-size-14">You are currently subscribed to our newsletter</span>
-                    <form th:action="@{/unsubscribe}" method="post">
+                    <form th:action="@{/profile-unsubscribe}" method="post">
                         <button class="btn btn-tb-outline">Unsubscribe</button>
                     </form>
                 </div>
                 <div class="newsletter-box d-flex justify-content-between align-items-center" th:unless="${user.subscribed}">
                     <span class="text-muted font-size-14">You are not currently subscribed to our newsletter</span>
-                    <form th:action="@{/subscribe}" method="post">
+                    <form th:action="@{/profile-subscribe}" method="post">
                         <button class="btn btn-tb-orange">Subscribe</button>
                     </form>
                 </div>

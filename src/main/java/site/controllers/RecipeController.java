@@ -1,28 +1,28 @@
 package site.controllers;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
+import site.persistent.dto.RecipeForm;
+import site.persistent.entity.ProposedRecipe;
 import site.persistent.entity.comments.Comment;
 import site.persistent.entity.comments.Reply;
-import site.persistent.entity.recipes.Rating;
-import site.persistent.entity.recipes.Recipe;
+import site.persistent.entity.recipes.*;
 import site.persistent.entity.User;
-import site.persistent.repository.CommentRepository;
-import site.persistent.repository.RatingRepository;
-import site.persistent.repository.RecipeRepository;
-import site.persistent.repository.UserRepository;
+import site.persistent.repository.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 public class RecipeController {
@@ -31,13 +31,16 @@ public class RecipeController {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final RatingRepository ratingRepository;
+    private final ProposedRecipeRepository proposedRecipeRepository;
 
     public RecipeController(RecipeRepository recipeRepository, UserRepository userRepository,
-                            CommentRepository commentRepository, RatingRepository ratingRepository) {
+                            CommentRepository commentRepository, RatingRepository ratingRepository,
+                            ProposedRecipeRepository proposedRecipeRepository) {
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
         this.ratingRepository = ratingRepository;
+        this.proposedRecipeRepository = proposedRecipeRepository;
     }
 
     @GetMapping("/recipe")
@@ -214,5 +217,173 @@ public class RecipeController {
         return ResponseEntity.ok(Map.of("average", recipe.getAverageRating(),
                 "totalRatings", recipe.getRatings().size(),
                 "userScore", score));
+    }
+
+    @GetMapping("/recipe/propose")
+    public ModelAndView proposeRecipe(HttpSession session) {
+        ModelAndView model = new ModelAndView("proposeRecipe");
+        User user = (User) session.getAttribute("user");
+        long secondsToWait = 0;
+        if (user != null) {
+            model.addObject("user", user);
+            if (user.getLastProposeRecipe() != null) {
+                LocalDateTime allowedTime = user.getLastProposeRecipe().plusMinutes(5);
+                if (allowedTime.isAfter(LocalDateTime.now())) {
+                    secondsToWait = Duration.between(LocalDateTime.now(), allowedTime).getSeconds();
+                }
+            }
+        }
+
+        model.addObject("secondsToWait", secondsToWait);
+        return model;
+    }
+
+    @PostMapping("/recipe/propose")
+    public RedirectView saveProposedRecipe(
+            @RequestParam("title") String title,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "prepTime", required = false) String prepTime,
+            @RequestParam(value = "cookTime", required = false) String cookTime,
+            @RequestParam(value = "servings", required = false) String servings,
+
+            @RequestParam("imageFile") MultipartFile imageFile,
+            @RequestParam(value = "videoFile", required = false) MultipartFile videoFile,
+
+            @RequestParam(value = "calories", required = false) String calories,
+            @RequestParam(value = "carbs", required = false) String carbs,
+            @RequestParam(value = "protein", required = false) String protein,
+            @RequestParam(value = "fat", required = false) String fat,
+
+            @ModelAttribute RecipeForm recipeForm,
+            @RequestParam("stepDescriptions") List<String> stepDescriptions,
+
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) throws IOException {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return new RedirectView("/");
+        }
+
+        LocalDateTime lastPropose = user.getLastProposeRecipe();
+        if (lastPropose != null && lastPropose.plusMinutes(5).isAfter(LocalDateTime.now())) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Please wait 5 minutes before submitting another recipe!");
+            return new RedirectView("/recipe/propose");
+        }
+
+        ProposedRecipe proposedRecipe = new ProposedRecipe(title, description, prepTime, cookTime,
+                servings, user, LocalDateTime.now(), new Nutrition(calories, carbs, fat, protein));
+
+        if (imageFile.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Empty file!");
+            return new RedirectView("/recipe/propose");
+        }
+
+        proposedRecipe = proposedRecipeRepository.save(proposedRecipe);
+
+        String contentType = imageFile.getContentType();
+        if (contentType == null || !(contentType.equals("image/png") || contentType.equals("image/jpeg"))) {
+            redirectAttributes.addFlashAttribute("error", "Invalid format!");
+            proposedRecipeRepository.delete(proposedRecipe);
+            return new RedirectView("/recipe/propose");
+        }
+
+        try {
+            String originalFilename = imageFile.getOriginalFilename();
+            String extension = "";
+
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+
+            String newFileName = "recipe" + proposedRecipe.getId() + extension;
+            Path physicalPath = Paths.get("uploads/recipes/" + newFileName);
+            Files.write(physicalPath, imageFile.getBytes());
+
+            String webPath = "/uploads/recipes/" + newFileName;
+            proposedRecipe.setImagePath(webPath);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Upload failed!");
+            proposedRecipeRepository.delete(proposedRecipe);
+            return new RedirectView("/recipe/propose");
+        }
+
+        if (videoFile != null && !videoFile.isEmpty()) {
+            contentType = videoFile.getContentType();
+            if (contentType == null || !(contentType.equals("video/mp4") || contentType.equals("video/webm"))) {
+                redirectAttributes.addFlashAttribute("error", "Invalid format!");
+                String webPath = proposedRecipe.getImagePath();
+                Path path = Paths.get(webPath.startsWith("/") ? webPath.substring(1) : webPath);
+                Files.deleteIfExists(path);
+                proposedRecipeRepository.delete(proposedRecipe);
+                return new RedirectView("/recipe/propose");
+            }
+
+            try {
+                String originalFilename = videoFile.getOriginalFilename();
+                String extension = "";
+
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                }
+
+                String newFileName = "recipe" + proposedRecipe.getId() + "video" + extension;
+                Path physicalPath = Paths.get("uploads/recipes/" + newFileName);
+                Files.write(physicalPath, videoFile.getBytes());
+
+                String webPath = "/uploads/recipes/" + newFileName;
+                proposedRecipe.setVideoPath(webPath);
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                redirectAttributes.addFlashAttribute("error", "Upload failed!");
+                String webPath = proposedRecipe.getImagePath();
+                Path path = Paths.get(webPath.startsWith("/") ? webPath.substring(1) : webPath);
+                Files.deleteIfExists(path);
+                proposedRecipeRepository.delete(proposedRecipe);
+                return new RedirectView("/recipe/propose");
+            }
+        }
+
+        List<IngredientSection> ingredientSections = new ArrayList<>();
+        for (RecipeForm.IngredientSectionDto ingSecDto : recipeForm.getSections()) {
+
+            if (ingSecDto == null || ingSecDto.getTitle() == null || ingSecDto.getTitle().isBlank()) {
+                continue;
+            }
+
+            List<Ingredient> ingredients = new ArrayList<>();
+            if (ingSecDto.getIngredients() != null) {
+                for (RecipeForm.IngredientDto ingDto : ingSecDto.getIngredients()) {
+                    if (ingDto != null && ingDto.getName() != null && !ingDto.getName().isBlank()) {
+                        ingredients.add(new Ingredient(ingDto.getAmount(), ingDto.getName()));
+                    }
+                }
+            }
+            ingredientSections.add(new IngredientSection(ingSecDto.getTitle(), ingredients));
+        }
+        proposedRecipe.setIngredientSections(ingredientSections);
+
+        List<InstructionStep> steps = new ArrayList<>();
+        if (stepDescriptions != null) {
+            for (String text : stepDescriptions) {
+                if (text != null && !text.isBlank()) {
+                    steps.add(new InstructionStep(text));
+                }
+            }
+        }
+        proposedRecipe.setInstructions(steps);
+        proposedRecipeRepository.save(proposedRecipe);
+        user.setLastProposeRecipe(LocalDateTime.now());
+        userRepository.save(user);
+        session.setAttribute("user", user);
+
+        redirectAttributes.addFlashAttribute("message", "Recipe was suggested");
+        return new RedirectView("/recipe/propose");
     }
 }

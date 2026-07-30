@@ -1,7 +1,9 @@
 package site.controllers;
 
 import jakarta.servlet.http.HttpSession;
+import site.persistent.entity.Subscriber;
 import site.persistent.entity.User;
+import site.persistent.repository.SubscriberRepository;
 import site.persistent.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,9 +23,11 @@ import java.nio.file.Paths;
 @RestController
 public class ProfileController {
     private final UserRepository userRepository;
+    private final SubscriberRepository subscriberRepository;
 
-    public ProfileController(UserRepository userRepository) {
+    public ProfileController(UserRepository userRepository, SubscriberRepository subscriberRepository) {
         this.userRepository = userRepository;
+        this.subscriberRepository = subscriberRepository;
     }
 
     @GetMapping("/profile")
@@ -59,24 +63,30 @@ public class ProfileController {
         return model;
     }
 
-    @PostMapping("/subscribe")
+    @PostMapping("/profile-subscribe")
     public RedirectView subscribe(HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user != null) {
             user.setSubscribed(true);
             userRepository.save(user);
             session.setAttribute("user", user);
+            if (!subscriberRepository.existsByEmail(user.getEmail().trim().toLowerCase())) {
+                subscriberRepository.save(new Subscriber(user.getEmail().trim().toLowerCase()));
+            }
         }
         return new RedirectView("/profile");
     }
 
-    @PostMapping("/unsubscribe")
+    @PostMapping("/profile-unsubscribe")
     public RedirectView unsubscribe(HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user != null) {
             user.setSubscribed(false);
             userRepository.save(user);
             session.setAttribute("user", user);
+            if (subscriberRepository.existsByEmail(user.getEmail().trim().toLowerCase())) {
+                subscriberRepository.delete(new Subscriber(user.getEmail().trim().toLowerCase()));
+            }
         }
         return new RedirectView("/profile");
     }

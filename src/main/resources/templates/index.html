@@ -38,6 +38,36 @@
     </div>
 </section>
 
+<section class="newsletter-section">
+    <div class="container text-center">
+        <div class="newsletter-content">
+            <h2 class="newsletter-title">Deliciousness<br>to your inbox</h2>
+            <p class="newsletter-subtitle">
+                Enjoy weekly hand picked recipes and<br class="d-none d-sm-inline"> recommendations
+            </p>
+
+            <form id="newsletterForm" th:action="@{/subscribe}" method="POST" class="newsletter-form">
+                <div class="input-group newsletter-input-group">
+                    <input type="email"
+                           id="newsletterEmail"
+                           name="email"
+                           class="form-control newsletter-input"
+                           placeholder="Email Address"
+                           th:value="${user != null ? user.email : ''}"
+                           required
+                           aria-label="Email Address">
+                    <button id="newsletterBtn" class="btn btn-newsletter-join" type="submit">JOIN</button>
+                </div>
+            </form>
+
+            <p class="newsletter-terms">
+                By joining our newsletter you agree to our
+                <a href="/terms" class="newsletter-link">Terms and Conditions</a>
+            </p>
+        </div>
+    </div>
+</section>
+
 <div th:replace="~{fragments/footer :: footer}"></div>
 
 <div th:replace="~{fragments/header :: modalSignUp}"></div>
@@ -64,7 +94,126 @@
     </div>
 </div>
 
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="responseToast" class="toast border-0 bg-transparent" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="toastAlert" class="alert m-0 flex-nowrap justify-content-between d-flex align-items-center">
+            <span id="toastMessage"></span>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 <script th:replace="~{fragments/header :: searchScript}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const emailInput = document.getElementById('newsletterEmail');
+        const submitBtn = document.getElementById('newsletterBtn');
+        const form = document.getElementById('newsletterForm');
+
+        const toastEl = document.getElementById('responseToast');
+        const toastAlert = document.getElementById('toastAlert');
+        const toastMessage = document.getElementById('toastMessage');
+        const bsToast = new bootstrap.Toast(toastEl);
+
+        if (!form) return;
+
+        let debounceTimer;
+        let isSubscribedState = false;
+
+        function showToast(message, isError = false) {
+            toastMessage.textContent = message;
+
+            toastAlert.classList.remove('alert-success', 'alert-danger');
+
+            const closeBtn = toastAlert.querySelector('.btn-close');
+
+            if (isError) {
+                toastAlert.classList.add('alert-danger');
+                closeBtn.classList.add('btn-close-white');
+            } else {
+                toastAlert.classList.add('alert-success');
+                closeBtn.classList.remove('btn-close-white');
+            }
+            bsToast.show();
+        }
+
+        // Проверка подписки
+        async function checkSubscriptionStatus(email) {
+            if (!email || !email.includes('@')) {
+                updateUI(false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`/check-subscription?email=${encodeURIComponent(email)}`);
+                if (response.ok) {
+                    const isSubscribed = await response.json();
+                    updateUI(isSubscribed);
+                }
+            } catch (err) {
+                console.error('Check status error:', err);
+            }
+        }
+
+        // Обновление кнопки и состояния
+        function updateUI(isSubscribed) {
+            isSubscribedState = isSubscribed;
+            if (isSubscribed) {
+                submitBtn.textContent = 'UNSUBSCRIBE';
+                submitBtn.classList.add('btn-outline-danger');
+            } else {
+                submitBtn.textContent = 'JOIN';
+                submitBtn.classList.remove('btn-outline-danger');
+            }
+        }
+
+        if (emailInput.value.trim()) {
+            checkSubscriptionStatus(emailInput.value.trim());
+        }
+
+        emailInput.addEventListener('input', (e) => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                checkSubscriptionStatus(e.target.value.trim());
+            }, 400);
+        });
+
+        // ОБРАБОТКА НАЖАТИЯ КНОПКИ (Без перезагрузки)
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const endpoint = isSubscribedState ? '/unsubscribe' : '/subscribe';
+
+            // Формируем FormData для отправки как @RequestParam
+            const formData = new FormData();
+            formData.append('email', email);
+
+            try {
+                submitBtn.disabled = true;
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showToast(data.message, false);
+                    updateUI(!isSubscribedState);
+                } else {
+                    showToast(data.error || 'Something went wrong', true);
+                }
+            } catch (error) {
+                showToast('Server connection error', true);
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    });
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

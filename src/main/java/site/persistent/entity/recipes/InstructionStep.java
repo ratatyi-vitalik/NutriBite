@@ -11,10 +11,14 @@ public class InstructionStep {
     private Long id;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    private String text; // Текст шага рецепта
+    private String text;
 
     // Конструктор по умолчанию
     public InstructionStep() {
+    }
+
+    public InstructionStep(String text) {
+        this.text = text;
     }
 
     // Геттеры и Сеттеры
