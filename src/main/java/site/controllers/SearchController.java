@@ -1,6 +1,7 @@
 package site.controllers;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import site.persistent.entity.User;
 import site.persistent.entity.recipes.Category;
 import site.persistent.entity.recipes.Recipe;
@@ -31,12 +32,8 @@ public class SearchController {
     }
 
     @GetMapping("/search-results")
-    public ModelAndView searchResultsPage(HttpSession session) {
+    public ModelAndView searchResultsPage(@AuthenticationPrincipal User user) {
         ModelAndView model = new ModelAndView("searchResults");
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return new ModelAndView("redirect:/");
-        }
         model.addObject("user", user);
         return model;
     }

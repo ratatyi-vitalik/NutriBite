@@ -1,6 +1,7 @@
 package site.controllers;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -44,34 +45,24 @@ public class RecipeController {
     }
 
     @GetMapping("/recipe")
-    public ModelAndView recipe(Long recipeId, HttpSession session) {
+    public ModelAndView recipe(Long recipeId, @AuthenticationPrincipal User user) {
         ModelAndView model = new ModelAndView("recipe");
 
         Optional<Recipe> recipe = recipeRepository.findById(recipeId);
         if (recipe.isPresent()) {
             model.addObject("recipe", recipe.get());
-        }
-        else {
+        } else {
             return new ModelAndView("redirects:/");
         }
-
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
-            model.addObject("user", user);
-        }
+        model.addObject("user", user);
         return model;
     }
 
     @PostMapping("/comment-post")
-    public ModelAndView postComment(@RequestParam String text, @RequestParam Long recipeId, @RequestParam(required = false) Long commentId, HttpSession session) {
-        User user = (User)session.getAttribute("user");
-        if (user != null) {
-            user = userRepository.findById(user.getId()).get();
-        }
-        else {
-            return new ModelAndView("redirect:/recipe?recipeId=" + recipeId);
-        }
-
+    public ModelAndView postComment(@RequestParam String text,
+                                    @RequestParam Long recipeId,
+                                    @RequestParam(required = false) Long commentId,
+                                    @AuthenticationPrincipal User user) {
         Recipe recipe = recipeRepository.findById(recipeId).orElse(null);
         if (recipe == null) {
             return new ModelAndView("redirect:/");
@@ -84,8 +75,7 @@ public class RecipeController {
             comment.setDate(LocalDateTime.now());
 
             recipe.getComments().add(comment);
-        }
-        else {
+        } else {
             Reply reply = new Reply();
             reply.setAuthor(user);
             reply.setText(text);
@@ -93,7 +83,7 @@ public class RecipeController {
 
             List<Comment> comments = recipe.getComments();
             Comment comment = null;
-            for (Comment com: recipe.getComments()) {
+            for (Comment com : recipe.getComments()) {
                 if (com.getId().equals(commentId)) {
                     comment = com;
                     break;
@@ -113,21 +103,12 @@ public class RecipeController {
     }
 
     @PostMapping("/like-comment")
-    public ResponseEntity<?> likeComment(@RequestParam Long commentId, HttpSession session) {
-        User user = (User)session.getAttribute("user");
-        if (user != null) {
-            user = userRepository.findById(user.getId()).get();
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Войдите в аккаунт");
-        }
-
+    public ResponseEntity<?> likeComment(@RequestParam Long commentId, @AuthenticationPrincipal User user) {
         Optional<Comment> com = commentRepository.findById(commentId);
         Comment comment;
         if (com.isPresent()) {
             comment = com.get();
-        }
-        else {
+        } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Комментарий не найден");
         }
 
@@ -137,8 +118,7 @@ public class RecipeController {
             comment.setLikes(likes);
             commentRepository.save(comment);
             return ResponseEntity.ok(Map.of("likes", likes.size(), "liked", false));
-        }
-        else {
+        } else {
             likes.add(user);
             comment.setLikes(likes);
             commentRepository.save(comment);
@@ -147,14 +127,7 @@ public class RecipeController {
     }
 
     @PostMapping("/save-recipe")
-    public ResponseEntity<?> saveRecipe(@RequestParam Long recipeId, HttpSession session) {
-        User user = (User)session.getAttribute("user");
-        if (user != null) {
-            user = userRepository.findById(user.getId()).get();
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sign in");
-        }
+    public ResponseEntity<?> saveRecipe(@RequestParam Long recipeId, @AuthenticationPrincipal User user) {
         Optional<Recipe> optRecipe = recipeRepository.findById(recipeId);
         if (optRecipe.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Recipe not found!");
@@ -179,20 +152,9 @@ public class RecipeController {
     }
 
     @PostMapping("/rate-recipe")
-    public ResponseEntity<?> rateRecipe(@RequestParam Long recipeId, @RequestParam int score, HttpSession session) {
-        User user = (User)session.getAttribute("user");
-        if (user != null) {
-            Optional<User> userOpt = userRepository.findById(user.getId());
-            if (userOpt.isEmpty()) {
-                session.removeAttribute("user");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sign in");
-            }
-            user = userOpt.get();
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sign in");
-        }
-
+    public ResponseEntity<?> rateRecipe(@RequestParam Long recipeId,
+                                        @RequestParam int score,
+                                        @AuthenticationPrincipal User user) {
         Optional<Recipe> optRecipe = recipeRepository.findById(recipeId);
         if (optRecipe.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Recipe not found!");
@@ -220,9 +182,8 @@ public class RecipeController {
     }
 
     @GetMapping("/recipe/propose")
-    public ModelAndView proposeRecipe(HttpSession session) {
+    public ModelAndView proposeRecipe(@AuthenticationPrincipal User user) {
         ModelAndView model = new ModelAndView("proposeRecipe");
-        User user = (User) session.getAttribute("user");
         long secondsToWait = 0;
         if (user != null) {
             model.addObject("user", user);
@@ -257,14 +218,9 @@ public class RecipeController {
             @ModelAttribute RecipeForm recipeForm,
             @RequestParam("stepDescriptions") List<String> stepDescriptions,
 
-            HttpSession session,
+            @AuthenticationPrincipal User user,
             RedirectAttributes redirectAttributes
     ) throws IOException {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return new RedirectView("/");
-        }
-
         LocalDateTime lastPropose = user.getLastProposeRecipe();
         if (lastPropose != null && lastPropose.plusMinutes(5).isAfter(LocalDateTime.now())) {
             redirectAttributes.addFlashAttribute("error",
@@ -381,7 +337,6 @@ public class RecipeController {
         proposedRecipeRepository.save(proposedRecipe);
         user.setLastProposeRecipe(LocalDateTime.now());
         userRepository.save(user);
-        session.setAttribute("user", user);
 
         redirectAttributes.addFlashAttribute("message", "Recipe was suggested");
         return new RedirectView("/recipe/propose");

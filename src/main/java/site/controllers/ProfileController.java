@@ -1,11 +1,12 @@
 package site.controllers;
 
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import site.persistent.entity.Subscriber;
 import site.persistent.entity.User;
 import site.persistent.repository.SubscriberRepository;
 import site.persistent.repository.UserRepository;
-import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+import site.service.UserService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,91 +26,65 @@ import java.nio.file.Paths;
 public class ProfileController {
     private final UserRepository userRepository;
     private final SubscriberRepository subscriberRepository;
+    private final UserService userService;
 
-    public ProfileController(UserRepository userRepository, SubscriberRepository subscriberRepository) {
+    public ProfileController(UserRepository userRepository,
+                             SubscriberRepository subscriberRepository,
+                             UserService userService) {
         this.userRepository = userRepository;
         this.subscriberRepository = subscriberRepository;
+        this.userService = userService;
     }
 
     @GetMapping("/profile")
-    public ModelAndView showProfilePage(HttpSession session) {
+    public ModelAndView showProfilePage(@AuthenticationPrincipal User user) {
         ModelAndView model = new ModelAndView("profile");
-
-        User currentUser = (User) session.getAttribute("user");
-
-        if (currentUser == null) {
-            return new ModelAndView("redirect:/");
-        }
-
-        model.addObject("user", currentUser);
-
+        model.addObject("user", user);
         return model;
     }
 
     @GetMapping("/profile/favourites")
-    public ModelAndView favourites(HttpSession session) {
+    public ModelAndView favourites(@AuthenticationPrincipal User user) {
         ModelAndView model = new ModelAndView("favourites");
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return new ModelAndView("redirect:/");
-        } else {
-            try {
-                user = userRepository.findById(user.getId()).get();
-            } catch (Exception e) {
-                return new ModelAndView("redirect:/");
-            }
-        }
         model.addObject("user", user);
         model.addObject("recipes", user.getSaved());
         return model;
     }
 
     @PostMapping("/profile-subscribe")
-    public RedirectView subscribe(HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
-            user.setSubscribed(true);
-            userRepository.save(user);
-            session.setAttribute("user", user);
-            if (!subscriberRepository.existsByEmail(user.getEmail().trim().toLowerCase())) {
-                subscriberRepository.save(new Subscriber(user.getEmail().trim().toLowerCase()));
-            }
+    public RedirectView subscribe(@AuthenticationPrincipal User user) {
+        user.setSubscribed(true);
+        userRepository.save(user);
+        userService.reloadUserInSecurityContext(user);
+        if (!subscriberRepository.existsByEmail(user.getEmail().trim().toLowerCase())) {
+            subscriberRepository.save(new Subscriber(user.getEmail().trim().toLowerCase()));
         }
         return new RedirectView("/profile");
     }
 
     @PostMapping("/profile-unsubscribe")
-    public RedirectView unsubscribe(HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
-            user.setSubscribed(false);
-            userRepository.save(user);
-            session.setAttribute("user", user);
-            if (subscriberRepository.existsByEmail(user.getEmail().trim().toLowerCase())) {
-                subscriberRepository.delete(new Subscriber(user.getEmail().trim().toLowerCase()));
-            }
+    public RedirectView unsubscribe(@AuthenticationPrincipal User user) {
+        user.setSubscribed(false);
+        userRepository.save(user);
+        userService.reloadUserInSecurityContext(user);
+        if (subscriberRepository.existsByEmail(user.getEmail().trim().toLowerCase())) {
+            subscriberRepository.delete(new Subscriber(user.getEmail().trim().toLowerCase()));
         }
         return new RedirectView("/profile");
     }
 
     @PostMapping("/deletePFP")
-    public RedirectView deletePFP(HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
-            user.setAvatarPath(null);
-            userRepository.save(user);
-            session.setAttribute("user", user);
-        }
+    public RedirectView deletePFP(@AuthenticationPrincipal User user) {
+        user.setAvatarPath(null);
+        userRepository.save(user);
+        userService.reloadUserInSecurityContext(user);
         return new RedirectView("/profile");
     }
 
     @PostMapping("/changePFP")
-    public RedirectView changePFP(@RequestParam MultipartFile file, HttpSession session, RedirectAttributes redirectAttributes) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return new RedirectView("/");
-        }
-
+    public RedirectView changePFP(@RequestParam MultipartFile file,
+                                  @AuthenticationPrincipal User user,
+                                  RedirectAttributes redirectAttributes) {
         if (file.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Empty file!");
             return new RedirectView("/profile");
@@ -136,7 +112,7 @@ public class ProfileController {
             user.setAvatarPath(webPath);
 
             userRepository.save(user);
-            session.setAttribute("user", user);
+            userService.reloadUserInSecurityContext(user);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -149,67 +125,52 @@ public class ProfileController {
 
     @PostMapping("/profile/change-password")
     public RedirectView changePassword(@RequestParam String oldPassword,
-                                 @RequestParam String newPassword,
-                                 @RequestParam String confirmPassword,
-                                 HttpSession session, RedirectAttributes redirectAttributes) {
-        User user = (User) session.getAttribute("user");
-
-        if (user != null) {
-            if (BCrypt.checkpw(oldPassword, user.getPassword()) && newPassword.equals(confirmPassword) && !oldPassword.equals(newPassword)) {
-                user.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
-                redirectAttributes.addFlashAttribute("Success", "Password successfully changed!");
-                userRepository.save(user);
-            } else if (!BCrypt.checkpw(oldPassword, user.getPassword())) {
-                redirectAttributes.addFlashAttribute("ChangePassError", "Old password doesn't match");
-            } else if (!newPassword.equals(confirmPassword)) {
-                redirectAttributes.addFlashAttribute("ChangePassError", "New passwords don't match");
-            } else if (oldPassword.equals(newPassword)) {
-                redirectAttributes.addFlashAttribute("ChangePassError", "New and old passwords must not match!");
-            }
-        }
-        else {
-            return new RedirectView("/profile");
+                                       @RequestParam String newPassword,
+                                       @RequestParam String confirmPassword,
+                                       @AuthenticationPrincipal User user,
+                                       RedirectAttributes redirectAttributes) {
+        String changePass = userService.changeUserPassword(user, oldPassword, newPassword, confirmPassword);
+        if (changePass == null) {
+            redirectAttributes.addFlashAttribute("Success", "Password successfully changed!");
+        } else {
+            redirectAttributes.addFlashAttribute("ChangePassError", changePass);
         }
 
         return new RedirectView("/profile");
     }
 
     @PostMapping("/saveName")
-    public RedirectView saveName(@RequestParam String name,  HttpSession session, RedirectAttributes redirectAttributes) {
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
-            user.setFullName(name);
-            redirectAttributes.addFlashAttribute("Success", "Name changed");
-            userRepository.save(user);
-        }
-
+    public RedirectView saveName(@RequestParam String name,
+                                 @AuthenticationPrincipal User user,
+                                 RedirectAttributes redirectAttributes) {
+        user.setFullName(name);
+        redirectAttributes.addFlashAttribute("Success", "Name changed");
+        userRepository.save(user);
+        userService.reloadUserInSecurityContext(user);
         return new RedirectView("/profile");
     }
 
     @PostMapping("/saveUsername")
-    public RedirectView saveUsername(@RequestParam String username,  HttpSession session, RedirectAttributes redirectAttributes) {
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
-
-            if (userRepository.findByName(username).isPresent()) {
-                redirectAttributes.addFlashAttribute("Error", "Username already taken");
-            }
-            else {
-                user.setName(username);
-                redirectAttributes.addFlashAttribute("Success", "Username changed");
-                userRepository.save(user);
-            }
+    public RedirectView saveUsername(@RequestParam String username,
+                                     @AuthenticationPrincipal User user,
+                                     RedirectAttributes redirectAttributes) {
+        if (userRepository.findByName(username).isPresent()) {
+            redirectAttributes.addFlashAttribute("Error", "Username already taken");
+        } else {
+            user.setName(username);
+            redirectAttributes.addFlashAttribute("Success", "Username changed");
+            userRepository.save(user);
+            userService.reloadUserInSecurityContext(user);
         }
 
         return new RedirectView("/profile");
     }
 
     @PostMapping("/profile/delete")
-    public RedirectView deleteProfile(HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
-            userRepository.delete(user);
-        }
+    public RedirectView deleteProfile(@AuthenticationPrincipal User user, HttpServletRequest request) {
+        userRepository.delete(user);
+        request.getSession().invalidate();
+        SecurityContextHolder.clearContext();
         return new RedirectView("/");
     }
 }

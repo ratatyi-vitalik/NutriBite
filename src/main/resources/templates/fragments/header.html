@@ -297,5 +297,20 @@
     });
 </script>
 
+<script th:inline="javascript" th:fragment="openLoginScript">
+    document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Если пользователь получил ошибку входа или перешел по защищенной ссылке без авторизации
+        if (urlParams.has('loginError') || urlParams.has('loginRequired')) {
+            const loginModalElement = document.getElementById('loginModal');
+            if (loginModalElement) {
+                const loginModal = new bootstrap.Modal(loginModalElement);
+                loginModal.show();
+            }
+        }
+    });
+</script>
+
 </body>
 </html>

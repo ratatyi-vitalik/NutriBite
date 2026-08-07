@@ -1,6 +1,7 @@
 package site.controllers;
 
-import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import site.persistent.entity.User;
 import site.persistent.entity.recipes.Category;
 import site.persistent.repository.CategoryRepository;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,11 +20,10 @@ public class CategoryController {
     }
 
     @GetMapping("/categories")
-    public ModelAndView categoriesPage(HttpSession session) {
+    public ModelAndView categoriesPage(@AuthenticationPrincipal User user) {
         ModelAndView model = new ModelAndView("categories");
-
         model.addObject("categories", categoryRepository.findAll());
-        model.addObject("user", session.getAttribute("user"));
+        model.addObject("user", user);
         return model;
     }
 
@@ -36,7 +36,7 @@ public class CategoryController {
             model.addObject("category", category.get());
         }
         else {
-            return new ModelAndView("redirects:/");
+            return new ModelAndView("redirect:/");
         }
 
         return model;

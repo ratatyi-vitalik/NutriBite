@@ -1,12 +1,11 @@
 package site.controllers;
 
-import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.view.RedirectView;
 import site.persistent.entity.Subscriber;
+import site.persistent.entity.User;
 import site.persistent.entity.recipes.Category;
 import site.persistent.repository.CategoryRepository;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,10 +28,9 @@ public class HomeController {
     }
 
     @GetMapping("/")
-    public ModelAndView home(HttpSession session) {
-        ModelAndView model = new ModelAndView("index"); // указываем имя HTML-шаблона
+    public ModelAndView home(@AuthenticationPrincipal User user) {
+        ModelAndView model = new ModelAndView("index");
 
-        Object user = session.getAttribute("user");
         model.addObject("user", user);
 
         List<Category> categories = categoryRepository.findTop6ByOrderByIdAsc();
