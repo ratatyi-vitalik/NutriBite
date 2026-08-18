@@ -7,6 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "subscribers")
 public class Subscriber {
@@ -18,11 +20,15 @@ public class Subscriber {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column
+    private String token;
+
     public Subscriber() {
     }
 
     public Subscriber(String email) {
         this.email = email;
+        token = UUID.randomUUID().toString();
     }
 
     public Long getId() {
@@ -39,5 +45,13 @@ public class Subscriber {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

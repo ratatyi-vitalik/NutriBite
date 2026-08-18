@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposed Recipes | Tastebite Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="admin-section flex-grow-1">
+    <div class="container">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <div>
+                <h1 class="font-serif fw-bold m-0" style="font-size: 32px;">Proposed Recipes</h1>
+                <p class="text-muted small m-0 mt-1">
+                    Pending approval: <span class="fw-bold" th:text="${totalProposedRecipes != null ? totalProposedRecipes : '0'}">0</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${proposedRecipes == null or #lists.isEmpty(proposedRecipes.content)}" class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+            <p class="text-muted fs-5 mt-2">No proposed recipes found.</p>
+        </div>
+
+        <!-- Grid with 12 items (3 rows x 4 cols) -->
+        <div th:unless="${proposedRecipes == null or #lists.isEmpty(proposedRecipes.content)}">
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
+
+                <div class="col" th:each="recipe : ${proposedRecipes.content}">
+                    <div class="admin-recipe-card">
+
+                        <a th:href="@{/admin/proposedRecipe(proposedRecipeId=${recipe.id})}" class="recipe-card-link-wrapper">
+                            <div class="admin-recipe-img-wrapper">
+                                <img th:src="${recipe.imagePath != null ? recipe.imagePath : '/images/placeholder.jpg'}"
+                                     th:alt="${recipe.title}"
+                                     class="admin-recipe-img">
+                            </div>
+
+                            <div class="admin-recipe-body">
+                                <h2 class="admin-recipe-title" th:text="${recipe.title}">Recipe Title</h2>
+                                <div class="text-muted small mt-auto" th:if="${recipe.author != null}">
+                                    <i class="bi bi-person me-1"></i>
+                                    <span th:text="${!#strings.isEmpty(recipe.author?.fullName)} ? ${recipe.author.fullName} : ${recipe.author?.name}">Author</span>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Actions: Accept / Decline -->
+                        <div class="p-2 border-top bg-light d-flex gap-2">
+                            <!-- Accept Form -->
+                            <form th:action="@{/admin/proposed/accept}" method="post" class="w-50">
+                                <input type="hidden" name="proposedRecipeId" th:value="${recipe.id}">
+                                <button type="submit" class="btn btn-sm btn-success w-100">
+                                    <i class="bi bi-check-lg me-1"></i> Accept
+                                </button>
+                            </form>
+
+                            <!-- Decline Modal Trigger Button -->
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger w-50"
+                                    data-bs-toggle="modal"
+                                    th:data-bs-target="'#declineModal-' + ${recipe.id}">
+                                <i class="bi bi-x-lg me-1"></i> Decline
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- Modal for Decline Confirmation -->
+                    <div class="modal fade" th:aria-labelledby="'declineModalLabel-' + ${recipe.id}" tabindex="-1" aria-hidden="true" th:id="'declineModal-' + ${recipe.id}">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header border-0">
+                                    <h5 class="modal-title font-serif fw-bold">Confirm Decline</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to decline the recipe <strong th:text="${recipe.title}"></strong>?
+                                    <p class="text-danger small mt-2 m-0">This operation cannot be undone.</p>
+                                </div>
+                                <div class="modal-footer border-0">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                    <form th:action="@{/admin/proposed/decline}" method="post">
+                                        <input type="hidden" name="proposedRecipeId" th:value="${recipe.id}">
+                                        <button type="submit" class="btn btn-danger">Decline</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${proposedRecipes.totalPages > 1}" aria-label="Proposed recipes navigation">
+                <ul class="pagination justify-content-center">
+
+                    <li class="page-item" th:classappend="${proposedRecipes.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/proposed(page=${proposedRecipes.number - 1})}" aria-label="Previous">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, proposedRecipes.totalPages - 1)}"
+                        th:classappend="${i == proposedRecipes.number} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/admin/proposed(page=${i})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+
+                    <li class="page-item" th:classappend="${proposedRecipes.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/proposed(page=${proposedRecipes.number + 1})}" aria-label="Next">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
+
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/footer :: successToast}"></div>
+<div th:replace="~{fragments/footer :: errorToast}"></div>
+<script th:replace="~{fragments/footer :: toastScript}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,9 +1,11 @@
 package site.persistent.entity.recipes;
 
 import jakarta.persistence.*;
+import site.persistent.entity.ProposedRecipe;
 import site.persistent.entity.User;
 import site.persistent.entity.comments.Comment;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,9 +26,8 @@ public class Recipe {
     @JoinColumn(name = "author_id", referencedColumnName = "id")
     private User author;
 
-    // В зависимости от логики можно использовать LocalDate/LocalDateTime
     @Column(nullable = false)
-    private String date;
+    private LocalDateTime date;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -101,6 +102,42 @@ public class Recipe {
     public Recipe() {
     }
 
+    public Recipe(String title,
+                          String description,
+                          String prepTime,
+                          String cookTime,
+                          String servings,
+                          User author,
+                          LocalDateTime date,
+                          Nutrition nutrition
+    ) {
+        this.title = title;
+        this.description = description;
+        this.prepTime = prepTime;
+        this.cookTime = cookTime;
+        this.servings = servings;
+        this.author = author;
+        this.date = date;
+        this.nutrition = nutrition;
+    }
+
+    public Recipe(ProposedRecipe proposedRecipe) {
+        this.title = proposedRecipe.getTitle();
+        this.author = proposedRecipe.getAuthor();
+        this.date = proposedRecipe.getDate();
+        this.description = proposedRecipe.getDescription();
+        this.imagePath = proposedRecipe.getImagePath();
+        if (proposedRecipe.getVideoPath() != null) {
+            this.videoPath = proposedRecipe.getVideoPath();
+        }
+        this.prepTime = proposedRecipe.getPrepTime();
+        this.cookTime = proposedRecipe.getCookTime();
+        this.servings = proposedRecipe.getServings();
+        this.nutrition = proposedRecipe.getNutrition();
+        this.ingredientSections = proposedRecipe.getIngredientSections();
+        this.instructions = proposedRecipe.getInstructions();
+    }
+
     public Long getId() {
         return id;
     }
@@ -125,11 +162,11 @@ public class Recipe {
         this.author = author;
     }
 
-    public String getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 

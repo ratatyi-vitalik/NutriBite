@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Newsletter | Tastebite Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<header class="custom-navbar">
+    <div class="container">
+        <div class="row align-items-center">
+
+            <div class="col-3 col-lg-2">
+                <a href="/static">
+                    <img th:src="@{/icons/Logo.svg}" alt="logo">
+                </a>
+            </div>
+
+        </div>
+    </div>
+</header>
+
+<main class="admin-section flex-grow-1 py-5">
+    <div class="container">
+
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <div>
+                <h1 class="font-serif fw-bold m-0" style="font-size: 32px;">Send Newsletter</h1>
+                <p class="text-muted small m-0 mt-1">Create and send updates or news to your subscribers</p>
+            </div>
+            <div>
+                <button type="button"
+                        class="recipient-badge border-0 cursor-pointer d-inline-flex align-items-center gap-1"
+                        data-bs-toggle="modal"
+                        data-bs-target="#subscribersModal">
+                    <i class="bi bi-people-fill me-1"></i>
+                    Subscribers: <strong id="subscribersCountText" th:text="${subscribersCount ?: 0}">0</strong>
+                    <i class="bi bi-gear-fill ms-1 text-muted fs-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="newsletter-card">
+                    <h4 class="font-serif fw-bold mb-4">Email Details</h4>
+
+                    <form th:action="@{/admin/mail/send}" method="post" enctype="multipart/form-data">
+
+                        <div class="mb-3">
+                            <label for="title" class="form-label fw-semibold">Category / Badge Tag</label>
+                            <input type="text"
+                                   class="form-control form-control-tb"
+                                   id="title"
+                                   name="title"
+                                   placeholder="e.g. Weekly News, Special Edition"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="subject" class="form-label fw-semibold">Email Subject (Headline)</label>
+                            <input type="text"
+                                   class="form-control form-control-tb"
+                                   id="subject"
+                                   name="subject"
+                                   placeholder="Enter email subject line..."
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="content" class="form-label fw-semibold">Message / Content</label>
+                            <textarea class="form-control form-control-tb"
+                                      id="content"
+                                      name="content"
+                                      rows="7"
+                                      required></textarea>
+                        </div>
+
+                        <div class="row g-2 mb-4">
+                            <div class="col-md-6">
+                                <label for="ctaText" class="form-label fw-semibold">Button Text (CTA)</label>
+                                <input type="text"
+                                       class="form-control form-control-tb"
+                                       id="ctaText"
+                                       name="ctaText"
+                                       placeholder="Visit Website">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="ctaUrl" class="form-label fw-semibold">Button Link URL</label>
+                                <input type="url"
+                                       class="form-control form-control-tb"
+                                       id="ctaUrl"
+                                       name="ctaUrl"
+                                       placeholder="https://tastebite.com/recipe/1">
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end pt-3 border-top">
+                            <button type="button" class="btn btn-tb-outline" onclick="updatePreview()">
+                                <i class="bi bi-eye me-1"></i> Preview
+                            </button>
+                            <button type="submit" class="btn btn-tb-orange">
+                                <i class="bi bi-send me-1"></i> Send Newsletter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="newsletter-card">
+                    <h4 class="font-serif fw-bold mb-3">Live Preview</h4>
+                    <p class="text-muted small mb-3">This is how the email card will appear to subscribers.</p>
+
+                    <div class="preview-box" id="previewArea">
+                        <span class="badge bg-warning text-dark mb-2" id="prevBadge">SPECIAL EDITION</span>
+                        <h4 class="font-serif fw-bold text-dark" id="prevSubject">Your Headline Here</h4>
+                        <hr>
+                        <p class="text-secondary small" id="prevContent">Your message content will appear here as you fill out the form...</p>
+                        <div class="text-center mt-4">
+                            <span class="btn btn-tb-orange btn-sm disabled" id="prevBtn">Visit Website</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<div class="modal fade custom-modal" id="subscribersModal" tabindex="-1" aria-labelledby="subscribersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h3 class="modal-title" id="subscribersModalLabel">Newsletter Subscribers</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="input-group-custom mb-4">
+                    <i class="bi bi-search"></i>
+                    <input type="text"
+                           id="subscriberSearchInput"
+                           class="form-control-custom"
+                           placeholder="Search subscriber by email...">
+                </div>
+
+                <div class="subscribers-list-container" style="max-height: 350px; overflow-y: auto;">
+                    <ul class="list-group list-group-flush" id="subscribersList">
+                    </ul>
+
+                    <div id="noSubscribersFound" class="text-center py-4 text-muted d-none">
+                        <i class="bi bi-envelope-x fs-3 d-block mb-2"></i>
+                        No subscribers found matching your search.
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 pt-3">
+                <div class="w-100 d-flex justify-content-between align-items-center text-muted small">
+                    <span>Total count: <strong id="modalTotalCount">0</strong></span>
+                    <button type="button" class="btn btn-tb-outline btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: successToast}"></div>
+<div th:replace="~{fragments/footer :: errorToast}"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const subscribersModal = document.getElementById('subscribersModal');
+        const searchInput = document.getElementById('subscriberSearchInput');
+        const subscribersList = document.getElementById('subscribersList');
+        const noResultsMsg = document.getElementById('noSubscribersFound');
+        const modalTotalCount = document.getElementById('modalTotalCount');
+        const subscribersCountText = document.getElementById('subscribersCountText');
+
+        let subscribersData = [];
+        let searchDebounceTimeout = null;
+
+        if (subscribersModal) {
+            subscribersModal.addEventListener('show.bs.modal', function () {
+                if (searchInput) searchInput.value = '';
+                fetchSubscribers();
+            });
+        }
+
+        // 1. Загрузка подписчиков с сервера (поддерживает поиск)
+        function fetchSubscribers(query = '', page = 0) {
+            const url = `/admin/api/subscribers?page=${page}` + (query ? `&query=${encodeURIComponent(query)}` : '');
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json();
+                })
+                .then(emails => {
+                    subscribersData = emails;
+                    renderSubscribers(subscribersData);
+                })
+                .catch(err => {
+                    console.error('Failed to load subscribers:', err);
+                    subscribersList.innerHTML = `<li class="list-group-item text-danger text-center py-3">Error loading subscribers list</li>`;
+                });
+        }
+
+        // 2. Отрисовка элементов
+        function renderSubscribers(list) {
+            subscribersList.innerHTML = '';
+
+            if (modalTotalCount) modalTotalCount.innerText = list.length;
+
+            if (list.length === 0) {
+                noResultsMsg.classList.remove('d-none');
+                return;
+            } else {
+                noResultsMsg.classList.add('d-none');
+            }
+
+            list.forEach(email => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center px-2 py-2 border-bottom subscriber-item';
+                li.setAttribute('data-email', email);
+
+                li.innerHTML = `
+                <span class="fw-medium text-dark">${escapeHtml(email)}</span>
+                <button type="button"
+                        class="btn btn-sm text-danger btn-link p-1 text-decoration-none delete-btn"
+                        title="Delete subscriber"
+                        onclick="removeSubscriber('${escapeHtml(email)}', this)">
+                    <i class="bi bi-trash3 fs-6"></i>
+                </button>
+            `;
+                subscribersList.appendChild(li);
+            });
+        }
+
+        // 3. Серверный поиск с задержкой 300мс (Debounce)
+        if (searchInput) {
+            searchInput.addEventListener('input', function (e) {
+                clearTimeout(searchDebounceTimeout);
+                const query = e.target.value.trim();
+
+                searchDebounceTimeout = setTimeout(() => {
+                    fetchSubscribers(query, 0);
+                }, 300);
+            });
+        }
+
+        // 4. Удаление подписчика
+        window.removeSubscriber = function (email, btnElement) {
+            if (!confirm(`Are you sure you want to remove ${email} from subscribers?`)) return;
+
+            btnElement.disabled = true;
+
+            fetch(`/admin/api/subscribers?email=${encodeURIComponent(email)}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        subscribersData = subscribersData.filter(e => e !== email);
+                        const listItem = btnElement.closest('.subscriber-item');
+
+                        if (listItem) {
+                            listItem.style.transition = 'opacity 0.3s ease';
+                            listItem.style.opacity = '0';
+                            setTimeout(() => {
+                                listItem.remove();
+                                if (modalTotalCount) modalTotalCount.innerText = subscribersData.length;
+
+                                // Уменьшаем общий счетчик на странице
+                                if (subscribersCountText) {
+                                    const currentTotal = parseInt(subscribersCountText.innerText) || 0;
+                                    subscribersCountText.innerText = Math.max(0, currentTotal - 1);
+                                }
+
+                                if (subscribersData.length === 0) {
+                                    noResultsMsg.classList.remove('d-none');
+                                }
+                            }, 300);
+                        }
+                    } else {
+                        alert('Failed to delete subscriber.');
+                        btnElement.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    console.error('Error deleting subscriber:', err);
+                    alert('An error occurred while deleting.');
+                    btnElement.disabled = false;
+                });
+        };
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    });
+</script>
+
+<script th:replace="~{fragments/footer :: toastScript}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function updatePreview() {
+        const category = document.getElementById('title').value || 'SPECIAL EDITION';
+        const subject = document.getElementById('subject').value || 'Your Headline Here';
+        const content = document.getElementById('content').value || 'Your message content will appear here...';
+        const ctaText = document.getElementById('ctaText').value || 'Visit Website';
+
+        document.getElementById('prevBadge').innerText = category.toUpperCase();
+        document.getElementById('prevSubject').innerText = subject;
+        document.getElementById('prevContent').innerText = content;
+        document.getElementById('prevBtn').innerText = ctaText;
+    }
+
+    // Input listeners for real-time preview updates
+    document.getElementById('title').addEventListener('input', updatePreview);
+    document.getElementById('subject').addEventListener('input', updatePreview);
+    document.getElementById('content').addEventListener('input', updatePreview);
+    document.getElementById('ctaText').addEventListener('input', updatePreview);
+</script>
+</body>
+</html>

@@ -67,5 +67,33 @@
     </div>
 </footer>
 
+<div class="toast-container position-fixed bottom-0 end-0 p-3" th:if="${message != null}" th:fragment="successToast">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="alert alert-success m-0 flex-nowrap justify-content-between d-flex">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3" th:if="${error != null}" th:fragment="errorToast">
+    <div id="ErrorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="alert alert-danger m-0 flex-nowrap justify-content-between d-flex">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<script th:fragment="toastScript">
+    document.addEventListener("DOMContentLoaded", function() {
+        var successEl = document.getElementById('successToast');
+        if (successEl) new bootstrap.Toast(successEl, { delay: 4000 }).show();
+
+        var errorEl = document.getElementById('ErrorToast');
+        if (errorEl) new bootstrap.Toast(errorEl, { delay: 4000 }).show();
+    });
+</script>
+
 </body>
 </html>

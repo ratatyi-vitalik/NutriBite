@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${recipe.title}"></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="recipe-section">
+    <div class="container">
+
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1 class="recipe-title" th:text="${recipe.title}"></h1>
+
+                <div class="recipe-meta flex-wrap">
+                    <span><i class="bi bi-person me-1"></i> <span
+                            th:text="${!#strings.isEmpty(recipe.author?.fullName)} ? ${recipe.author.fullName} : ${recipe.author?.name}"></span></span>
+                    <span><i class="bi bi-calendar3 me-1"></i> <span th:text="${recipe.date}"></span></span>
+                </div>
+            </div>
+        </div>
+
+        <p class="recipe-description" th:text="${recipe.description}"></p>
+
+        <div th:if="${recipe.videoPath != null and !#strings.isEmpty(recipe.videoPath)}" class="ratio ratio-16x9 mb-4">
+            <video controls
+                   class="w-100 rounded"
+                   th:src="@{${recipe.videoPath}}"
+                   th:poster="@{${recipe.imagePath}}">
+            </video>
+        </div>
+
+        <div th:unless="${recipe.videoPath != null and !#strings.isEmpty(recipe.videoPath)}" class="mb-4">
+            <img th:src="@{${recipe.imagePath}}"
+                 alt="Recipe Image"
+                 class="img-fluid rounded w-100 object-fit-cover">
+        </div>
+
+        <div class="d-flex align-items-center mb-5 border-bottom pb-4">
+            <div class="recipe-time-card">
+                <div class="recipe-time-label">Prep Time</div>
+                <div class="recipe-time-value" th:text="${recipe.prepTime}"></div>
+            </div>
+            <div class="recipe-time-card">
+                <div class="recipe-time-label">Cook Time</div>
+                <div class="recipe-time-value" th:text="${recipe.cookTime}"></div>
+            </div>
+            <div class="recipe-time-card">
+                <div class="recipe-time-label">Servings</div>
+                <div class="recipe-time-value" th:text="${recipe.servings}"></div>
+            </div>
+        </div>
+
+        <div class="row g-5 mb-5">
+            <div class="col-lg-7">
+                <h2 class="recipe-subtitle">Ingredients</h2>
+
+                <div th:each="section : ${recipe.ingredientSections}">
+                    <h3 class="ingredient-section-title" th:text="${section.title}">For the crust</h3>
+
+                    <div class="ingredient-item" th:each="ingredient : ${section.ingredients}">
+                        <div class="ingredient-checkbox"></div>
+                        <span th:text="${ingredient.amount + ' ' + ingredient.name}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="nutrition-card">
+                    <h2 class="nutrition-title">Nutrition Facts</h2>
+
+                    <div class="nutrition-row">
+                        <span class="nutrition-label">Calories</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.calories}"></span>
+                    </div>
+                    <div class="nutrition-row">
+                        <span class="nutrition-label">Carbs</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.carbs}"></span>
+                    </div>
+                    <div class="nutrition-row">
+                        <span class="nutrition-label">Fat</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.fat}"></span>
+                    </div>
+                    <div class="nutrition-row">
+                        <span class="nutrition-label">Protein</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.protein}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-5" style="color: #E8E8E8;">
+
+        <div class="row">
+            <div class="col-12">
+                <h2 class="recipe-subtitle">Instructions</h2>
+
+                <div class="instructions-list">
+                    <div class="instruction-step" th:each="step, iterStat : ${recipe.instructions}">
+                        <div class="step-number" th:text="${iterStat.count}">1</div>
+                        <p class="step-text" th:text="${step.text}"></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

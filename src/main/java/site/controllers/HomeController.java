@@ -62,4 +62,12 @@ public class HomeController {
     public boolean checkSubscription(@RequestParam String email) {
         return subscriberRepository.existsByEmail(email.trim().toLowerCase());
     }
+
+    @PostMapping("/unsubscribe")
+    public ResponseEntity<String> showUnsubscribePage(@RequestParam String token) {
+        if (subscriberRepository.existsByToken(token)) {
+            subscriberRepository.deleteByToken(token);
+        }
+        return ResponseEntity.ok("Unsubscribed successfully");
+    }
 }

@@ -154,7 +154,9 @@
                         <i class="bi bi-box-arrow-left fs-5"></i> Sign out
                     </button>
                 </form>
-                <a href="/profile/delete" class="btn-delete-acc">Delete Account</a>
+                <form th:action="@{/profile/delete}" method="post">
+                    <button type="submit" class="btn-delete-acc">Удалить профиль</button>
+                </form>
             </div>
         </div>
 
@@ -196,41 +198,9 @@
     </div>
 </div>
 
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="alert alert-success m-0 flex-nowrap justify-content-between">
-            <span th:text="${Success}"></span>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    </div>
-</div>
-
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="ErrorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="alert alert-danger m-0 flex-nowrap justify-content-between">
-            <span th:text="${Error}"></span>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    </div>
-</div>
-
-<script th:replace="~{fragments/header :: searchScript}"></script>
-
-<script th:if="${Success}">
-    document.addEventListener("DOMContentLoaded", function() {
-        var toastEl = document.getElementById('successToast');
-        var toast = new bootstrap.Toast(toastEl, { delay: 5000 });
-        toast.show();
-    });
-</script>
-
-<script th:if="${Error}">
-    document.addEventListener("DOMContentLoaded", function() {
-        var toastEl = document.getElementById('ErrorToast');
-        var toast = new bootstrap.Toast(toastEl, { delay: 5000 });
-        toast.show();
-    });
-</script>
+<div th:replace="~{fragments/footer :: successToast}"></div>
+<div th:replace="~{fragments/footer :: errorToast}"></div>
+<script th:replace="~{fragments/footer :: toastScript}"></script>
 
 <script th:if="${ChangePassError}">
     document.addEventListener("DOMContentLoaded", function() {
@@ -244,7 +214,7 @@
         const input = document.getElementById(inputId);
         const button = document.getElementById(buttonId);
         const originalValue = input.getAttribute('data-original');
-        button.disabled = (input.value.trim() === originalValue.trim());
+        button.disabled = (input.value === originalValue);
     }
 </script>
 

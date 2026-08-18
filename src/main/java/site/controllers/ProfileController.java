@@ -1,8 +1,10 @@
 package site.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import site.persistent.entity.Subscriber;
 import site.persistent.entity.User;
 import site.persistent.repository.SubscriberRepository;
@@ -131,7 +133,7 @@ public class ProfileController {
                                        RedirectAttributes redirectAttributes) {
         String changePass = userService.changeUserPassword(user, oldPassword, newPassword, confirmPassword);
         if (changePass == null) {
-            redirectAttributes.addFlashAttribute("Success", "Password successfully changed!");
+            redirectAttributes.addFlashAttribute("success", "Password successfully changed!");
         } else {
             redirectAttributes.addFlashAttribute("ChangePassError", changePass);
         }
@@ -144,7 +146,7 @@ public class ProfileController {
                                  @AuthenticationPrincipal User user,
                                  RedirectAttributes redirectAttributes) {
         user.setFullName(name);
-        redirectAttributes.addFlashAttribute("Success", "Name changed");
+        redirectAttributes.addFlashAttribute("success", "Name changed");
         userRepository.save(user);
         userService.reloadUserInSecurityContext(user);
         return new RedirectView("/profile");
@@ -155,10 +157,10 @@ public class ProfileController {
                                      @AuthenticationPrincipal User user,
                                      RedirectAttributes redirectAttributes) {
         if (userRepository.findByName(username).isPresent()) {
-            redirectAttributes.addFlashAttribute("Error", "Username already taken");
+            redirectAttributes.addFlashAttribute("error", "Username already taken");
         } else {
             user.setName(username);
-            redirectAttributes.addFlashAttribute("Success", "Username changed");
+            redirectAttributes.addFlashAttribute("success", "Username changed");
             userRepository.save(user);
             userService.reloadUserInSecurityContext(user);
         }
@@ -167,10 +169,11 @@ public class ProfileController {
     }
 
     @PostMapping("/profile/delete")
-    public RedirectView deleteProfile(@AuthenticationPrincipal User user, HttpServletRequest request) {
-        userRepository.delete(user);
-        request.getSession().invalidate();
-        SecurityContextHolder.clearContext();
+    public RedirectView deleteProfile(@AuthenticationPrincipal User user, HttpServletRequest request, HttpServletResponse response) {
+        if (user != null) {
+            userRepository.delete(user);
+            new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
+        }
         return new RedirectView("/");
     }
 }

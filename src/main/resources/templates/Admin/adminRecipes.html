@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление рецептами | Tastebite Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<header class="custom-navbar">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-3 col-lg-2">
+                <a href="/static">
+                    <img th:src="@{/icons/Logo.svg}" alt="logo">
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="admin-section flex-grow-1">
+    <div class="container">
+
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <div>
+                <h1 class="font-serif fw-bold m-0" style="font-size: 32px;">Recipes</h1>
+                <p class="text-muted small m-0 mt-1">
+                    Recipes count: <span class="fw-bold" th:text="${totalRecipes != null ? totalRecipes : '0'}">0</span>
+                </p>
+            </div>
+
+            <a th:href="@{/admin/recipes/add}" class="btn btn-tb-orange">
+                <i class="bi bi-plus-lg me-1"></i> Add recipe
+            </a>
+        </div>
+
+        <div th:if="${recipePage == null or #lists.isEmpty(recipePage.content)}" class="text-center py-5">
+            <i class="bi bi-journal-x fs-1 text-muted"></i>
+            <p class="text-muted fs-5 mt-2">Recipes not found</p>
+        </div>
+
+        <div th:unless="${recipePage == null or #lists.isEmpty(recipePage.content)}">
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
+
+                <div class="col" th:each="recipe : ${recipePage.content}">
+                    <div class="admin-recipe-card">
+
+                        <a th:href="@{/recipe?recipeId={id}(id=${recipe.id})}" class="recipe-card-link-wrapper">
+
+                            <div class="admin-recipe-img-wrapper">
+                                <img th:src="${recipe.imagePath != null ? recipe.imagePath : '/images/placeholder.jpg'}"
+                                     th:alt="${recipe.title}"
+                                     class="admin-recipe-img"
+                                     onerror="this.src='/images/placeholder.jpg';">
+                            </div>
+
+                            <div class="admin-recipe-body">
+                                <h2 class="admin-recipe-title" th:text="${recipe.title}">Decadent Raspberry and Cream Cake</h2>
+
+                                <div class="d-flex justify-content-between align-items-center mt-auto">
+                                    <div class="recipe-rating-badge">
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <span th:text="${recipe.averageRating != null ? #numbers.formatDecimal(recipe.averageRating, 1, 1) : '0.0'}">4.5</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <div class="p-2 border-top d-flex gap-2">
+                            <a th:href="@{/admin/recipes/edit/{id}(id=${recipe.id})}"
+                               class="btn btn-sm btn-outline-secondary flex-grow-1">
+                                <i class="bi bi-pencil me-1"></i> Change
+                            </a>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal"
+                                    th:data-bs-target="'#deleteModal-' + ${recipe.id}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+
+                    </div>
+                    <div class="modal fade" th:id="'deleteModal-' + ${recipe.id}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header border-0">
+                                    <h5 class="modal-title font-serif fw-bold">Confirm deletion</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    You sure want to delete recipe <strong th:text="${recipe.title}"></strong>?
+                                    <p class="text-danger small mt-2 m-0">This action can't be undone</p>
+                                </div>
+                                <div class="modal-footer border-0">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                    <form th:action="@{/admin/recipes/delete}" method="post">
+                                        <input type="hidden" name="recipeId" th:value="${recipe.id}">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <nav th:if="${recipePage.totalPages > 1}" aria-label="Recipe page navigation">
+                <ul class="pagination justify-content-center">
+
+                    <li class="page-item" th:classappend="${recipePage.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/recipes(page=${recipePage.number - 1})}" aria-label="Previous">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, recipePage.totalPages - 1)}"
+                        th:classappend="${i == recipePage.number} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/admin/recipes(page=${i})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+
+                    <li class="page-item" th:classappend="${recipePage.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/recipes(page=${recipePage.number + 1})}" aria-label="Next">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
+
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<div th:replace="~{fragments/footer :: successToast}"></div>
+
+<div th:replace="~{fragments/footer :: errorToast}"></div>
+
+<script th:replace="~{fragments/footer :: toastScript}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
