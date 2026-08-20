@@ -192,6 +192,18 @@
 
                                     <span class="likes-count" th:text="${comment.getLikes().size()}">0</span>
                                 </button>
+
+                                <form th:if="${user != null and user.role == 'ADMIN'}"
+                                      th:action="@{/admin/delete-comment}"
+                                      method="post"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Вы уверены, что хотите удалить этот комментарий?');">
+                                    <input type="hidden" name="commentId" th:value="${comment.id}">
+                                    <input type="hidden" name="recipeId" th:value="${recipe.id}">
+                                    <button type="submit" class="comment-action-btn text-danger">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -244,6 +256,18 @@
                                             <i class="bi" th:classappend="${user != null && comment.likes.contains(user)} ? 'bi-heart-fill' : 'bi-heart'"></i>
                                             <span class="likes-count" th:text="${comment.getLikes().size()}">0</span>
                                         </button>
+
+                                        <form th:if="${user != null and user.role == 'ADMIN'}"
+                                              th:action="@{/admin/delete-comment}"
+                                              method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Вы уверены, что хотите удалить этот ответ?');">
+                                            <input type="hidden" name="replyId" th:value="${reply.id}">
+                                            <input type="hidden" name="recipeId" th:value="${recipe.id}">
+                                            <button type="submit" class="comment-action-btn text-danger">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>

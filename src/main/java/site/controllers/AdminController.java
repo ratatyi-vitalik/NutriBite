@@ -13,10 +13,7 @@ import site.persistent.entity.ProposedRecipe;
 import site.persistent.entity.Subscriber;
 import site.persistent.entity.User;
 import site.persistent.entity.recipes.*;
-import site.persistent.repository.CategoryRepository;
-import site.persistent.repository.ProposedRecipeRepository;
-import site.persistent.repository.RecipeRepository;
-import site.persistent.repository.SubscriberRepository;
+import site.persistent.repository.*;
 import site.service.SendMailService;
 
 import java.io.IOException;
@@ -36,17 +33,23 @@ public class AdminController {
     private final CategoryRepository categoryRepository;
     private final SubscriberRepository subscriberRepository;
     private final SendMailService  sendMailService;
+    private final CommentRepository commentRepository;
+    private final ReplyRepository replyRepository;
 
     public AdminController(RecipeRepository recipeRepository,
                            ProposedRecipeRepository proposedRecipeRepository,
                            CategoryRepository categoryRepository,
                            SubscriberRepository subscriberRepository,
-                           SendMailService sendMailService) {
+                           SendMailService sendMailService,
+                           CommentRepository commentRepository,
+                           ReplyRepository replyRepository) {
         this.recipeRepository = recipeRepository;
         this.proposedRecipeRepository = proposedRecipeRepository;
         this.categoryRepository = categoryRepository;
         this.subscriberRepository = subscriberRepository;
         this.sendMailService = sendMailService;
+        this.commentRepository = commentRepository;
+        this.replyRepository = replyRepository;
     }
 
     @GetMapping("/admin")
@@ -360,5 +363,18 @@ public class AdminController {
             subscriberRepository.deleteByEmail(email);
         }
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/admin/delete-comment")
+    public RedirectView deleteComment(@RequestParam(required = false, defaultValue = "0") long commentId,
+                                      @RequestParam(required = false, defaultValue = "0") long replyId,
+                                      @RequestParam long recipeId) {
+        if (commentId != 0 && commentRepository.existsById(commentId)) {
+            commentRepository.deleteById(commentId);
+        }
+        if (replyId != 0 && replyRepository.existsById(replyId)) {
+            replyRepository.deleteById(replyId);
+        }
+        return new RedirectView("/recipe?recipeId=" + recipeId);
     }
 }
