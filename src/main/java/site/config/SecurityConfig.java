@@ -23,7 +23,9 @@ public class SecurityConfig {
                                 "/recipe/propose",
                                 "/profile-subscribe", "/profile-unsubscribe",
                                 "/deletePFP", "/changePFP",
-                                "/saveName", "/saveUsername"
+                                "/saveName", "/saveUsername",
+                                "/comment-post", "/like-comment",
+                                "/save-recipe", "/rate-recipe", "/report-comment"
                         ).authenticated()
 
                         .anyRequest().permitAll()

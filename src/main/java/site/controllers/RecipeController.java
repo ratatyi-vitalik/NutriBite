@@ -8,6 +8,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import site.persistent.dto.RecipeForm;
 import site.persistent.entity.ProposedRecipe;
+import site.persistent.entity.Report;
 import site.persistent.entity.comments.Comment;
 import site.persistent.entity.comments.Reply;
 import site.persistent.entity.recipes.*;
@@ -33,15 +34,21 @@ public class RecipeController {
     private final CommentRepository commentRepository;
     private final RatingRepository ratingRepository;
     private final ProposedRecipeRepository proposedRecipeRepository;
+    private final ReportRepository reportRepository;
+    private final ReplyRepository replyRepository;
 
     public RecipeController(RecipeRepository recipeRepository, UserRepository userRepository,
                             CommentRepository commentRepository, RatingRepository ratingRepository,
-                            ProposedRecipeRepository proposedRecipeRepository) {
+                            ProposedRecipeRepository proposedRecipeRepository,
+                            ReportRepository reportRepository,
+                            ReplyRepository replyRepository) {
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
         this.ratingRepository = ratingRepository;
         this.proposedRecipeRepository = proposedRecipeRepository;
+        this.reportRepository = reportRepository;
+        this.replyRepository = replyRepository;
     }
 
     @GetMapping("/recipe")
@@ -340,5 +347,29 @@ public class RecipeController {
 
         redirectAttributes.addFlashAttribute("message", "Recipe was suggested");
         return new RedirectView("/recipe/propose");
+    }
+
+    @PostMapping("/report-comment")
+    public ResponseEntity<?> reportComment(@RequestParam(required = false, defaultValue = "0") long commentId,
+                                           @RequestParam(required = false, defaultValue = "0") long replyId,
+                                           @RequestParam String reason,
+                                           @RequestParam String details,
+                                           @AuthenticationPrincipal User user) {
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized!");
+        }
+
+        if (commentId != 0){
+            commentRepository.findById(commentId).ifPresent(comment ->
+                    reportRepository.save(new Report(user, comment, reason, details)));
+            return ResponseEntity.ok().build();
+        }
+
+        if (replyId != 0){
+            replyRepository.findById(replyId).ifPresent(reply ->
+                    reportRepository.save(new Report(user, reply, reason, details)));
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Comment or reply not found!");
     }
 }

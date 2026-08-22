@@ -193,6 +193,19 @@
                                     <span class="likes-count" th:text="${comment.getLikes().size()}">0</span>
                                 </button>
 
+                                <button class="comment-action-btn" type="button"
+                                        data-bs-toggle="modal" data-bs-target="#loginModal"
+                                        th:if="${user == null}">
+                                    <i class="bi bi-flag"></i>
+                                </button>
+
+                                <button class="comment-action-btn js-report-btn" type="button"
+                                        th:data-comment-id="${comment.id}"
+                                        th:unless="${user == null}"
+                                        title="Report">
+                                    <i class="bi bi-flag"></i>
+                                </button>
+
                                 <form th:if="${user != null and user.role == 'ADMIN'}"
                                       th:action="@{/admin/delete-comment}"
                                       method="post"
@@ -255,6 +268,20 @@
 
                                             <i class="bi" th:classappend="${user != null && comment.likes.contains(user)} ? 'bi-heart-fill' : 'bi-heart'"></i>
                                             <span class="likes-count" th:text="${comment.getLikes().size()}">0</span>
+                                        </button>
+
+                                        <button class="comment-action-btn" type="button"
+                                                data-bs-toggle="modal" data-bs-target="#loginModal"
+                                                th:if="${user == null}">
+                                            <i class="bi bi-flag"></i>
+                                        </button>
+
+                                        <!-- Кнопка репорта ответов для авторизованных пользователей -->
+                                        <button class="comment-action-btn js-report-btn" type="button"
+                                                th:data-reply-id="${reply.id}"
+                                                th:unless="${user == null}"
+                                                title="Report">
+                                            <i class="bi bi-flag"></i>
                                         </button>
 
                                         <form th:if="${user != null and user.role == 'ADMIN'}"
@@ -354,6 +381,44 @@
                 <span id="toastMessage"></span>
             </div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">Report Comment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="report-form">
+                <div class="modal-body">
+                    <input type="hidden" id="reportCommentId" name="commentId" value="">
+                    <input type="hidden" id="reportReplyId" name="replyId" value="">
+
+                    <div class="mb-3">
+                        <label for="reportReason" class="form-label font-weight-bold">Select a reason:</label>
+                        <select class="form-select" id="reportReason" name="reason" required>
+                            <option value="" selected disabled>Choose reason...</option>
+                            <option value="SPAM">Spam or advertising</option>
+                            <option value="INSULT">Insult or hate speech</option>
+                            <option value="MISINFORMATION">Misinformation</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reportDetails" class="form-label">Details (optional):</label>
+                        <textarea class="form-control" id="reportDetails" name="details" rows="3"
+                                  placeholder="Provide additional information if needed..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Submit Report</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -649,6 +714,88 @@
         ratingContainer.addEventListener("mouseleave", function () {
             const currentUserScore = parseInt(this.getAttribute("data-user-score")) || 0;
             renderStars(currentUserScore);
+        });
+    });
+</script>
+
+<!-- reports -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const reportButtons = document.querySelectorAll(".js-report-btn");
+        const reportModalElement = document.getElementById("reportModal");
+        const reportForm = document.getElementById("report-form");
+
+        if (!reportModalElement || !reportForm) return;
+
+        const reportModal = new bootstrap.Modal(reportModalElement);
+        const commentIdInput = document.getElementById("reportCommentId");
+        const replyIdInput = document.getElementById("reportReplyId");
+
+        // Обработка клика по кнопке жалобы
+        reportButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                const commentId = this.getAttribute("data-comment-id");
+                const replyId = this.getAttribute("data-reply-id");
+
+                // Сбрасываем поля формы
+                reportForm.reset();
+                commentIdInput.value = commentId || "";
+                replyIdInput.value = replyId || "";
+
+                // Открываем модальное окно
+                reportModal.show();
+            });
+        });
+
+        // Отправка формы через AJAX
+        reportForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const commentId = commentIdInput.value;
+            const replyId = replyIdInput.value;
+            const reason = document.getElementById("reportReason").value;
+            const details = document.getElementById("reportDetails").value;
+
+            // Формируем параметры запроса
+            const params = new URLSearchParams();
+            if (commentId) params.append("commentId", commentId);
+            if (replyId) params.append("replyId", replyId);
+            params.append("reason", reason);
+            params.append("details", details);
+
+            fetch("/report-comment", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: params
+            })
+                .then(response => {
+                    if (response.status === 401) {
+                        reportModal.hide();
+                        alert("Please sign in to report comments.");
+                        throw new Error("Unauthorized");
+                    }
+                    if (!response.ok) {
+                        throw new Error("Failed to send report");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    reportModal.hide();
+
+                    const toastElement = document.getElementById('ratingToast');
+                    const toastMessage = document.getElementById("toastMessage");
+
+                    if (toastElement && toastMessage) {
+                        toastMessage.textContent = "Thank you! Your report has been submitted.";
+                        const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+                        toast.show();
+                    }
+                })
+                .catch(error => {
+                    console.error("Error sending report:", error);
+                });
         });
     });
 </script>
