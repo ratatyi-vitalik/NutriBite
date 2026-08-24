@@ -40,7 +40,7 @@ public class SendMailService {
                     context.setVariable("ctaUrl", ctaUrl);
                 }
 
-                String unsubscribeUrl = "http://localhost:8080/unsubscribe?token=" + subscriber.getToken();
+                String unsubscribeUrl = "http://localhost:8080/unsubscribe-from-mail?token=" + subscriber.getToken();
                 context.setVariable("unsubscribeUrl", unsubscribeUrl);
 
                 String htmlContent = templateEngine.process("Mails/newsletter", context);

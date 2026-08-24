@@ -38,6 +38,9 @@ public class Comment {
     )
     private Set<User> likes = new HashSet<>();
 
+    @Column(nullable = false)
+    private boolean hidden = false;
+
     public Comment() {
     }
 
@@ -87,5 +90,13 @@ public class Comment {
 
     public void setLikes(Set<User> likes) {
         this.likes = likes;
+    }
+
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 }

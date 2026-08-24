@@ -23,6 +23,9 @@ public class Reply {
     @JoinColumn(name = "author_id", referencedColumnName = "id")
     private User author;
 
+    @Column(nullable = false)
+    private boolean hidden = false;
+
     public Reply() {
     }
 
@@ -56,5 +59,13 @@ public class Reply {
 
     public void setAuthor(User author) {
         this.author = author;
+    }
+
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 }

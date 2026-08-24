@@ -212,7 +212,27 @@
 
 <script th:replace="~{fragments/header :: openLoginScript}"></script>
 
-<!-- Скрипт динамического добавления ингредиентов и шагов -->
+<div th:replace="~{fragments/footer :: modalBanned}"></div>
+
+<script th:replace="~{fragments/footer :: bannedScript}"></script>
+
+<!-- check banned -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const proposeForm = document.querySelector('form[action$="/recipe/propose"]');
+
+        if (proposeForm) {
+            proposeForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                checkBanAndExecute(() => {
+                    proposeForm.submit();
+                });
+            });
+        }
+    });
+</script>
+
 <script>
     let sectionCounter = 1;
 
@@ -332,14 +352,13 @@
 </script>
 
 <script th:inline="javascript">
-    let secondsToWait = /*[[${secondsToWait}]]*/ 0;
+    let secondsToWait = 0;
 
     if (secondsToWait > 0) {
         const submitBtn = document.getElementById('submit-btn');
         const cooldownAlert = document.getElementById('cooldown-alert');
         const timerDisplay = document.getElementById('cooldown-timer');
 
-        // Блокируем кнопку отправки
         submitBtn.disabled = true;
         cooldownAlert.classList.remove('d-none');
 

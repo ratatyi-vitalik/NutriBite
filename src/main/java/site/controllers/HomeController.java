@@ -63,11 +63,22 @@ public class HomeController {
         return subscriberRepository.existsByEmail(email.trim().toLowerCase());
     }
 
-    @PostMapping("/unsubscribe")
+    @PostMapping("/unsubscribe-from-mail")
     public ResponseEntity<String> showUnsubscribePage(@RequestParam String token) {
         if (subscriberRepository.existsByToken(token)) {
             subscriberRepository.deleteByToken(token);
         }
         return ResponseEntity.ok("Unsubscribed successfully");
+    }
+
+    @GetMapping("/ban-status")
+    public ResponseEntity<?> getBanStatus(@AuthenticationPrincipal User currentUser) {
+        boolean banned = currentUser.isBanned();
+        String remainingTime = banned ? currentUser.getRemainingBanTimeFormatted() : "";
+
+        return ResponseEntity.ok(Map.of(
+                "isBanned", banned,
+                "remainingTime", remainingTime
+        ));
     }
 }

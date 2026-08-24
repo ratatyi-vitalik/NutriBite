@@ -67,6 +67,34 @@
     </div>
 </footer>
 
+<div class="modal fade" id="banModal" tabindex="-1" aria-labelledby="banModalLabel" aria-hidden="true" th:fragment="modalBanned">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title d-flex align-items-center" id="banModalLabel">
+                    <i class="bi bi-shield-slash-fill me-2 fs-4"></i> Action Restricted
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3 text-danger">
+                    <i class="bi bi-exclamation-triangle-fill display-3"></i>
+                </div>
+                <h5 class="fw-bold mb-3">Your account is restricted</h5>
+                <p class="text-muted">
+                    You cannot perform this action because your account is currently suspended.
+                </p>
+                <div class="alert alert-light border border-danger text-danger fw-bold d-inline-block px-4 py-2 my-2">
+                    Ban time remaining: <span id="banModalRemainingTime">0 days</span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Understand</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="toast-container position-fixed bottom-0 end-0 p-3" th:if="${message != null}" th:fragment="successToast">
     <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="alert alert-success m-0 flex-nowrap justify-content-between d-flex">
@@ -93,6 +121,54 @@
         var errorEl = document.getElementById('ErrorToast');
         if (errorEl) new bootstrap.Toast(errorEl, { delay: 4000 }).show();
     });
+</script>
+
+<script th:fragment="bannedScript">
+    async function checkBanAndExecute(actionCallback) {
+        try {
+            const response = await fetch('/ban-status');
+
+            if (response.status === 401) {
+                const loginModalElement = document.getElementById('loginModal');
+                if (loginModalElement) {
+                    const loginModal = new bootstrap.Modal(loginModalElement);
+                    loginModal.show();
+                } else {
+                    window.location.href = '/login';
+                }
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('Server error during ban check');
+            }
+
+            const data = await response.json();
+
+            if (data.isBanned) {
+                const remainingTimeSpan = document.getElementById('banModalRemainingTime');
+                if (remainingTimeSpan) {
+                    remainingTimeSpan.textContent = data.remainingTime;
+                }
+
+                const banModalElement = document.getElementById('banModal');
+                if (banModalElement) {
+                    const banModal = new bootstrap.Modal(banModalElement);
+                    banModal.show();
+                } else {
+                    alert(`Your account are banned. Remaining time: ${data.remainingTime}`);
+                }
+                return;
+            }
+
+            if (typeof actionCallback === 'function') {
+                actionCallback();
+            }
+
+        } catch (error) {
+            console.error('Error checking user status:', error);
+        }
+    }
 </script>
 
 </body>

@@ -5,8 +5,10 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import site.persistent.entity.recipes.Nutrition;
 import site.persistent.entity.recipes.Recipe;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,6 +48,10 @@ public class User implements UserDetails {
 
     @ManyToMany(mappedBy = "saved")
     private List<Recipe> saved = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "ban_id", referencedColumnName = "id")
+    private Ban ban = null;
 
     public User() {
     }
@@ -93,6 +99,34 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() { return true; }
+
+    public boolean isBanned() {
+        if (ban == null) {
+            return false;
+        }
+        return ban.getPeriod() != null && ban.getPeriod().isAfter(LocalDateTime.now());
+    }
+
+    public String getRemainingBanTimeFormatted() {
+        if (!isBanned() || ban.getPeriod() == null) {
+            return "";
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime period = ban.getPeriod();
+
+        Duration duration = Duration.between(now, period);
+        long days = duration.toDays();
+        long hours = duration.toHours() % 24;
+        long minutes = duration.toMinutes() % 60;
+
+        StringBuilder remainingTime = new StringBuilder();
+        if (days > 0) remainingTime.append(days).append(days == 1 ? " day " : " days ");
+        if (hours > 0) remainingTime.append(hours).append(hours == 1 ? " hour " : " hours ");
+        if (minutes > 0 || remainingTime.isEmpty()) remainingTime.append(minutes).append(minutes == 1 ? " minute" : " minutes");
+
+        return remainingTime.toString().trim();
+    }
 
     public Long getId() {
         return id;
@@ -172,5 +206,13 @@ public class User implements UserDetails {
 
     public void setSaved(List<Recipe> saved) {
         this.saved = saved;
+    }
+
+    public Ban getBan() {
+        return ban;
+    }
+
+    public void setBanned(Ban ban) {
+        this.ban = ban;
     }
 }

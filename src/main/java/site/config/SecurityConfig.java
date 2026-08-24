@@ -8,6 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -25,7 +26,7 @@ public class SecurityConfig {
                                 "/deletePFP", "/changePFP",
                                 "/saveName", "/saveUsername",
                                 "/comment-post", "/like-comment",
-                                "/save-recipe", "/rate-recipe", "/report-comment"
+                                "/save-recipe", "/rate-recipe", "/report-comment", "/ban-status"
                         ).authenticated()
 
                         .anyRequest().permitAll()

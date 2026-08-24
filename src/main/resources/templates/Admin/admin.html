@@ -18,7 +18,7 @@
         <div class="row align-items-center">
 
             <div class="col-3 col-lg-2">
-                <a href="/static">
+                <a href="/">
                     <img th:src="@{/icons/Logo.svg}" alt="logo">
                 </a>
             </div>
@@ -30,7 +30,6 @@
 <main class="admin-section flex-grow-1">
     <div class="container">
 
-        <!-- Сетка действий -->
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="actionsGrid">
 
             <!-- 1. Управление рецептами -->
@@ -95,20 +94,22 @@
                 </div>
             </div>
 
-            <!-- 4. Оценки рецептов -->
             <div class="col action-item">
                 <div class="admin-card">
                     <div>
                         <div class="d-flex justify-content-between align-items-start">
-                            <div class="admin-icon-wrapper" style="background-color: #FFF8E6; color: #FFC107;">
-                                <i class="bi bi-star-fill"></i>
+                            <div class="admin-icon-wrapper" style="background-color: #FFF2E8; color: #FF642F;">
+                                <i class="bi bi-shield-exclamation"></i>
                             </div>
+                            <span class="badge bg-danger rounded-pill fs-6"
+                                  th:if="${pendingReportsCount != null and pendingReportsCount > 0}"
+                                  th:text="${pendingReportsCount}"></span>
                         </div>
-                        <h3 class="admin-card-title">Оценки рецептов</h3>
-                        <p class="admin-card-desc">Просмотр истории оценок и рейтингов для каждого конкретного рецепта.</p>
+                        <h3 class="admin-card-title">Жалобы и модерация</h3>
+                        <p class="admin-card-desc">Обработка жалоб пользователей на комментарии, рецепты и нарушения правил.</p>
                     </div>
-                    <a th:href="@{/admin/ratings}" class="action-link">
-                        Посмотреть оценки <i class="bi bi-arrow-right"></i>
+                    <a th:href="@{/admin/reports}" class="action-link">
+                        Просмотреть жалобы <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
@@ -127,24 +128,6 @@
                     </div>
                     <a th:href="@{/admin/newsletter}" class="action-link">
                         Отправить рассылку <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 6. Очистка спама -->
-            <div class="col action-item">
-                <div class="admin-card">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="admin-icon-wrapper" style="background-color: #FFEBEB; color: #DC3545;">
-                                <i class="bi bi-person-x-fill"></i>
-                            </div>
-                        </div>
-                        <h3 class="admin-card-title">Очистка спама</h3>
-                        <p class="admin-card-desc">Поиск и массовое удаление пустых или неактивных аккаунтов-ботов.</p>
-                    </div>
-                    <a th:href="@{/admin/users/cleanup-spam}" class="action-link text-danger">
-                        Запустить очистку <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>

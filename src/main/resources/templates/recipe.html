@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title th:text="${recipe.title}"></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -429,7 +431,11 @@
 
 <div th:replace="~{fragments/header :: modalForgot}"></div>
 
-<script th:replace="~{fragments/header :: searchScript}"></script>
+<div th:replace="~{fragments/header :: modalForgot}"></div>
+
+<div th:replace="~{fragments/footer :: modalBanned}"></div>
+
+<script th:replace="~{fragments/footer :: bannedScript}"></script>
 
 <script th:replace="~{fragments/header :: openLoginScript}"></script>
 
@@ -444,53 +450,54 @@
                 const icon = this.querySelector("i");
                 const countSpan = this.querySelector(".likes-count");
 
-                // Отправляем запрос на ваш новый эндпоинт
-                fetch(`/like-comment?commentId=${commentId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
-                })
-                    .then(response => {
-                        // Если сервер ответил 401 (не авторизован)
-                        if (response.status === 401) {
-                            // Здесь в будущем вызовите открытие вашего модального окна регистрации/входа, например:
-                            // openAuthModal();
-                            alert("Пожалуйста, войдите в аккаунт, чтобы ставить лайки!");
-                            throw new Error("Unauthorized");
-                        }
-
-                        // Если сервер ответил 404 (комментарий удален)
-                        if (response.status === 404) {
-                            alert("Этот комментарий больше не существует.");
-                            throw new Error("Comment not found");
-                        }
-
-                        if (!response.ok) {
-                            throw new Error("Network response was not ok");
-                        }
-
-                        return response.json();
-                    })
-                    .then(data => {
-                        // Извлекаем "likes" и "liked" из вашей мапы
-                        countSpan.textContent = data.likes;
-
-                        if (data.liked) {
-                            // Если лайк успешно поставлен
-                            this.classList.add("text-danger");
-                            icon.classList.remove("bi-heart");
-                            icon.classList.add("bi-heart-fill");
-                        } else {
-                            // Если лайк успешно убран
-                            this.classList.remove("text-danger");
-                            icon.classList.remove("bi-heart-fill");
-                            icon.classList.add("bi-heart");
+                checkBanAndExecute(() => {
+                    fetch(`/like-comment?commentId=${commentId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
                         }
                     })
-                    .catch(error => {
-                        console.error("Ошибка при отправке лайка:", error);
-                    });
+                        .then(response => {
+                            // Если сервер ответил 401 (не авторизован)
+                            if (response.status === 401) {
+                                // Здесь в будущем вызовите открытие вашего модального окна регистрации/входа, например:
+                                // openAuthModal();
+                                alert("Пожалуйста, войдите в аккаунт, чтобы ставить лайки!");
+                                throw new Error("Unauthorized");
+                            }
+
+                            // Если сервер ответил 404 (комментарий удален)
+                            if (response.status === 404) {
+                                alert("Этот комментарий больше не существует.");
+                                throw new Error("Comment not found");
+                            }
+
+                            if (!response.ok) {
+                                throw new Error("Network response was not ok");
+                            }
+
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Извлекаем "likes" и "liked" из вашей мапы
+                            countSpan.textContent = data.likes;
+
+                            if (data.liked) {
+                                // Если лайк успешно поставлен
+                                this.classList.add("text-danger");
+                                icon.classList.remove("bi-heart");
+                                icon.classList.add("bi-heart-fill");
+                            } else {
+                                // Если лайк успешно убран
+                                this.classList.remove("text-danger");
+                                icon.classList.remove("bi-heart-fill");
+                                icon.classList.add("bi-heart");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Ошибка при отправке лайка:", error);
+                        });
+                });
             });
         });
     });
@@ -506,35 +513,37 @@
                 const recipeId = this.getAttribute("data-recipe-id");
                 const icon = this.querySelector("i");
 
-                fetch(`/save-recipe?recipeId=${recipeId}`, {
-                    method: 'POST'
-                })
-                    .then(response => {
-                        if (response.status === 401) {
-                            alert("Please, sign in to save recipe!");
-                            throw new Error("Unauthorized");
-                        }
-                        if (response.status === 404) {
-                            alert("Recipe not found");
-                            throw new Error("Recipe not found");
-                        }
-                        if (!response.ok) {
-                            throw new Error("Network response was not ok");
-                        }
-                        return response.json();
+                checkBanAndExecute(() => {
+                    fetch(`/save-recipe?recipeId=${recipeId}`, {
+                        method: 'POST'
                     })
-                    .then(data => {
-                        if (data.saved) {
-                            icon.classList.remove("bi-bookmark");
-                            icon.classList.add("bi-bookmark-fill", "text-warning");
-                        } else {
-                            icon.classList.remove("bi-bookmark-fill", "text-warning");
-                            icon.classList.add("bi-bookmark");
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
+                        .then(response => {
+                            if (response.status === 401) {
+                                alert("Please, sign in to save recipe!");
+                                throw new Error("Unauthorized");
+                            }
+                            if (response.status === 404) {
+                                alert("Recipe not found");
+                                throw new Error("Recipe not found");
+                            }
+                            if (!response.ok) {
+                                throw new Error("Network response was not ok");
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.saved) {
+                                icon.classList.remove("bi-bookmark");
+                                icon.classList.add("bi-bookmark-fill", "text-warning");
+                            } else {
+                                icon.classList.remove("bi-bookmark-fill", "text-warning");
+                                icon.classList.add("bi-bookmark");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                        });
+                });
             });
         }
     });
@@ -556,34 +565,28 @@
             button.addEventListener("click", function () {
                 const commentId = this.getAttribute("data-comment-id");
                 const authorName = this.getAttribute("data-author-name");
-                const commentText = this.getAttribute("data-comment-text"); // Добавлено
+                const commentText = this.getAttribute("data-comment-text");
 
-                if (commentIdInput) {
-                    commentIdInput.value = commentId || "";
-                }
+                // Оборачиваем подготовку ответа в проверку бана
+                checkBanAndExecute(() => {
+                    if (commentIdInput) commentIdInput.value = commentId || "";
 
-                if (replyStatusContainer && replyTargetName) {
-                    replyTargetName.textContent = authorName;
-
-                    // Подставляем текст комментария в плашку
-                    if (replyTargetText) {
-                        replyTargetText.textContent = commentText;
+                    if (replyStatusContainer && replyTargetName) {
+                        replyTargetName.textContent = authorName;
+                        if (replyTargetText) replyTargetText.textContent = commentText;
+                        replyStatusContainer.classList.remove("d-none");
+                        replyStatusContainer.classList.add("d-flex");
                     }
 
-                    replyStatusContainer.classList.remove("d-none");
-                    replyStatusContainer.classList.add("d-flex");
-                }
-
-                if (commentTextarea) {
-                    const mention = `@${authorName}, `;
-
-                    if (!commentTextarea.value.startsWith(mention)) {
-                        commentTextarea.value = mention + commentTextarea.value.replace(/^@[^,]+,\s*/, '');
+                    if (commentTextarea) {
+                        const mention = `@${authorName}, `;
+                        if (!commentTextarea.value.startsWith(mention)) {
+                            commentTextarea.value = mention + commentTextarea.value.replace(/^@[^,]+,\s*/, '');
+                        }
+                        commentTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        commentTextarea.focus();
                     }
-
-                    commentTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    commentTextarea.focus();
-                }
+                });
             });
         });
 
@@ -680,33 +683,35 @@
             star.addEventListener("click", function () {
                 const score = parseInt(this.getAttribute("data-score"));
 
-                fetch(`/rate-recipe?recipeId=${recipeId}&score=${score}`, {
-                    method: 'POST'
-                })
-                    .then(response => {
-                        if (response.status === 401) {
-                            const modal = new bootstrap.Modal(document.getElementById('loginModal'));
-                            modal.show();
-                            throw new Error("Unauthorized");
-                        }
-                        if (!response.ok) throw new Error("Rating error");
-                        return response.json();
+                checkBanAndExecute(() => {
+                    fetch(`/rate-recipe?recipeId=${recipeId}&score=${score}`, {
+                        method: 'POST'
                     })
-                    .then(data => {
-                        // Обновляем сохраненную оценку пользователя в атрибуте
-                        ratingContainer.setAttribute("data-user-score", data.userScore);
-                        renderStars(data.userScore);
+                        .then(response => {
+                            if (response.status === 401) {
+                                const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+                                modal.show();
+                                throw new Error("Unauthorized");
+                            }
+                            if (!response.ok) throw new Error("Rating error");
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Обновляем сохраненную оценку пользователя в атрибуте
+                            ratingContainer.setAttribute("data-user-score", data.userScore);
+                            renderStars(data.userScore);
 
-                        const toastElement = document.getElementById('ratingToast');
-                        const toastMessage = document.getElementById("toastMessage")
+                            const toastElement = document.getElementById('ratingToast');
+                            const toastMessage = document.getElementById("toastMessage")
 
-                        if (toastElement) {
-                            toastMessage.textContent = `Your rating has been saved!`;
-                            const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
-                            toast.show();
-                        }
-                    })
-                    .catch(err => console.error(err));
+                            if (toastElement) {
+                                toastMessage.textContent = `Your rating has been saved!`;
+                                const toast = new bootstrap.Toast(toastElement, {delay: 5000});
+                                toast.show();
+                            }
+                        })
+                        .catch(err => console.error(err));
+                });
             });
         });
 
@@ -731,18 +736,15 @@
         const commentIdInput = document.getElementById("reportCommentId");
         const replyIdInput = document.getElementById("reportReplyId");
 
-        // Обработка клика по кнопке жалобы
         reportButtons.forEach(button => {
             button.addEventListener("click", function () {
                 const commentId = this.getAttribute("data-comment-id");
                 const replyId = this.getAttribute("data-reply-id");
 
-                // Сбрасываем поля формы
                 reportForm.reset();
                 commentIdInput.value = commentId || "";
                 replyIdInput.value = replyId || "";
 
-                // Открываем модальное окно
                 reportModal.show();
             });
         });
@@ -763,40 +765,63 @@
             params.append("reason", reason);
             params.append("details", details);
 
-            fetch("/report-comment", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: params
-            })
-                .then(response => {
-                    if (response.status === 401) {
+            const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+            const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+
+            checkBanAndExecute(() => {
+                fetch("/report-comment", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        [csrfHeader]: csrfToken
+                    },
+                    body: params
+                })
+                    .then(response => {
+                        if (response.status === 401) {
+                            reportModal.hide();
+                            alert("Please sign in to report comments.");
+                            throw new Error("Unauthorized");
+                        }
+                        if (!response.ok) {
+                            throw new Error("Failed to send report" + response.status);
+                        }
+                        return response;
+                    })
+                    .then(() => {
                         reportModal.hide();
-                        alert("Please sign in to report comments.");
-                        throw new Error("Unauthorized");
-                    }
-                    if (!response.ok) {
-                        throw new Error("Failed to send report");
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    reportModal.hide();
 
-                    const toastElement = document.getElementById('ratingToast');
-                    const toastMessage = document.getElementById("toastMessage");
+                        const toastElement = document.getElementById('ratingToast');
+                        const toastMessage = document.getElementById("toastMessage");
 
-                    if (toastElement && toastMessage) {
-                        toastMessage.textContent = "Thank you! Your report has been submitted.";
-                        const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
-                        toast.show();
-                    }
-                })
-                .catch(error => {
-                    console.error("Error sending report:", error);
-                });
+                        if (toastElement && toastMessage) {
+                            toastMessage.textContent = "Thank you! Your report has been submitted.";
+                            const toast = new bootstrap.Toast(toastElement, {delay: 4000});
+                            toast.show();
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error sending report:", error);
+                    });
+            });
         });
+    });
+</script>
+
+<!-- post comment -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const commentForm = document.querySelector('form[action$="/comment-post"]');
+
+        if (commentForm) {
+            commentForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                checkBanAndExecute(() => {
+                    commentForm.submit();
+                });
+            });
+        }
     });
 </script>
 

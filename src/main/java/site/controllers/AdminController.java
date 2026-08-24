@@ -1,6 +1,7 @@
 package site.controllers;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -9,9 +10,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import site.persistent.dto.RecipeForm;
-import site.persistent.entity.ProposedRecipe;
-import site.persistent.entity.Subscriber;
-import site.persistent.entity.User;
+import site.persistent.entity.*;
 import site.persistent.entity.recipes.*;
 import site.persistent.repository.*;
 import site.service.SendMailService;
@@ -21,10 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 public class AdminController {
@@ -35,6 +31,8 @@ public class AdminController {
     private final SendMailService  sendMailService;
     private final CommentRepository commentRepository;
     private final ReplyRepository replyRepository;
+    private final ReportRepository reportRepository;
+    private final UserRepository userRepository;
 
     public AdminController(RecipeRepository recipeRepository,
                            ProposedRecipeRepository proposedRecipeRepository,
@@ -42,7 +40,9 @@ public class AdminController {
                            SubscriberRepository subscriberRepository,
                            SendMailService sendMailService,
                            CommentRepository commentRepository,
-                           ReplyRepository replyRepository) {
+                           ReplyRepository replyRepository,
+                           ReportRepository reportRepository,
+                           UserRepository userRepository) {
         this.recipeRepository = recipeRepository;
         this.proposedRecipeRepository = proposedRecipeRepository;
         this.categoryRepository = categoryRepository;
@@ -50,6 +50,8 @@ public class AdminController {
         this.sendMailService = sendMailService;
         this.commentRepository = commentRepository;
         this.replyRepository = replyRepository;
+        this.reportRepository = reportRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/admin")
@@ -376,5 +378,78 @@ public class AdminController {
             replyRepository.deleteById(replyId);
         }
         return new RedirectView("/recipe?recipeId=" + recipeId);
+    }
+
+    @GetMapping("/admin/reports")
+    public ModelAndView showReportsPage(@RequestParam(defaultValue = "PENDING") Report.ReportStatus status,
+                                        @RequestParam(defaultValue = "0") int page) {
+        ModelAndView model = new ModelAndView("Admin/adminReports");
+        model.addObject("currentStatus", status.name());
+        model.addObject("totalReports", reportRepository.count());
+        model.addObject("totalPages", (int)reportRepository.count() / 10);
+        model.addObject("pendingCount", reportRepository.countByStatus(Report.ReportStatus.PENDING));
+        model.addObject("resolvedCount", reportRepository.countByStatus(Report.ReportStatus.RESOLVED));
+        model.addObject("reports", reportRepository.findByStatus(status, PageRequest.of(page, 10)));
+        return model;
+    }
+
+    @PostMapping("/admin/reports/resolve")
+    public ResponseEntity<?> resolveReport(@RequestParam long reportId,
+                                                @RequestParam String actionType,
+                                                @RequestParam(required = false) Integer days,
+                                                @RequestParam(required = false) Integer hours,
+                                                @RequestParam(required = false) Integer minutes,
+                                                @RequestParam(required = false) String adminNote) {
+        Optional<Report> reportOpt = reportRepository.findById(reportId);
+        if (reportOpt.isPresent()) {
+            Report report = reportOpt.get();
+            report.setStatus(Report.ReportStatus.RESOLVED);
+
+            if ("DELETE_COMMENT".equals(actionType)) {
+                if (report.getComment() != null) {
+                    report.getComment().setHidden(true);
+                } else if (report.getReply() != null) {
+                    report.getReply().setHidden(true);
+                }
+            }
+            else if ("BAN_USER".equals(actionType)) {
+                Ban ban = new Ban();
+
+                if (adminNote != null && !adminNote.isEmpty()) {
+                    ban.setReason(adminNote);
+                }
+
+                ban.setPeriod(LocalDateTime.now().plusDays(days).plusHours(hours).plusMinutes(minutes));
+
+                User commentAuthor = null;
+                if (report.getComment() != null) {
+                    commentAuthor = report.getComment().getAuthor();
+                } else if (report.getReply() != null) {
+                    commentAuthor = report.getReply().getAuthor();
+                }
+                assert commentAuthor != null;
+                commentAuthor.setBanned(ban);
+                userRepository.save(commentAuthor);
+            }
+            reportRepository.save(report);
+            return ResponseEntity.ok().build();
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Report not found!");
+        }
+    }
+
+    @PostMapping("/admin/reports/reject")
+    public ResponseEntity<?> dismissReport(@RequestParam long reportId) {
+        Optional<Report> reportOpt = reportRepository.findById(reportId);
+        if (reportOpt.isPresent()) {
+            Report report = reportOpt.get();
+            report.setStatus(Report.ReportStatus.REJECTED);
+            reportRepository.save(report);
+            return ResponseEntity.ok().build();
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Report not found!");
+        }
     }
 }
