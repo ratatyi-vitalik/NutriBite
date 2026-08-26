@@ -1,9 +1,12 @@
 package site.controllers;
 
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -60,6 +63,7 @@ public class AdminController {
         model.addObject("totalRecipesCount", recipeRepository.count());
         model.addObject("proposedRecipesCount", proposedRecipeRepository.count());
         model.addObject("categoriesCount", categoryRepository.count());
+        model.addObject("usersCount", userRepository.count());
         return model;
     }
 
@@ -451,5 +455,71 @@ public class AdminController {
         else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Report not found!");
         }
+    }
+
+    @GetMapping("/admin/users")
+    public ModelAndView showUsersPage(@RequestParam(defaultValue = "0") int page,
+                                      @RequestParam(defaultValue = "0") int bannedPage,
+                                      @RequestParam(defaultValue = "all") String tab) {
+        ModelAndView model = new ModelAndView("Admin/adminUsers");
+        model.addObject("usersPage", userRepository.findAll(PageRequest.of(page, 10)));
+        Page<User> bannedUsers = userRepository.findByBanNotNull(PageRequest.of(bannedPage, 10));
+        if (bannedUsers == null) {
+            bannedUsers = Page.empty(PageRequest.of(bannedPage, 10));
+        }
+        model.addObject("bannedUsers", bannedUsers);
+        model.addObject("activeTab", tab);
+        return model;
+    }
+
+    @PostMapping("/admin/users/ban")
+    public ResponseEntity<?> banUser(@RequestParam long userId,
+                                     @RequestParam(required = false, defaultValue = "") String reason,
+                                     @RequestParam int durationHours) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            if (user.isBanned()) {
+                user.getBan().setPeriod(user.getBan().getPeriod().plusHours(durationHours));
+                if (user.getBan().getReason() == null && user.getBan().getReason().isBlank()) {
+                    user.getBan().setReason(reason);
+                }
+            } else {
+                user.setBanned(new Ban(reason, LocalDateTime.now().plusHours(durationHours)));
+            }
+
+            userRepository.save(user);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
+        }
+    }
+
+    @PostMapping("/admin/users/unban")
+    @Transactional
+    public ResponseEntity<?> unbanUser(@RequestParam long userId) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (user.getBan() != null) {
+                user.setBanned(null);
+                userRepository.save(user);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @DeleteMapping("/admin/users")
+    @Transactional
+    public ResponseEntity<?> deleteUser(@RequestParam long  userId) {
+        if (userRepository.existsById(userId)) {
+            userRepository.deleteById(userId);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 }
