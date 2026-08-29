@@ -14,6 +14,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import site.persistent.dto.RecipeForm;
 import site.persistent.entity.*;
+import site.persistent.entity.comments.Comment;
+import site.persistent.entity.comments.Reply;
 import site.persistent.entity.recipes.*;
 import site.persistent.repository.*;
 import site.service.SendMailService;
@@ -36,6 +38,7 @@ public class AdminController {
     private final ReplyRepository replyRepository;
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
 
     public AdminController(RecipeRepository recipeRepository,
                            ProposedRecipeRepository proposedRecipeRepository,
@@ -45,7 +48,8 @@ public class AdminController {
                            CommentRepository commentRepository,
                            ReplyRepository replyRepository,
                            ReportRepository reportRepository,
-                           UserRepository userRepository) {
+                           UserRepository userRepository,
+                           NotificationRepository notificationRepository) {
         this.recipeRepository = recipeRepository;
         this.proposedRecipeRepository = proposedRecipeRepository;
         this.categoryRepository = categoryRepository;
@@ -55,6 +59,7 @@ public class AdminController {
         this.replyRepository = replyRepository;
         this.reportRepository = reportRepository;
         this.userRepository = userRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     @GetMapping("/admin")
@@ -323,11 +328,18 @@ public class AdminController {
     }
 
     @PostMapping("/admin/proposed/accept")
+    @Transactional
     public RedirectView acceptRecipe(@RequestParam long proposedRecipeId, RedirectAttributes redirectAttributes) {
         Optional<ProposedRecipe> proposedRecipeOpt = proposedRecipeRepository.findById(proposedRecipeId);
         if (proposedRecipeOpt.isPresent()) {
-            recipeRepository.save(new  Recipe(proposedRecipeOpt.get()));
+            Recipe recipe = new  Recipe(proposedRecipeOpt.get());
+            recipeRepository.save(recipe);
             proposedRecipeRepository.deleteById(proposedRecipeId);
+
+            notificationRepository.save(new Notification(recipe.getAuthor(),
+                    "Your recipe was approved!",
+                    "Recipe " + recipe.getTitle() + " was accepted and appeared on website",
+                    "/recipe?recipeId=" + recipe.getId()));
             redirectAttributes.addFlashAttribute("message", "Recipe was accepted");
             return new RedirectView("/admin/proposed");
         }
@@ -378,7 +390,7 @@ public class AdminController {
         if (commentId != 0 && commentRepository.existsById(commentId)) {
             commentRepository.deleteById(commentId);
         }
-        if (replyId != 0 && replyRepository.existsById(replyId)) {
+        else if (replyId != 0 && replyRepository.existsById(replyId)) {
             replyRepository.deleteById(replyId);
         }
         return new RedirectView("/recipe?recipeId=" + recipeId);
@@ -482,11 +494,17 @@ public class AdminController {
 
             if (user.isBanned()) {
                 user.getBan().setPeriod(user.getBan().getPeriod().plusHours(durationHours));
-                if (user.getBan().getReason() == null && user.getBan().getReason().isBlank()) {
+                notificationRepository.save(new Notification(user,
+                        "Your ban was extended",
+                        "Your ban was extended by " + durationHours + " hours"));
+                if (user.getBan().getReason() == null || user.getBan().getReason().isBlank()) {
                     user.getBan().setReason(reason);
                 }
             } else {
                 user.setBanned(new Ban(reason, LocalDateTime.now().plusHours(durationHours)));
+                notificationRepository.save(new Notification(user,
+                        "You are banned",
+                        "You are banned for " + durationHours + " hours due to: " + reason));
             }
 
             userRepository.save(user);
@@ -505,6 +523,9 @@ public class AdminController {
             if (user.getBan() != null) {
                 user.setBanned(null);
                 userRepository.save(user);
+                notificationRepository.save(new Notification(user,
+                        "You are unbanned",
+                        "You are unbanned by administrator"));
                 return ResponseEntity.ok().build();
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

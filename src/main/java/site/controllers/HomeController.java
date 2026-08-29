@@ -1,9 +1,12 @@
 package site.controllers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import site.persistent.entity.Notification;
 import site.persistent.entity.Subscriber;
 import site.persistent.entity.User;
 import site.persistent.entity.recipes.Category;
@@ -11,6 +14,7 @@ import site.persistent.repository.CategoryRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
+import site.persistent.repository.NotificationRepository;
 import site.persistent.repository.SubscriberRepository;
 
 import java.util.List;
@@ -21,17 +25,34 @@ import java.util.Optional;
 public class HomeController {
     private final CategoryRepository categoryRepository;
     private final SubscriberRepository subscriberRepository;
+    private final NotificationRepository notificationRepository;
 
-    public HomeController(CategoryRepository categoryRepository, SubscriberRepository subscriberRepository) {
+    public HomeController(CategoryRepository categoryRepository, SubscriberRepository subscriberRepository, NotificationRepository notificationRepository) {
         this.categoryRepository = categoryRepository;
         this.subscriberRepository = subscriberRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     @GetMapping("/")
-    public ModelAndView home(@AuthenticationPrincipal User user) {
+    public ModelAndView home(Authentication authentication) {
         ModelAndView model = new ModelAndView("index");
 
-        model.addObject("user", user);
+        boolean isAuthenticated = authentication != null
+                && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken);
+
+        if (isAuthenticated) {
+            User user = (User) authentication.getPrincipal();
+            model.addObject("user", user);
+            model.addObject("unreadNotificationsCount", notificationRepository.countByUserIdAndIsReadFalse(user.getId()));
+
+            List<Notification> notifications = notificationRepository.findTop5ByUserIdAndIsReadFalseOrderByCreatedAtDesc(user.getId());
+            if (notifications.size() < 5) {
+                List<Notification> nots = notificationRepository.findTop5ByUserIdAndIsReadTrueOrderByCreatedAtDesc(user.getId());
+                notifications.addAll(nots.stream().limit(5 - notifications.size()).toList());
+            }
+            model.addObject("notifications", notifications);
+        }
 
         List<Category> categories = categoryRepository.findTop6ByOrderByIdAsc();
         model.addObject("categories", categories);

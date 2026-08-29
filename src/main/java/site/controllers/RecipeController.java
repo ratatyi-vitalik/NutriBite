@@ -1,12 +1,15 @@
 package site.controllers;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import site.persistent.dto.RecipeForm;
+import site.persistent.entity.Notification;
 import site.persistent.entity.ProposedRecipe;
 import site.persistent.entity.Report;
 import site.persistent.entity.comments.Comment;
@@ -36,12 +39,14 @@ public class RecipeController {
     private final ProposedRecipeRepository proposedRecipeRepository;
     private final ReportRepository reportRepository;
     private final ReplyRepository replyRepository;
+    private final NotificationRepository notificationRepository;
 
     public RecipeController(RecipeRepository recipeRepository, UserRepository userRepository,
                             CommentRepository commentRepository, RatingRepository ratingRepository,
                             ProposedRecipeRepository proposedRecipeRepository,
                             ReportRepository reportRepository,
-                            ReplyRepository replyRepository) {
+                            ReplyRepository replyRepository,
+                            NotificationRepository notificationRepository) {
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
@@ -49,6 +54,7 @@ public class RecipeController {
         this.proposedRecipeRepository = proposedRecipeRepository;
         this.reportRepository = reportRepository;
         this.replyRepository = replyRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     @GetMapping("/recipe")
@@ -66,13 +72,17 @@ public class RecipeController {
     }
 
     @PostMapping("/comment-post")
-    public ModelAndView postComment(@RequestParam String text,
+    public RedirectView postComment(@RequestParam String text,
                                     @RequestParam Long recipeId,
                                     @RequestParam(required = false) Long commentId,
-                                    @AuthenticationPrincipal User user) {
+                                    @AuthenticationPrincipal User authUser) {
         Recipe recipe = recipeRepository.findById(recipeId).orElse(null);
         if (recipe == null) {
-            return new ModelAndView("redirect:/");
+            return new RedirectView("/");
+        }
+        User user = userRepository.findById(authUser.getId()).orElse(null);
+        if (user == null) {
+            return new RedirectView("/");
         }
 
         if (commentId == null) {
@@ -80,56 +90,102 @@ public class RecipeController {
             comment.setText(text);
             comment.setAuthor(user);
             comment.setDate(LocalDateTime.now());
+            comment.setRecipe(recipe);
 
             recipe.getComments().add(comment);
-        } else {
-            Reply reply = new Reply();
-            reply.setAuthor(user);
-            reply.setText(text);
-            reply.setDate(LocalDateTime.now());
-
-            List<Comment> comments = recipe.getComments();
-            Comment comment = null;
-            for (Comment com : recipe.getComments()) {
-                if (com.getId().equals(commentId)) {
-                    comment = com;
-                    break;
-                }
+            if (!user.getId().equals(recipe.getAuthor().getId())) {
+                notificationRepository.save(new Notification(
+                        recipe.getAuthor(),
+                        "New comment on your recipe!",
+                        user.getName() + " wrote a comment: \"" + text + "\"",
+                        "/recipe?recipeId=" + recipeId
+                ));
             }
+        } else {
+            Optional<Comment> commentOpt = commentRepository.findById(commentId);
+            if (commentOpt.isPresent()) {
+                Comment comment = commentOpt.get();
 
-            if (comment != null) {
+                Reply reply = new Reply();
+                reply.setAuthor(user);
+                reply.setText(text);
+                reply.setDate(LocalDateTime.now());
+                reply.setComment(comment);
+
                 comment.getReplies().add(reply);
+                if (!user.getId().equals(comment.getAuthor().getId())) {
+                    notificationRepository.save(new Notification(
+                            comment.getAuthor(),
+                            "New reply to your comment!",
+                            user.getName() + " replied: \"" + text + "\"",
+                            "/recipe?recipeId=" + recipeId
+                    ));
+                }
             } else {
-                return new ModelAndView("redirect:/recipe?recipeId=" + recipeId);
+                return new RedirectView("/recipe?recipeId=" + recipeId);
             }
         }
-
         recipeRepository.save(recipe);
 
-        return new ModelAndView("redirect:/recipe?recipeId=" + recipeId);
+        return new RedirectView("/recipe?recipeId=" + recipeId);
     }
 
     @PostMapping("/like-comment")
-    public ResponseEntity<?> likeComment(@RequestParam Long commentId, @AuthenticationPrincipal User user) {
-        Optional<Comment> com = commentRepository.findById(commentId);
+    @Transactional
+    public ResponseEntity<?> likeComment(@RequestParam(required = false, defaultValue = "0") Long commentId,
+                                         @RequestParam(required = false,defaultValue = "0") Long replyId,
+                                         @AuthenticationPrincipal User user) {
+        Optional<Comment> commentOpt = commentRepository.findById(commentId);
+        Optional<Reply> replyOpt = replyRepository.findById(replyId);
         Comment comment;
-        if (com.isPresent()) {
-            comment = com.get();
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Комментарий не найден");
-        }
+        if (commentOpt.isPresent()) {
+            comment = commentOpt.get();
+            Set<User> likes = comment.getLikes();
+            if (likes.contains(user)) {
+                likes.remove(user);
+                comment.setLikes(likes);
+                commentRepository.save(comment);
+                if (!user.equals(comment.getAuthor())) {
+                    notificationRepository.deleteByUserAndCommentId(comment.getAuthor(), commentId);
+                }
+                return ResponseEntity.ok(Map.of("likes", likes.size(), "liked", false));
+            } else {
+                likes.add(user);
+                comment.setLikes(likes);
+                commentRepository.save(comment);
+                if (!user.equals(comment.getAuthor())) {
+                    notificationRepository.save(new Notification(comment.getAuthor(), "New like!",
+                            user.getName() + " liked your comment",
+                            "/recipe?recipeId=" + comment.getRecipe().getId(), comment));
+                }
+                return ResponseEntity.ok((Map.of("likes", likes.size(), "liked", true)));
+            }
+        } else if (replyOpt.isPresent()) {
+            Reply reply = replyOpt.get();
 
-        Set<User> likes = comment.getLikes();
-        if (likes.contains(user)) {
-            likes.remove(user);
-            comment.setLikes(likes);
-            commentRepository.save(comment);
-            return ResponseEntity.ok(Map.of("likes", likes.size(), "liked", false));
-        } else {
-            likes.add(user);
-            comment.setLikes(likes);
-            commentRepository.save(comment);
-            return ResponseEntity.ok((Map.of("likes", likes.size(), "liked", true)));
+            Set<User> likes = reply.getLikes();
+            if (likes.contains(user)) {
+                likes.remove(user);
+                reply.setLikes(likes);
+                replyRepository.save(reply);
+                if (!user.equals(reply.getAuthor())) {
+                    notificationRepository.deleteByUserAndReplyId(reply.getAuthor(), replyId);
+                }
+                return ResponseEntity.ok(Map.of("likes", likes.size(), "liked", false));
+            } else {
+                likes.add(user);
+                reply.setLikes(likes);
+                replyRepository.save(reply);
+                if (!user.equals(reply.getAuthor())) {
+                    notificationRepository.save(new Notification(reply.getAuthor(), "New like!",
+                            user.getName() + " liked your comment",
+                            "/recipe?recipeId=" + reply.getComment().getRecipe().getId(), reply));
+                }
+                return ResponseEntity.ok((Map.of("likes", likes.size(), "liked", true)));
+            }
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Комментарий не найден");
         }
     }
 
@@ -359,13 +415,13 @@ public class RecipeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized!");
         }
 
-        if (commentId != 0){
+        if (commentId != 0) {
             commentRepository.findById(commentId).ifPresent(comment ->
                     reportRepository.save(new Report(user, comment, reason, details)));
             return ResponseEntity.ok().build();
         }
 
-        if (replyId != 0){
+        if (replyId != 0) {
             replyRepository.findById(replyId).ifPresent(reply ->
                     reportRepository.save(new Report(user, reply, reason, details)));
             return ResponseEntity.ok().build();

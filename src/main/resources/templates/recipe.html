@@ -261,15 +261,15 @@
                                                 data-bs-toggle="modal" data-bs-target="#loginModal"
                                                 th:if="${user == null}">
                                             <i class="bi bi-heart"></i>
-                                            <span class="likes-count" th:text="${comment.getLikes().size()}">0</span>
+                                            <span class="likes-count" th:text="${reply.getLikes().size()}">0</span>
                                         </button>
                                         <button class="comment-action-btn js-like-btn" type="button"
-                                                th:data-comment-id="${comment.id}"
-                                                th:classappend="${user != null && comment.likes.contains(user)} ? 'text-danger' : ''"
+                                                th:data-reply-id="${reply.id}"
+                                                th:classappend="${user != null && reply.likes.contains(user)} ? 'text-danger' : ''"
                                                 th:unless="${user == null}">
 
-                                            <i class="bi" th:classappend="${user != null && comment.likes.contains(user)} ? 'bi-heart-fill' : 'bi-heart'"></i>
-                                            <span class="likes-count" th:text="${comment.getLikes().size()}">0</span>
+                                            <i class="bi" th:classappend="${user != null && reply.likes.contains(user)} ? 'bi-heart-fill' : 'bi-heart'"></i>
+                                            <span class="likes-count" th:text="${reply.getLikes().size()}">0</span>
                                         </button>
 
                                         <button class="comment-action-btn" type="button"
@@ -447,29 +447,43 @@
         likeButtons.forEach(button => {
             button.addEventListener("click", function () {
                 const commentId = this.getAttribute("data-comment-id");
+                const replyId = this.getAttribute("data-reply-id");
                 const icon = this.querySelector("i");
                 const countSpan = this.querySelector(".likes-count");
 
+                // Формируем query-параметры в зависимости от того, что лайкают
+                const params = new URLSearchParams();
+                if (commentId) {
+                    params.append("commentId", commentId);
+                } else if (replyId) {
+                    params.append("replyId", replyId);
+                }
+
+                // Извлекаем CSRF-токены из meta-тегов (если включена Spring Security CSRF защита)
+                const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+                const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+
+                const headers = {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                };
+                if (csrfToken && csrfHeader) {
+                    headers[csrfHeader] = csrfToken;
+                }
+
                 checkBanAndExecute(() => {
-                    fetch(`/like-comment?commentId=${commentId}`, {
+                    fetch(`/like-comment?${params.toString()}`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        }
+                        headers: headers
                     })
                         .then(response => {
-                            // Если сервер ответил 401 (не авторизован)
                             if (response.status === 401) {
-                                // Здесь в будущем вызовите открытие вашего модального окна регистрации/входа, например:
-                                // openAuthModal();
                                 alert("Пожалуйста, войдите в аккаунт, чтобы ставить лайки!");
                                 throw new Error("Unauthorized");
                             }
 
-                            // Если сервер ответил 404 (комментарий удален)
                             if (response.status === 404) {
-                                alert("Этот комментарий больше не существует.");
-                                throw new Error("Comment not found");
+                                alert("Комментарий или ответ больше не существует.");
+                                throw new Error("Comment/Reply not found");
                             }
 
                             if (!response.ok) {
@@ -479,16 +493,13 @@
                             return response.json();
                         })
                         .then(data => {
-                            // Извлекаем "likes" и "liked" из вашей мапы
                             countSpan.textContent = data.likes;
 
                             if (data.liked) {
-                                // Если лайк успешно поставлен
                                 this.classList.add("text-danger");
                                 icon.classList.remove("bi-heart");
                                 icon.classList.add("bi-heart-fill");
                             } else {
-                                // Если лайк успешно убран
                                 this.classList.remove("text-danger");
                                 icon.classList.remove("bi-heart-fill");
                                 icon.classList.add("bi-heart");

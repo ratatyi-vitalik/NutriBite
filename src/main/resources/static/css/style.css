@@ -1536,7 +1536,7 @@ body {
 
 .recipient-badge {
     background-color: #FFF2E8;
-    color: #FF6B00;
+    color: var(--tb-orange);
     font-weight: 600;
     padding: 6px 14px;
     border-radius: 20px;

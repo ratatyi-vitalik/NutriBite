@@ -39,18 +39,63 @@
                             <li><a class="dropdown-item" href="/categories">Categories</a></li>
                         </ul>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell fs-5"></i>
+                            <span th:if="${unreadNotificationsCount > 0}"
+                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  th:text="${unreadNotificationsCount}">
+                                3
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow p-2" aria-labelledby="notificationsDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                            <li class="dropdown-header d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                <span class="fw-bold">Notifications</span>
+                                <a href="/profile/notifications/mark-all-read" class="text-decoration-none font-size-12" style="color: var(--tb-orange);">Mark all read</a>
+                            </li>
+
+                            <li th:each="notif : ${notifications}" class="mb-2">
+                                <a th:if="${notif.link != null}"
+                                   th:href="${notif.link}"
+                                   class="dropdown-item rounded p-2 text-wrap">
+                                    <div class="d-flex align-items-start gap-2">
+                                        <div>
+                                            <p class="mb-0 font-size-14 fw-medium" th:text="${notif.title}"></p>
+                                            <small class="text-muted d-block" th:text="${notif.message}"></small>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <div th:unless="${notif.link != null}"
+                                     class="dropdown-item-text rounded p-2 text-wrap">
+                                    <div class="d-flex align-items-start gap-2">
+                                        <div>
+                                            <p class="mb-0 font-size-14 fw-medium" th:text="${notif.title}"></p>
+                                            <small class="text-muted d-block" th:text="${notif.message}"></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li th:if="${#lists.isEmpty(notifications)}" class="text-center py-3 text-muted">
+                                No new notifications
+                            </li>
+
+                            <li class="border-top pt-2 mt-2 text-center">
+                                <a href="/profile/notifications" class="text-decoration-none font-size-14 fw-semibold" style="color: var(--tb-orange);">View all notifications</a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
 
             <div class="col-3 col-lg-2 d-flex align-items-center justify-content-end gap-4">
                 <div class="search-integration-wrapper" id="searchWrapper">
 
-                    <!-- Кнопка-лупа, которая изначально видна в шапке -->
                     <button class="search-btn main-trigger-icon" id="searchTriggerBtn" type="button" aria-label="Search">
                         <i class="bi bi-search"></i>
                     </button>
 
-                    <!-- Внутреннее содержимое панели (поля ввода и кнопка закрытия) -->
                     <div class="search-expandable-content">
                         <input type="text" id="searchLiveInput" class="search-minimal-input" placeholder="Cake" autocomplete="off">
                         <button class="search-action-icon" id="searchCloseBtn" type="button" aria-label="Close">
@@ -58,7 +103,6 @@
                         </button>
                     </div>
 
-                    <!-- Контейнер для динамического списка результатов -->
                     <div class="search-attached-results" id="searchLiveResults"></div>
                 </div>
 

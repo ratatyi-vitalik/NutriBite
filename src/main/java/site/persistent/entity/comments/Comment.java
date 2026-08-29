@@ -2,6 +2,7 @@ package site.persistent.entity.comments;
 
 import jakarta.persistence.*;
 import site.persistent.entity.User;
+import site.persistent.entity.recipes.Recipe;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -22,7 +23,7 @@ public class Comment {
     @Column
     private LocalDateTime date;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", referencedColumnName = "id")
     private User author;
 
@@ -40,6 +41,10 @@ public class Comment {
 
     @Column(nullable = false)
     private boolean hidden = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipe_id")
+    private Recipe recipe;
 
     public Comment() {
     }
@@ -98,5 +103,13 @@ public class Comment {
 
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
+    }
+
+    public Recipe getRecipe() {
+        return recipe;
+    }
+
+    public void setRecipe(Recipe recipe) {
+        this.recipe = recipe;
     }
 }
