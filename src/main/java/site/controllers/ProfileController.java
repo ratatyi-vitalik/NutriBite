@@ -2,11 +2,15 @@ package site.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import site.persistent.entity.Notification;
 import site.persistent.entity.Subscriber;
 import site.persistent.entity.User;
+import site.persistent.repository.NotificationRepository;
 import site.persistent.repository.SubscriberRepository;
 import site.persistent.repository.UserRepository;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,19 +27,23 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @RestController
 public class ProfileController {
     private final UserRepository userRepository;
     private final SubscriberRepository subscriberRepository;
     private final UserService userService;
+    private final NotificationRepository notificationRepository;
 
     public ProfileController(UserRepository userRepository,
                              SubscriberRepository subscriberRepository,
-                             UserService userService) {
+                             UserService userService,
+                             NotificationRepository notificationRepository) {
         this.userRepository = userRepository;
         this.subscriberRepository = subscriberRepository;
         this.userService = userService;
+        this.notificationRepository = notificationRepository;
     }
 
     @GetMapping("/profile")
@@ -175,5 +183,19 @@ public class ProfileController {
             new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
         }
         return new RedirectView("/");
+    }
+
+    @GetMapping("/profile/notifications")
+    public ModelAndView showNotificationsPage(@AuthenticationPrincipal User user,
+                                              @RequestParam(defaultValue = "0") int page) {
+        ModelAndView model = new ModelAndView("Notifications");
+
+        Page<Notification> notificationPage = notificationRepository.findPriorityNotificationsByUserId(
+                user.getId(), PageRequest.of(page, 10));
+
+        model.addObject("notificationPage", notificationPage);
+        model.addObject("currentPage", page);
+        model.addObject("totalPages", notificationPage.getTotalPages());
+        return model;
     }
 }

@@ -1,11 +1,14 @@
 package site.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.view.RedirectView;
 import site.persistent.entity.Notification;
 import site.persistent.entity.Subscriber;
 import site.persistent.entity.User;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import site.persistent.repository.NotificationRepository;
 import site.persistent.repository.SubscriberRepository;
+import site.persistent.repository.UserRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -26,11 +30,16 @@ public class HomeController {
     private final CategoryRepository categoryRepository;
     private final SubscriberRepository subscriberRepository;
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
 
-    public HomeController(CategoryRepository categoryRepository, SubscriberRepository subscriberRepository, NotificationRepository notificationRepository) {
+    public HomeController(CategoryRepository categoryRepository,
+                          SubscriberRepository subscriberRepository,
+                          NotificationRepository notificationRepository,
+                          UserRepository userRepository) {
         this.categoryRepository = categoryRepository;
         this.subscriberRepository = subscriberRepository;
         this.notificationRepository = notificationRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/")
@@ -101,5 +110,20 @@ public class HomeController {
                 "isBanned", banned,
                 "remainingTime", remainingTime
         ));
+    }
+
+    @GetMapping("/notifications/mark-all-read")
+    @Transactional
+    public RedirectView markAllNotificationsRead(@AuthenticationPrincipal User user,
+                                                 HttpServletRequest request) {
+        if (user != null) {
+            notificationRepository.markAllAsReadByUserId(user.getId());
+        }
+        return new RedirectView(getRefererUrl(request));
+    }
+
+    private String getRefererUrl(HttpServletRequest request) {
+        String referer = request.getHeader("Referer");
+        return (referer != null) ? referer : "/";
     }
 }
