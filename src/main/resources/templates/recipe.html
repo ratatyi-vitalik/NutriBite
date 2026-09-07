@@ -69,11 +69,11 @@
         <div class="d-flex align-items-center mb-5 border-bottom pb-4">
             <div class="recipe-time-card">
                 <div class="recipe-time-label">Prep Time</div>
-                <div class="recipe-time-value" th:text="${recipe.prepTime}"></div>
+                <div class="recipe-time-value" th:text="${recipe.formattedPrepTime}"></div>
             </div>
             <div class="recipe-time-card">
                 <div class="recipe-time-label">Cook Time</div>
-                <div class="recipe-time-value" th:text="${recipe.cookTime}"></div>
+                <div class="recipe-time-value" th:text="${recipe.formattedCookTime}"></div>
             </div>
             <div class="recipe-time-card">
                 <div class="recipe-time-label">Servings</div>
@@ -833,6 +833,27 @@
                 });
             });
         }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const recipeId = 0;
+
+        setTimeout(() => {
+            const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+            const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+
+            const headers = {};
+            if (token && header) {
+                headers[header] = token;
+            }
+
+            fetch(`/recipes/view?recipeId=${recipeId}`, {
+                method: 'POST',
+                headers: headers
+            }).catch(err => console.error('Error counting view:', err));
+        }, 30000); // 30 секунд
     });
 </script>
 

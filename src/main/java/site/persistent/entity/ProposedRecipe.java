@@ -23,10 +23,10 @@ public class ProposedRecipe {
     private String description;
 
     @Column(name = "prep_time")
-    private String prepTime;
+    private Integer prepTime;
 
     @Column(name = "cook_time")
-    private String cookTime;
+    private Integer cookTime;
 
     @Column
     private String servings;
@@ -62,8 +62,8 @@ public class ProposedRecipe {
 
     public ProposedRecipe(String title,
                           String description,
-                          String prepTime,
-                          String cookTime,
+                          Integer prepTime,
+                          Integer cookTime,
                           String servings,
                           User author,
                           LocalDateTime date,
@@ -103,19 +103,19 @@ public class ProposedRecipe {
         this.description = description;
     }
 
-    public String getPrepTime() {
+    public Integer getPrepTime() {
         return prepTime;
     }
 
-    public void setPrepTime(String prepTime) {
+    public void setPrepTime(Integer prepTime) {
         this.prepTime = prepTime;
     }
 
-    public String getCookTime() {
+    public Integer getCookTime() {
         return cookTime;
     }
 
-    public void setCookTime(String cookTime) {
+    public void setCookTime(Integer cookTime) {
         this.cookTime = cookTime;
     }
 

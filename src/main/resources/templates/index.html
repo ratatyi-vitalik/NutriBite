@@ -38,6 +38,104 @@
     </div>
 </section>
 
+<section class="popular-recipes-section border-top-0 pt-0">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h2 class="popular-recipes-title">Quick & Easy</h2>
+                <p class="popular-recipes-subtitle mb-0">Delicious meals ready in under 20 minutes</p>
+            </div>
+            <a th:href="@{/recipes(maxTime=20)}" class="popular-recipes-view-all">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <div class="col" th:each="recipe : ${quickRecipes}">
+                <a th:href="@{/recipe?recipeId={id}(id=${recipe.id})}" class="recipe-card-link">
+                    <div class="recipe-card-img-wrapper position-relative">
+                        <img th:src="@{{path}(path=${recipe.imagePath != null ? recipe.imagePath : '/images/default-recipe.jpg'})}"
+                             th:alt="${recipe.title}"
+                             class="recipe-card-img">
+                        <div class="recipe-rating-badge position-absolute top-0 end-0 m-3 shadow-sm" th:if="${recipe.averageRating > 0}">
+                            <i class="bi bi-star-fill text-warning fs-6"></i>
+                            <span th:text="${#numbers.formatDecimal(recipe.averageRating, 1, 1)}">4.5</span>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h3 class="recipe-card-title" th:text="${recipe.title}">Recipe Title</h3>
+                        <div class="d-flex align-items-center gap-3 mt-2 text-muted fs-6">
+                            <span>
+                                <i class="bi bi-clock me-1"></i>
+                                <span th:text="${(recipe.prepTime != null ? recipe.prepTime : 0) + (recipe.cookTime != null ? recipe.cookTime : 0)} + ' mins'">15 mins</span>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="popular-recipes-section">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h2 class="popular-recipes-title">Super Delicious</h2>
+                <p class="popular-recipes-subtitle mb-0">Popular recipes our readers love the most</p>
+            </div>
+            <!--
+            <a th:href="@{/recipes}" class="popular-recipes-view-all">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+            -->
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <div class="col" th:each="recipe : ${popularRecipes}">
+                <a th:href="@{/recipe?recipeId={id}(id=${recipe.id})}" class="recipe-card-link">
+                    <div class="recipe-card-img-wrapper position-relative">
+                        <img th:src="@{{path}(path=${recipe.imagePath != null ? recipe.imagePath : '/images/default-recipe.jpg'})}"
+                             th:alt="${recipe.title}"
+                             class="recipe-card-img">
+
+                        <div class="recipe-rating-badge position-absolute top-0 end-0 m-3 shadow-sm" th:if="${recipe.averageRating > 0}">
+                            <i class="bi bi-star-fill text-warning fs-6"></i>
+                            <span th:text="${#numbers.formatDecimal(recipe.averageRating, 1, 1)}">4.5</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h3 class="recipe-card-title" th:text="${recipe.title}">Recipe Title</h3>
+
+                        <div class="d-flex align-items-center gap-3 mt-2 text-muted fs-6">
+                            <span th:if="${recipe.prepTime != null or recipe.cookTime != null}">
+                                <i class="bi bi-clock me-1"></i>
+                                <span th:text="${recipe.cookTime != null ? recipe.cookTime : recipe.prepTime}">30 mins</span>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-propose-section py-5">
+    <div class="container text-center py-3">
+        <h2 class="popular-recipes-title mb-3">Share Your Special Recipe!</h2>
+        <p class="popular-recipes-subtitle mb-4 mx-auto" style="max-width: 550px;">
+            Have a unique dish loved by family and friends? Submit it to our community and get featured on Tastebite!
+        </p>
+        <a th:if="${user != null}" th:href="@{/recipe/propose}" class="btn btn-tb-orange px-4 py-2 fs-6">
+            Propose a Recipe
+        </a>
+        <button th:unless="${user != null}" type="button" class="btn btn-tb-orange px-4 py-2 fs-6" data-bs-toggle="modal" data-bs-target="#loginModal">
+            Propose a Recipe
+        </button>
+    </div>
+</section>
+
 <section class="newsletter-section">
     <div class="container text-center">
         <div class="newsletter-content">
@@ -64,6 +162,34 @@
                 By joining our newsletter you agree to our
                 <a href="/terms" class="newsletter-link">Terms and Conditions</a>
             </p>
+        </div>
+    </div>
+</section>
+
+<section class="features-section py-6 bg-white">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-journal-check"></i>
+                </div>
+                <h5 class="fw-semibold">Tested Recipes</h5>
+                <p class="text-muted small mb-0">Every recipe is thoroughly tested to ensure perfection on your plate.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h5 class="fw-semibold">Vibrant Community</h5>
+                <p class="text-muted small mb-0">Join thousands of home cooks sharing their passion for delicious food.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <h5 class="fw-semibold">Quick & Easy</h5>
+                <p class="text-muted small mb-0">Find hundreds of fast 20-minute meals for daily busy schedules.</p>
+            </div>
         </div>
     </div>
 </section>

@@ -1,5 +1,6 @@
 package site.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +21,7 @@ import site.persistent.repository.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.ModelAndView;
+import site.service.IpUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,13 +42,15 @@ public class RecipeController {
     private final ReportRepository reportRepository;
     private final ReplyRepository replyRepository;
     private final NotificationRepository notificationRepository;
+    private final RecipeViewRepository recipeViewRepository;
 
     public RecipeController(RecipeRepository recipeRepository, UserRepository userRepository,
                             CommentRepository commentRepository, RatingRepository ratingRepository,
                             ProposedRecipeRepository proposedRecipeRepository,
                             ReportRepository reportRepository,
                             ReplyRepository replyRepository,
-                            NotificationRepository notificationRepository) {
+                            NotificationRepository notificationRepository,
+                            RecipeViewRepository recipeViewRepository) {
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
@@ -55,6 +59,7 @@ public class RecipeController {
         this.reportRepository = reportRepository;
         this.replyRepository = replyRepository;
         this.notificationRepository = notificationRepository;
+        this.recipeViewRepository = recipeViewRepository;
     }
 
     @GetMapping("/recipe")
@@ -133,7 +138,7 @@ public class RecipeController {
     @PostMapping("/like-comment")
     @Transactional
     public ResponseEntity<?> likeComment(@RequestParam(required = false, defaultValue = "0") Long commentId,
-                                         @RequestParam(required = false,defaultValue = "0") Long replyId,
+                                         @RequestParam(required = false, defaultValue = "0") Long replyId,
                                          @AuthenticationPrincipal User user) {
         Optional<Comment> commentOpt = commentRepository.findById(commentId);
         Optional<Reply> replyOpt = replyRepository.findById(replyId);
@@ -183,8 +188,7 @@ public class RecipeController {
                 }
                 return ResponseEntity.ok((Map.of("likes", likes.size(), "liked", true)));
             }
-        }
-        else {
+        } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Комментарий не найден");
         }
     }
@@ -266,8 +270,8 @@ public class RecipeController {
     public RedirectView saveProposedRecipe(
             @RequestParam("title") String title,
             @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "prepTime", required = false) String prepTime,
-            @RequestParam(value = "cookTime", required = false) String cookTime,
+            @RequestParam(value = "prepTime", required = false) Integer prepTime,
+            @RequestParam(value = "cookTime", required = false) Integer cookTime,
             @RequestParam(value = "servings", required = false) String servings,
 
             @RequestParam("imageFile") MultipartFile imageFile,
@@ -427,5 +431,26 @@ public class RecipeController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Comment or reply not found!");
+    }
+
+    @PostMapping("/recipe/view")
+    public ResponseEntity<Void> countView(@RequestParam long recipeId, @AuthenticationPrincipal User user, HttpServletRequest request) {
+        Optional<Recipe> recipeOpt = recipeRepository.findById(recipeId);
+        if (recipeOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Recipe recipe = recipeOpt.get();
+        if (user != null) {
+            if (!recipeViewRepository.existsByRecipeIdAndUserIdAndViewedAtAfter(recipeId, user.getId(), LocalDateTime.now().minusHours(2))) {
+                recipeViewRepository.save(new RecipeView(recipe, user));
+            }
+        }
+        else {
+            if (!recipeViewRepository.existsByRecipeIdAndIpAddressAndViewedAtAfter(recipeId, IpUtils.getClientIp(request), LocalDateTime.now().minusHours(2))) {
+                recipeViewRepository.save(new RecipeView(recipe, IpUtils.getClientIp(request)));
+            }
+        }
+        return ResponseEntity.ok().build();
     }
 }

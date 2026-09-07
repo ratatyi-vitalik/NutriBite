@@ -15,7 +15,7 @@ public class IngredientSection {
     private String title;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "section_id")
+    @JoinColumn(name = "section_id", nullable = false)
     private List<Ingredient> ingredients;
 
     public IngredientSection() {

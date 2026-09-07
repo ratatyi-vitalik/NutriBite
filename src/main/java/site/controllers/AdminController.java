@@ -146,8 +146,8 @@ public class AdminController {
     @PostMapping("/admin/recipes/add")
     public RedirectView showRecipePage(@RequestParam("title") String title,
                                        @RequestParam(value = "description", required = false) String description,
-                                       @RequestParam(value = "prepTime", required = false) String prepTime,
-                                       @RequestParam(value = "cookTime", required = false) String cookTime,
+                                       @RequestParam(value = "prepTime", required = false) Integer prepTime,
+                                       @RequestParam(value = "cookTime", required = false) Integer cookTime,
                                        @RequestParam(value = "servings", required = false) String servings,
 
                                        @RequestParam("imageFile") MultipartFile imageFile,

@@ -188,7 +188,7 @@ public class ProfileController {
     @GetMapping("/profile/notifications")
     public ModelAndView showNotificationsPage(@AuthenticationPrincipal User user,
                                               @RequestParam(defaultValue = "0") int page) {
-        ModelAndView model = new ModelAndView("Notifications");
+        ModelAndView model = new ModelAndView("notifications");
 
         Page<Notification> notificationPage = notificationRepository.findPriorityNotificationsByUserId(
                 user.getId(), PageRequest.of(page, 10));

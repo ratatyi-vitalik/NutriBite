@@ -36,10 +36,10 @@ public class Recipe {
     private String imagePath;
 
     @Column(name = "prep_time")
-    private String prepTime;
+    private Integer prepTime;
 
     @Column(name = "cook_time")
-    private String cookTime;
+    private Integer cookTime;
 
     @Column
     private String servings;
@@ -48,11 +48,11 @@ public class Recipe {
     private String videoPath;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "nutrition_id", referencedColumnName = "id")
+    @JoinColumn(name = "nutrition_id", referencedColumnName = "id", nullable = false)
     private Nutrition nutrition;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "recipe_id")
+    @JoinColumn(name = "recipe_id", nullable = false)
     private List<IngredientSection> ingredientSections;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -62,7 +62,7 @@ public class Recipe {
     // Связь One-to-Many для шагов приготовления (с сохранением порядка)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "recipe_id")
-    @OrderColumn(name = "step_order") // Гарантирует правильный порядок шагов (iterStat.count)
+    @OrderColumn(name = "step_order", nullable = false) // Гарантирует правильный порядок шагов (iterStat.count)
     private List<InstructionStep> instructions;
 
     @ManyToMany
@@ -75,6 +75,9 @@ public class Recipe {
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Rating> ratings = new HashSet<>();
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<RecipeView> views = new HashSet<>();
 
     public double getAverageRating() {
         if (ratings == null || ratings.isEmpty()) {
@@ -104,8 +107,8 @@ public class Recipe {
 
     public Recipe(String title,
                           String description,
-                          String prepTime,
-                          String cookTime,
+                          Integer prepTime,
+                          Integer cookTime,
                           String servings,
                           User author,
                           LocalDateTime date,
@@ -136,6 +139,31 @@ public class Recipe {
         this.nutrition = proposedRecipe.getNutrition();
         this.ingredientSections = proposedRecipe.getIngredientSections();
         this.instructions = proposedRecipe.getInstructions();
+    }
+
+    private String formatTime(Integer minutes) {
+        if (minutes == null || minutes <= 0) {
+            return "0 mins";
+        }
+        int hours = minutes / 60;
+        int mins = minutes % 60;
+
+        if (hours > 0) {
+            if (mins > 0) {
+                return String.format("%d hours %d mins", hours, mins); // или "%dh %dm"
+            }
+            return String.format("%d hours", hours);
+        }
+        return String.format("%d mins", mins);
+    }
+
+    // Вспомогательные геттеры для Thymeleaf (вызываются через recipe.formattedPrepTime)
+    public String getFormattedPrepTime() {
+        return formatTime(this.prepTime);
+    }
+
+    public String getFormattedCookTime() {
+        return formatTime(this.cookTime);
     }
 
     public Long getId() {
@@ -186,19 +214,19 @@ public class Recipe {
         this.imagePath = imagePath;
     }
 
-    public String getPrepTime() {
+    public Integer getPrepTime() {
         return prepTime;
     }
 
-    public void setPrepTime(String prepTime) {
+    public void setPrepTime(Integer prepTime) {
         this.prepTime = prepTime;
     }
 
-    public String getCookTime() {
+    public Integer getCookTime() {
         return cookTime;
     }
 
-    public void setCookTime(String cookTime) {
+    public void setCookTime(Integer cookTime) {
         this.cookTime = cookTime;
     }
 
@@ -264,5 +292,13 @@ public class Recipe {
 
     public void setRatings(Set<Rating> ratings) {
         this.ratings = ratings;
+    }
+
+    public Set<RecipeView> getViews() {
+        return views;
+    }
+
+    public void setViews(Set<RecipeView> views) {
+        this.views = views;
     }
 }

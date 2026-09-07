@@ -13,14 +13,13 @@ import site.persistent.entity.Notification;
 import site.persistent.entity.Subscriber;
 import site.persistent.entity.User;
 import site.persistent.entity.recipes.Category;
-import site.persistent.repository.CategoryRepository;
+import site.persistent.entity.recipes.Recipe;
+import site.persistent.repository.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
-import site.persistent.repository.NotificationRepository;
-import site.persistent.repository.SubscriberRepository;
-import site.persistent.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,16 +29,16 @@ public class HomeController {
     private final CategoryRepository categoryRepository;
     private final SubscriberRepository subscriberRepository;
     private final NotificationRepository notificationRepository;
-    private final UserRepository userRepository;
+    private final RecipeRepository recipeRepository;
 
     public HomeController(CategoryRepository categoryRepository,
                           SubscriberRepository subscriberRepository,
                           NotificationRepository notificationRepository,
-                          UserRepository userRepository) {
+                          RecipeRepository recipeRepository) {
         this.categoryRepository = categoryRepository;
         this.subscriberRepository = subscriberRepository;
         this.notificationRepository = notificationRepository;
-        this.userRepository = userRepository;
+        this.recipeRepository = recipeRepository;
     }
 
     @GetMapping("/")
@@ -63,8 +62,16 @@ public class HomeController {
             model.addObject("notifications", notifications);
         }
 
-        List<Category> categories = categoryRepository.findTop6ByOrderByIdAsc();
+        LocalDateTime since = LocalDateTime.now().minusDays(30);
+        List<Category> categories = categoryRepository.findTop6PopularOrFirstById(since);
         model.addObject("categories", categories);
+
+        List<Recipe> quickRecipes = recipeRepository.findTop8ByPrepTimeLessThanEqualOrderByPrepTimeAsc(20);
+        model.addObject("quickRecipes", quickRecipes);
+
+        List<Recipe> recipes = recipeRepository.findTop8PopularOrFirstById(since);
+        model.addObject("popularRecipes", recipes);
+
         return model;
     }
 

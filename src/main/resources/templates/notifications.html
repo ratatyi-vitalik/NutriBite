@@ -16,7 +16,6 @@
         </a>
     </div>
 
-    <!-- Notification List -->
     <div class="list-group mb-4 shadow-sm" th:if="${notificationPage.hasContent()}">
         <div th:each="notification : ${notificationPage.content}"
              class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
