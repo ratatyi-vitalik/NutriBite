@@ -66,7 +66,7 @@ public class HomeController {
         List<Category> categories = categoryRepository.findTop6PopularOrFirstById(since);
         model.addObject("categories", categories);
 
-        List<Recipe> quickRecipes = recipeRepository.findTop8ByPrepTimeLessThanEqualOrderByPrepTimeAsc(20);
+        List<Recipe> quickRecipes = recipeRepository.findTop8ByTotalTimeLessThanEqual(20);
         model.addObject("quickRecipes", quickRecipes);
 
         List<Recipe> recipes = recipeRepository.findTop8PopularOrFirstById(since);

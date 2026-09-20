@@ -45,7 +45,7 @@
                 <h2 class="popular-recipes-title">Quick & Easy</h2>
                 <p class="popular-recipes-subtitle mb-0">Delicious meals ready in under 20 minutes</p>
             </div>
-            <a th:href="@{/recipes(maxTime=20)}" class="popular-recipes-view-all">
+            <a th:href="@{/recipes}" class="popular-recipes-view-all">
                 View All <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
@@ -67,7 +67,7 @@
                         <div class="d-flex align-items-center gap-3 mt-2 text-muted fs-6">
                             <span>
                                 <i class="bi bi-clock me-1"></i>
-                                <span th:text="${(recipe.prepTime != null ? recipe.prepTime : 0) + (recipe.cookTime != null ? recipe.cookTime : 0)} + ' mins'">15 mins</span>
+                                <span th:text="${recipe.formattedCookTimePlusPrepTime}">15 mins</span>
                             </span>
                         </div>
                     </div>
@@ -84,11 +84,9 @@
                 <h2 class="popular-recipes-title">Super Delicious</h2>
                 <p class="popular-recipes-subtitle mb-0">Popular recipes our readers love the most</p>
             </div>
-            <!--
             <a th:href="@{/recipes}" class="popular-recipes-view-all">
                 View All <i class="bi bi-arrow-right ms-1"></i>
             </a>
-            -->
         </div>
 
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
@@ -111,7 +109,7 @@
                         <div class="d-flex align-items-center gap-3 mt-2 text-muted fs-6">
                             <span th:if="${recipe.prepTime != null or recipe.cookTime != null}">
                                 <i class="bi bi-clock me-1"></i>
-                                <span th:text="${recipe.cookTime != null ? recipe.cookTime : recipe.prepTime}">30 mins</span>
+                                <span th:text="${recipe.formattedCookTimePlusPrepTime}">30 mins</span>
                             </span>
                         </div>
                     </div>

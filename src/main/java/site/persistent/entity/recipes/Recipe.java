@@ -32,6 +32,10 @@ public class Recipe {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @Column(name = "image_path")
     private String imagePath;
 
@@ -166,6 +170,10 @@ public class Recipe {
         return formatTime(this.cookTime);
     }
 
+    public String getFormattedCookTimePlusPrepTime() {
+        return formatTime(this.cookTime + this.prepTime);
+    }
+
     public Long getId() {
         return id;
     }
@@ -204,6 +212,14 @@ public class Recipe {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public String getImagePath() {

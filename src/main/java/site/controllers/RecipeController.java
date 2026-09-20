@@ -3,6 +3,7 @@ package site.controllers;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
@@ -60,6 +61,13 @@ public class RecipeController {
         this.replyRepository = replyRepository;
         this.notificationRepository = notificationRepository;
         this.recipeViewRepository = recipeViewRepository;
+    }
+
+    @GetMapping("/recipes")
+    public ModelAndView showRecipesPage(@RequestParam(defaultValue = "0") int page) {
+        ModelAndView model = new ModelAndView("recipes");
+        model.addObject("recipesPage", recipeRepository.findAll(PageRequest.of(page, 12)));
+        return model;
     }
 
     @GetMapping("/recipe")

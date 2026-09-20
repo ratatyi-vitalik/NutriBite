@@ -30,7 +30,9 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     """, nativeQuery = true)
     List<Recipe> findTop8PopularOrFirstById(@Param("since") LocalDateTime since);
 
-    List<Recipe> findTop8ByPrepTimeLessThanEqualOrderByPrepTimeAsc(Integer maxPrepTime);
+    @Query("SELECT r FROM Recipe r WHERE (COALESCE(r.prepTime, 0) + COALESCE(r.cookTime, 0)) <= :maxTime " +
+            "ORDER BY (COALESCE(r.prepTime, 0) + COALESCE(r.cookTime, 0)) ASC")
+    List<Recipe> findTop8ByTotalTimeLessThanEqual(@Param("maxTime") Integer maxTime);
 
     boolean existsById(long id);
 }
