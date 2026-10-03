@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Results - Tastebite</title>
+    <title>Результаты поиска — NutriBite</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -15,31 +15,46 @@
 
 <div th:replace="~{fragments/header :: navbar}"></div>
 
-<section class="category-recipes-section">
+<main class="flex-grow-1 py-5">
     <div class="container">
-        <h1 class="search-page-title">Search results</h1>
+        <div class="text-center mb-4">
+            <h1 class="h2 fw-bold text-dark mb-2">Результаты поиска</h1>
+            <p class="text-muted">Найдите идеальные полезные рецепты для вашего рациона</p>
+        </div>
 
-        <!-- Верхняя поисковая строка с результатами из макета -->
-        <div class="search-input-container">
-            <input type="text" id="pageSearchInput" class="search-main-input" placeholder="Type to search...">
-            <span class="search-stats" id="searchStats">(0 Recipes)</span>
-            <button class="clear-search-btn" id="pageSearchClearBtn"><i class="bi bi-x-lg"></i></button>
+        <!-- Верхняя поисковая строка -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm p-2 rounded-pill bg-white">
+                    <div class="input-group align-items-center px-3">
+                        <i class="bi bi-search text-success fs-5 me-2"></i>
+                        <input type="text" id="pageSearchInput" class="form-control border-0 shadow-none bg-transparent" placeholder="Введите название или ингредиент...">
+                        <span class="badge bg-light text-muted rounded-pill px-3 py-2 me-2" id="searchStats">(0 Рецептов)</span>
+                        <button class="btn btn-link text-muted p-0 me-1" id="pageSearchClearBtn" type="button"><i class="bi bi-x-circle-fill fs-5"></i></button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Контейнер сетки результатов (4 колонки на больших экранах) -->
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="searchResultsGrid">
-            <!-- Сюда динамически рендерятся рецепты -->
+            <!-- Динамически рендерятся рецепты -->
         </div>
 
         <div class="text-center mt-5 d-none" id="loadMoreContainer">
-            <button class="btn-load-more" id="loadMoreBtn">Load More</button>
+            <button class="btn btn-outline-success rounded-pill px-5 py-2 fw-semibold" id="loadMoreBtn">Загрузить еще</button>
         </div>
     </div>
-</section>
+</main>
 
 <div th:replace="~{fragments/header :: modalSignUp}"></div>
 <div th:replace="~{fragments/header :: modalRegister}"></div>
 <div th:replace="~{fragments/header :: modalForgot}"></div>
+
+<div th:replace="~{fragments/footer :: successToast}"></div>
+<div th:replace="~{fragments/footer :: errorToast}"></div>
+<script th:replace="~{fragments/footer :: toastScript}"></script>
+
 <script th:replace="~{fragments/header :: searchScript}"></script>
 <script th:replace="~{fragments/header :: openLoginScript}"></script>
 
@@ -76,7 +91,7 @@
         pageSearchClearBtn.addEventListener("click", function() {
             pageSearchInput.value = "";
             searchResultsGrid.innerHTML = "";
-            searchStats.textContent = "(0 Recipes)";
+            searchStats.textContent = "(0 Рецептов)";
             loadMoreContainer.classList.add("d-none");
             currentQuery = "";
         });
@@ -99,7 +114,7 @@
 
             if (currentQuery.length === 0) {
                 searchResultsGrid.innerHTML = "";
-                searchStats.textContent = "(0 Recipes)";
+                searchStats.textContent = "(0 Рецептов)";
                 loadMoreContainer.classList.add("d-none");
                 return;
             }
@@ -125,25 +140,29 @@
             const totalRecipes = data.totalRecipes || 0;
             const totalPages = data.totalPages || 0;
 
-            searchStats.textContent = `(${totalRecipes} ${totalRecipes === 1 ? 'Recipe' : 'Recipes'})`;
+            searchStats.textContent = `(${totalRecipes} ${totalRecipes === 1 ? 'Рецепт' : totalRecipes > 1 && totalRecipes < 5 ? 'Рецепта' : 'Рецептов'})`;
 
             if (recipes.length === 0 && !appendMode) {
-                searchResultsGrid.innerHTML = `<div class="col-12 text-center text-muted py-5">No recipes found matching your criteria.</div>`;
+                searchResultsGrid.innerHTML = `<div class="col-12 text-center text-muted py-5"><i class="bi bi-search display-4 d-block mb-3 text-secondary"></i>По вашему запросу ничего не найдено.</div>`;
                 loadMoreContainer.classList.add("d-none");
                 return;
             }
 
-            // Рендер карточек рецептов в сетку по стилям recipe-card-link
+            // Рендер карточек рецептов в сетку
             recipes.forEach(recipe => {
                 const col = document.createElement("div");
                 col.className = "col";
                 col.innerHTML = `
-                    <a href="/recipe?recipeId=${recipe.id}" class="recipe-card-link">
-                        <div class="recipe-card-img-wrapper">
-                            <img src="${recipe.imagePath ? recipe.imagePath : '/icons/avatar.png'}" class="recipe-card-img" alt="${recipe.title}">
-                        </div>
-                        <h3 class="recipe-card-title">${recipe.title}</h3>
-                    </a>
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden text-decoration-none hover-lift">
+                        <a href="/recipe?recipeId=${recipe.id}" class="text-decoration-none text-dark">
+                            <div class="ratio ratio-4x3 overflow-hidden">
+                                <img src="${recipe.imagePath ? recipe.imagePath : '/icons/avatar.png'}" class="card-img-top object-fit-cover" alt="${recipe.title}">
+                            </div>
+                            <div class="card-body p-3">
+                                <h3 class="h6 card-title fw-bold text-dark mb-0 line-clamp-2">${recipe.title}</h3>
+                            </div>
+                        </a>
+                    </div>
                 `;
                 searchResultsGrid.appendChild(col);
             });

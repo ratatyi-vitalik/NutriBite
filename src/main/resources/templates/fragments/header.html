@@ -7,45 +7,45 @@
         <div class="row align-items-center">
 
             <div class="col-3 col-lg-2">
-                <a href="/">
-                    <img th:src="@{/icons/Logo.svg}" alt="logo">
+                <a href="/" class="d-flex align-items-center text-decoration-none">
+                    <img th:src="@{/icons/Logo.svg}" alt="NutriBite Organic" style="max-height: 50px;">
                 </a>
             </div>
 
-            <div class="col-6 col-lg-8 d-none d-md-block">
-                <ul class="nav justify-content-center navbar-nav flex-row">
+            <div class="col-6 col-lg-7 d-none d-md-block">
+                <ul class="nav justify-content-center navbar-nav flex-row gap-lg-3">
                     <li class="nav-item">
                         <a class="nav-link" href="/">
-                            Homepage
+                            Главная
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/recipes">
-                            Recipes Page
+                            ПП-Рецепты
                         </a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Pages
+                            Разделы
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/recipe/propose">Propose Recipe</a></li>
-                            <li><a class="dropdown-item" href="/categories">Categories</a></li>
+                        <ul class="dropdown-menu border-0 shadow-sm">
+                            <li><a class="dropdown-item" href="/recipe/propose">Предложить рецепт</a></li>
+                            <li><a class="dropdown-item" href="/categories">Категории</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-bell fs-5"></i>
                             <span th:if="${unreadNotificationsCount > 0}"
-                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
                                   th:text="${unreadNotificationsCount}">
                                 3
                             </span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow p-2" aria-labelledby="notificationsDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
                             <li class="dropdown-header d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-                                <span class="fw-bold">Notifications</span>
-                                <a href="/notifications/mark-all-read" class="text-decoration-none font-size-12" style="color: var(--tb-orange);">Mark all read</a>
+                                <span class="fw-bold">Уведомления</span>
+                                <a href="/notifications/mark-all-read" class="text-decoration-none font-size-12 text-success">Прочитать все</a>
                             </li>
 
                             <li th:each="notif : ${notifications}" class="mb-2">
@@ -72,27 +72,27 @@
                             </li>
 
                             <li th:if="${#lists.isEmpty(notifications)}" class="text-center py-3 text-muted">
-                                No new notifications
+                                Нет новых уведомлений
                             </li>
 
                             <li class="border-top pt-2 mt-2 text-center">
-                                <a href="/profile/notifications" class="text-decoration-none font-size-14 fw-semibold" style="color: var(--tb-orange);">View all notifications</a>
+                                <a href="/profile/notifications" class="text-decoration-none font-size-14 fw-semibold text-success">Все уведомления</a>
                             </li>
                         </ul>
                     </li>
                 </ul>
             </div>
 
-            <div class="col-3 col-lg-2 d-flex align-items-center justify-content-end gap-4">
+            <div class="col-3 col-lg-3 d-flex align-items-center justify-content-end gap-2 gap-lg-3">
                 <div class="search-integration-wrapper" id="searchWrapper">
 
-                    <button class="search-btn main-trigger-icon" id="searchTriggerBtn" type="button" aria-label="Search">
+                    <button class="search-btn main-trigger-icon" id="searchTriggerBtn" type="button" aria-label="Поиск">
                         <i class="bi bi-search"></i>
                     </button>
 
                     <div class="search-expandable-content">
-                        <input type="text" id="searchLiveInput" class="search-minimal-input" placeholder="Cake" autocomplete="off">
-                        <button class="search-action-icon" id="searchCloseBtn" type="button" aria-label="Close">
+                        <input type="text" id="searchLiveInput" class="search-minimal-input" placeholder="Боул, смузи, авокадо..." autocomplete="off">
+                        <button class="search-action-icon" id="searchCloseBtn" type="button" aria-label="Закрыть">
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
@@ -100,14 +100,21 @@
                     <div class="search-attached-results" id="searchLiveResults"></div>
                 </div>
 
-                <div class="auth-buttons-block d-flex" th:if="${user == null}">
-                    <button class="btn btn-login" data-bs-toggle="modal" data-bs-target="#loginModal">Sign up</button>
-                    <button class="btn btn-register" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
+                <!-- Обновленный блок авторизации -->
+                <div class="auth-buttons-block d-flex align-items-center gap-2" th:if="${user == null}">
+                    <button class="btn btn-outline-success btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        Вход
+                    </button>
+                    <button class="btn btn-success btn-sm rounded-pill px-3 fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#registerModal">
+                        Регистрация
+                    </button>
                 </div>
 
                 <a href="/profile" class="profile-block" th:unless="${user == null}">
                     <img th:src="${user.avatarPath != null ? user.avatarPath : '/icons/avatar.png'}"
-                         alt="profile" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                         alt="Профиль"
+                         class="rounded-circle object-fit-cover"
+                         style="width: 36px; height: 36px;">
                 </a>
 
             </div>
@@ -118,29 +125,31 @@
 
 <div class="modal fade custom-modal" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true" th:fragment="modalSignUp">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="loginModalLabel">LOGIN</h5>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-success pb-2" id="loginModalLabel">Вход в NutriBite</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="login-form" th:action="@{/login}" method="POST">
-                    <div class="input-group-custom">
-                        <i class="bi bi-envelope"></i>
-                        <input type="email" class="form-control-custom" id="loginEmail" name="email" required placeholder="Email">
+                    <div class="input-group-custom mb-3">
+                        <i class="bi bi-envelope text-muted"></i>
+                        <input type="email" class="form-control-custom" id="loginEmail" name="email" required placeholder="Ваш Email">
                     </div>
 
-                    <div class="input-group-custom">
-                        <i class="bi bi-lock"></i>
-                        <input type="password" class="form-control-custom" id="loginPassword" name="password" required placeholder="Password">
+                    <div class="input-group-custom mb-2">
+                        <i class="bi bi-lock text-muted"></i>
+                        <input type="password" class="form-control-custom" id="loginPassword" name="password" required placeholder="Пароль">
                     </div>
 
-                    <a href="#" class="forgot-link" data-bs-toggle="modal" data-bs-target="#forgotModal">Forgot Password?</a>
+                    <div class="text-end mb-3">
+                        <a href="#" class="forgot-link small text-muted text-decoration-none" data-bs-toggle="modal" data-bs-target="#forgotModal">Забыли пароль?</a>
+                    </div>
 
-                    <button type="submit" class="btn btn-orange">Login</button>
+                    <button type="submit" class="btn btn-success w-100 py-2 rounded-3 mb-3">Войти</button>
 
-                    <div class="modal-footer-text">
-                        Don’t have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Sign up</a>
+                    <div class="modal-footer-text text-center small text-muted">
+                        Еще нет аккаунта? <a href="#" class="text-success text-decoration-none fw-semibold" data-bs-toggle="modal" data-bs-target="#registerModal">Зарегистрироваться</a>
                     </div>
                 </form>
             </div>
@@ -150,32 +159,32 @@
 
 <div class="modal fade custom-modal" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true" th:fragment="modalRegister">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="registerModalLabel">SIGN UP</h5>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-success" id="registerModalLabel">Присоединиться к NutriBite</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form th:action="@{/register}" method="POST">
-                    <div class="input-group-custom">
-                        <i class="bi bi-person"></i>
-                        <input type="text" class="form-control-custom" id="regName" name="name" required placeholder="Full Name">
+                    <div class="input-group-custom mb-3">
+                        <i class="bi bi-person text-muted"></i>
+                        <input type="text" class="form-control-custom" id="regName" name="name" required placeholder="Полное имя">
                     </div>
 
-                    <div class="input-group-custom">
-                        <i class="bi bi-envelope"></i>
-                        <input type="email" class="form-control-custom" id="regEmail" name="email" required placeholder="Email">
+                    <div class="input-group-custom mb-3">
+                        <i class="bi bi-envelope text-muted"></i>
+                        <input type="email" class="form-control-custom" id="regEmail" name="email" required placeholder="Email адрес">
                     </div>
 
-                    <div class="input-group-custom">
-                        <i class="bi bi-lock"></i>
-                        <input type="password" class="form-control-custom" id="regPassword" name="password" required placeholder="Password">
+                    <div class="input-group-custom mb-3">
+                        <i class="bi bi-lock text-muted"></i>
+                        <input type="password" class="form-control-custom" id="regPassword" name="password" required placeholder="Придумайте пароль">
                     </div>
 
-                    <button type="submit" class="btn btn-orange">Sign up</button>
+                    <button type="submit" class="btn btn-success w-100 py-2 rounded-3 mb-3">Создать аккаунт</button>
 
-                    <div class="terms-text">
-                        By creating an account, you agree to our <a href="#">Terms & Conditions</a>
+                    <div class="terms-text text-center small text-muted">
+                        Создавая аккаунт, вы соглашаетесь с нашей <a href="/terms" class="text-success">Политикой конфиденциальности</a>
                     </div>
                 </form>
             </div>
@@ -185,18 +194,18 @@
 
 <div class="modal fade custom-modal" id="forgotModal" tabindex="-1" aria-hidden="true" th:fragment="modalForgot">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Reset Password</h5>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-success">Восстановление пароля</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form th:action="@{/forgot-password}" method="POST">
-                    <div class="input-group-custom">
-                        <i class="bi bi-envelope"></i>
-                        <input type="email" class="form-control-custom" name="email" required placeholder="Enter your email">
+                    <div class="input-group-custom mb-3">
+                        <i class="bi bi-envelope text-muted"></i>
+                        <input type="email" class="form-control-custom" name="email" required placeholder="Введите ваш Email">
                     </div>
-                    <button type="submit" class="btn btn-orange mt-3">Send Reset Link</button>
+                    <button type="submit" class="btn btn-success w-100 py-2 rounded-3">Отправить ссылку</button>
                 </form>
             </div>
         </div>
@@ -211,7 +220,6 @@
         const searchLiveInput = document.getElementById("searchLiveInput");
         const searchLiveResults = document.getElementById("searchLiveResults");
 
-        // Открытие панели / Принудительный поиск при повторном клике на лупу
         searchTriggerBtn.addEventListener("click", function (e) {
             e.stopPropagation();
             const isActive = searchWrapper.classList.contains("active");
@@ -222,13 +230,11 @@
             } else {
                 const query = searchLiveInput.value.trim();
                 if (query.length > 0) {
-                    // Перенаправляем на отдельную страницу поиска с параметром query
                     window.location.href = `/search-results?query=${encodeURIComponent(query)}`;
                 }
             }
         });
 
-// Также рекомендуется добавить перенаправление по нажатию на Enter в инпуте шапки:
         searchLiveInput.addEventListener("keydown", function(e) {
             if (e.key === "Enter") {
                 const query = searchLiveInput.value.trim();
@@ -238,13 +244,11 @@
             }
         });
 
-        // Закрытие панели при нажатии на крестик
         searchCloseBtn.addEventListener("click", function (e) {
             e.stopPropagation();
             closeSearchWidget();
         });
 
-        // Скрытие окна при клике в любое место документа за пределами виджета поиска
         document.addEventListener("click", function (e) {
             if (!searchWrapper.contains(e.target)) {
                 closeSearchWidget();
@@ -257,7 +261,6 @@
             searchLiveResults.innerHTML = "";
         }
 
-        // Функция задержки ввода (Debounce)
         function debounce(func, delay = 300) {
             let timeoutId;
             return (...args) => {
@@ -266,7 +269,6 @@
             };
         }
 
-        // Живой поиск при изменении текста в поле ввода
         const performLiveSearch = debounce(function () {
             const query = searchLiveInput.value.trim();
 
@@ -280,53 +282,46 @@
 
         searchLiveInput.addEventListener("input", performLiveSearch);
 
-        // Изолированная функция отправки запроса на сервер
         function executeSearchRequest(query) {
-            // ИСПРАВЛЕНО: путь изменен с /api/search на /search согласно @GetMapping вашего контроллера
             fetch(`/search?query=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => renderVisualResults(data))
-                .catch(err => console.error("Ошибка при выполнении поиска:", err));
+                .catch(err => console.error("Ошибка поиска:", err));
         }
 
-        // Отрисовка полученного JSON структуры в HTML
         function renderVisualResults(data) {
             searchLiveResults.innerHTML = "";
             const categories = data.categories || [];
             const recipes = data.recipes || [];
 
             if (categories.length === 0 && recipes.length === 0) {
-                searchLiveResults.innerHTML = `<div class="search-empty-message">No results found</div>`;
+                searchLiveResults.innerHTML = `<div class="search-empty-message p-3 text-muted">Ничего не найдено</div>`;
                 return;
             }
 
-            // Рендер Категорий (Круглые картинки)
             categories.forEach(category => {
                 const row = document.createElement("a");
-                // ИСПРАВЛЕНО: ссылка ведет на фильтр рецептов по категории
                 row.href = `/categories(categoryId=${category.id})`;
-                row.className = "search-result-row";
+                row.className = "search-result-row d-flex align-items-center gap-2 p-2 text-decoration-none";
                 row.innerHTML = `
-                <img src="${category.imagePath}" class="result-img is-category" alt="">
+                <img src="${category.imagePath}" class="result-img is-category rounded-circle" style="width:32px;height:32px;object-fit:cover;" alt="">
                 <div class="result-meta">
-                    <!-- ИСПРАВЛЕНО: category.name заменен на category.title под структуру вашей мапы из контроллера -->
-                    <span class="result-title">${category.title}</span>
-                    <span class="result-subtitle">Category</span>
+                    <span class="result-title text-dark d-block font-size-14 fw-medium">${category.title}</span>
+                    <span class="result-subtitle text-muted font-size-12">Категория</span>
                 </div>
             `;
                 searchLiveResults.appendChild(row);
             });
 
-            // Рендер Рецептов (Квадратные картинки)
             recipes.forEach(recipe => {
                 const row = document.createElement("a");
                 row.href = `/recipe?recipeId=${recipe.id}`;
-                row.className = "search-result-row";
+                row.className = "search-result-row d-flex align-items-center gap-2 p-2 text-decoration-none";
                 row.innerHTML = `
-                <img src="${recipe.imagePath}" class="result-img" alt="">
+                <img src="${recipe.imagePath}" class="result-img rounded" style="width:32px;height:32px;object-fit:cover;" alt="">
                 <div class="result-meta">
-                    <span class="result-title">${recipe.title}</span>
-                    <span class="result-subtitle">Recipe</span>
+                    <span class="result-title text-dark d-block font-size-14 fw-medium">${recipe.title}</span>
+                    <span class="result-subtitle text-muted font-size-12">Рецепт</span>
                 </div>
             `;
                 searchLiveResults.appendChild(row);
@@ -339,7 +334,6 @@
     document.addEventListener("DOMContentLoaded", function () {
         const urlParams = new URLSearchParams(window.location.search);
 
-        // Если пользователь получил ошибку входа или перешел по защищенной ссылке без авторизации
         if (urlParams.has('loginError') || urlParams.has('loginRequired')) {
             const loginModalElement = document.getElementById('loginModal');
             if (loginModalElement) {

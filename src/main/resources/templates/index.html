@@ -17,7 +17,7 @@
 
 <section class="categories-section">
     <div class="container">
-        <h2 class="categories-title">Popular Categories</h2>
+        <h2 class="categories-title">Популярные категории</h2>
 
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-4 justify-content-center">
 
@@ -38,15 +38,16 @@
     </div>
 </section>
 
+<!-- Быстрые и полезные блюда -->
 <section class="popular-recipes-section border-top-0 pt-0">
     <div class="container">
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
-                <h2 class="popular-recipes-title">Quick & Easy</h2>
-                <p class="popular-recipes-subtitle mb-0">Delicious meals ready in under 20 minutes</p>
+                <h2 class="popular-recipes-title">Быстро и полезно</h2>
+                <p class="popular-recipes-subtitle mb-0">Сбалансированные ПП-блюда за 20 минут</p>
             </div>
             <a th:href="@{/recipes}" class="popular-recipes-view-all">
-                View All <i class="bi bi-arrow-right ms-1"></i>
+                Смотреть все <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
 
@@ -63,11 +64,11 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <h3 class="recipe-card-title" th:text="${recipe.title}">Recipe Title</h3>
+                        <h3 class="recipe-card-title" th:text="${recipe.title}">Название рецепта</h3>
                         <div class="d-flex align-items-center gap-3 mt-2 text-muted fs-6">
                             <span>
                                 <i class="bi bi-clock me-1"></i>
-                                <span th:text="${recipe.formattedCookTimePlusPrepTime}">15 mins</span>
+                                <span th:text="${recipe.formattedCookTimePlusPrepTime}">15 мин</span>
                             </span>
                         </div>
                     </div>
@@ -77,15 +78,16 @@
     </div>
 </section>
 
+<!-- Популярное в сообществе -->
 <section class="popular-recipes-section">
     <div class="container">
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
-                <h2 class="popular-recipes-title">Super Delicious</h2>
-                <p class="popular-recipes-subtitle mb-0">Popular recipes our readers love the most</p>
+                <h2 class="popular-recipes-title">Выбор сообщества</h2>
+                <p class="popular-recipes-subtitle mb-0">Самые любимые рецепты здорового питания</p>
             </div>
             <a th:href="@{/recipes}" class="popular-recipes-view-all">
-                View All <i class="bi bi-arrow-right ms-1"></i>
+                Смотреть все <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
 
@@ -104,12 +106,12 @@
                     </div>
 
                     <div class="mt-3">
-                        <h3 class="recipe-card-title" th:text="${recipe.title}">Recipe Title</h3>
+                        <h3 class="recipe-card-title" th:text="${recipe.title}">Название рецепта</h3>
 
                         <div class="d-flex align-items-center gap-3 mt-2 text-muted fs-6">
                             <span th:if="${recipe.prepTime != null or recipe.cookTime != null}">
                                 <i class="bi bi-clock me-1"></i>
-                                <span th:text="${recipe.formattedCookTimePlusPrepTime}">30 mins</span>
+                                <span th:text="${recipe.formattedCookTimePlusPrepTime}">30 мин</span>
                             </span>
                         </div>
                     </div>
@@ -119,27 +121,29 @@
     </div>
 </section>
 
+<!-- Призыв предложить рецепт -->
 <section class="cta-propose-section py-5">
     <div class="container text-center py-3">
-        <h2 class="popular-recipes-title mb-3">Share Your Special Recipe!</h2>
-        <p class="popular-recipes-subtitle mb-4 mx-auto" style="max-width: 550px;">
-            Have a unique dish loved by family and friends? Submit it to our community and get featured on Tastebite!
+        <h2 class="popular-recipes-title mb-3">Поделитесь своим полезным рецептом!</h2>
+        <p class="popular-recipes-subtitle mb-4 mx-auto" style="max-width: 580px;">
+            У вас есть фирменное ПП-блюдо или вкусный смузи? Опубликуйте его в нашем сообществе и вдохновите тысяч людей на здоровый образ жизни!
         </p>
         <a th:if="${user != null}" th:href="@{/recipe/propose}" class="btn btn-tb-orange px-4 py-2 fs-6">
-            Propose a Recipe
+            Предложить рецепт
         </a>
         <button th:unless="${user != null}" type="button" class="btn btn-tb-orange px-4 py-2 fs-6" data-bs-toggle="modal" data-bs-target="#loginModal">
-            Propose a Recipe
+            Предложить рецепт
         </button>
     </div>
 </section>
 
+<!-- Рассылка полезных рационов -->
 <section class="newsletter-section">
     <div class="container text-center">
         <div class="newsletter-content">
-            <h2 class="newsletter-title">Deliciousness<br>to your inbox</h2>
+            <h2 class="newsletter-title">Польза и вкус</h2>
             <p class="newsletter-subtitle">
-                Enjoy weekly hand picked recipes and<br class="d-none d-sm-inline"> recommendations
+                Получайте еженедельную подборку ПП-рецептов,<br class="d-none d-sm-inline"> расчитанные КБЖУ и советы нутрициологов
             </p>
 
             <form id="newsletterForm" th:action="@{/subscribe}" method="POST" class="newsletter-form">
@@ -148,45 +152,46 @@
                            id="newsletterEmail"
                            name="email"
                            class="form-control newsletter-input"
-                           placeholder="Email Address"
+                           placeholder="Ваш Email адрес"
                            th:value="${user != null ? user.email : ''}"
                            required
                            aria-label="Email Address">
-                    <button id="newsletterBtn" class="btn btn-newsletter-join" type="submit">JOIN</button>
+                    <button id="newsletterBtn" class="btn btn-newsletter-join" type="submit">ПОДПИСАТЬСЯ</button>
                 </div>
             </form>
 
             <p class="newsletter-terms">
-                By joining our newsletter you agree to our
-                <a href="/terms" class="newsletter-link">Terms and Conditions</a>
+                Подписываясь на рассылку, вы соглашаетесь с нашей
+                <a href="/terms" class="newsletter-link">Политикой конфиденциальности</a>
             </p>
         </div>
     </div>
 </section>
 
+<!-- Преимущества и ценности бренда -->
 <section class="features-section py-6 bg-white">
     <div class="container">
         <div class="row g-4 text-center">
             <div class="col-md-4">
                 <div class="feature-icon mb-3">
-                    <i class="bi bi-journal-check"></i>
+                    <i class="bi bi-heart-pulse"></i>
                 </div>
-                <h5 class="fw-semibold">Tested Recipes</h5>
-                <p class="text-muted small mb-0">Every recipe is thoroughly tested to ensure perfection on your plate.</p>
+                <h5 class="fw-semibold">Сбалансированное меню</h5>
+                <p class="text-muted small mb-0">Каждый рецепт содержит просчитанные калории, белки, жиры и углеводы.</p>
             </div>
             <div class="col-md-4">
                 <div class="feature-icon mb-3">
-                    <i class="bi bi-people"></i>
+                    <i class="bi bi-shield-check"></i>
                 </div>
-                <h5 class="fw-semibold">Vibrant Community</h5>
-                <p class="text-muted small mb-0">Join thousands of home cooks sharing their passion for delicious food.</p>
+                <h5 class="fw-semibold">Проверенные ингредиенты</h5>
+                <p class="text-muted small mb-0">Только натуральные, доступные и свежие продукты без лишнего сахара.</p>
             </div>
             <div class="col-md-4">
                 <div class="feature-icon mb-3">
-                    <i class="bi bi-clock-history"></i>
+                    <i class="bi bi-lightning-charge"></i>
                 </div>
-                <h5 class="fw-semibold">Quick & Easy</h5>
-                <p class="text-muted small mb-0">Find hundreds of fast 20-minute meals for daily busy schedules.</p>
+                <h5 class="fw-semibold">Быстро и доступно</h5>
+                <p class="text-muted small mb-0">Простые в приготовлении блюда для поддержания энергии на весь день.</p>
             </div>
         </div>
     </div>
@@ -195,28 +200,8 @@
 <div th:replace="~{fragments/footer :: footer}"></div>
 
 <div th:replace="~{fragments/header :: modalSignUp}"></div>
-
 <div th:replace="~{fragments/header :: modalRegister}"></div>
-
 <div th:replace="~{fragments/header :: modalForgot}"></div>
-
-<div class="toast-container position-fixed bottom-0 end-0 p-3" th:if="${message != null}">
-    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="alert alert-success m-0 flex-nowrap justify-content-between">
-            <span th:text="${message}"></span>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    </div>
-</div>
-
-<div class="toast-container position-fixed bottom-0 end-0 p-3" th:if="${error}">
-    <div id="ErrorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="alert alert-danger m-0 flex-nowrap justify-content-between">
-            <span th:text="${error}"></span>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    </div>
-</div>
 
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
     <div id="responseToast" class="toast border-0 bg-transparent" role="alert" aria-live="assertive" aria-atomic="true">
@@ -227,8 +212,11 @@
     </div>
 </div>
 
-<script th:replace="~{fragments/header :: searchScript}"></script>
+<div th:replace="~{fragments/footer :: successToast}"></div>
+<div th:replace="~{fragments/footer :: errorToast}"></div>
+<script th:replace="~{fragments/footer :: toastScript}"></script>
 
+<script th:replace="~{fragments/header :: searchScript}"></script>
 <script th:replace="~{fragments/header :: openLoginScript}"></script>
 
 <script>

@@ -1,6 +1,7 @@
 package site.persistent.entity.recipes;
 
 import jakarta.persistence.*;
+import site.persistent.entity.Diet;
 import site.persistent.entity.ProposedRecipe;
 import site.persistent.entity.User;
 import site.persistent.entity.comments.Comment;
@@ -82,6 +83,35 @@ public class Recipe {
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RecipeView> views = new HashSet<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "meal_type")
+    private Set<MealType> mealType = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "recipe_diets",
+            joinColumns = @JoinColumn(name = "recipe_id"),
+            inverseJoinColumns = @JoinColumn(name = "diet_id")
+    )
+    private Set<Diet> diets = new HashSet<>();
+
+    public enum MealType {
+        BREAKFAST("Завтрак"),
+        LUNCH("Обед"),
+        DINNER("Ужин"),
+        SNACK("Перекус");
+
+        private final String title;
+
+        MealType(String title) {
+            this.title = title;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+    }
 
     public double getAverageRating() {
         if (ratings == null || ratings.isEmpty()) {
@@ -316,5 +346,21 @@ public class Recipe {
 
     public void setViews(Set<RecipeView> views) {
         this.views = views;
+    }
+
+    public Set<MealType> getMealType() {
+        return mealType;
+    }
+
+    public void setMealType(Set<MealType> mealType) {
+        this.mealType = mealType;
+    }
+
+    public Set<Diet> getDiets() {
+        return diets;
+    }
+
+    public void setDiets(Set<Diet> diets) {
+        this.diets = diets;
     }
 }

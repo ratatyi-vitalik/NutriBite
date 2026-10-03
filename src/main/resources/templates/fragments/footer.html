@@ -2,48 +2,46 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<footer class="site-footer" th:fragment="footer">
+<footer class="site-footer bg-light border-top py-5" th:fragment="footer">
     <div class="container">
-        <div class="row gy-4 mb-2 justify-content-between">
+        <div class="row gy-4 mb-4 justify-content-between">
 
-            <div class="col-lg-5 col-md-12">
-                <a href="/" class="footer-logo-link">
-                    <img th:src="@{/icons/Logo.svg}" src="/icons/Logo.svg" alt="Tastebite" class="footer-logo">
+            <div class="col-lg-4 col-md-12">
+                <a href="/" class="footer-logo-link d-inline-block mb-3">
+                    <img th:src="@{/icons/Logo.svg}" src="/icons/Logo.svg" alt="NutriBite Organic" class="footer-logo" style="max-height: 60px;">
                 </a>
-                <p class="footer-description">
-                    On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment
+                <p class="footer-description text-muted small">
+                    NutriBite — ваш персональный гид по миру полезного, сбалансированного и правильного питания. Все рецепты проверены и содержат точный расчет КБЖУ.
                 </p>
             </div>
 
-            <div class="col-lg-6 col-md-12">
+            <div class="col-lg-7 col-md-12">
                 <div class="row">
                     <div class="col-4">
-                        <h6 class="footer-heading">Tastebite</h6>
-                        <ul class="list-unstyled footer-links">
-                            <li><a href="/about">About us</a></li>
-                            <li><a href="/careers">Careers</a></li>
-                            <li><a href="/contact">Contact Us</a></li>
-                            <li><a href="/feedback">Feedback</a></li>
+                        <h6 class="footer-heading fw-bold text-dark mb-3">Навигация</h6>
+                        <ul class="list-unstyled footer-links text-muted small">
+                            <li class="mb-2"><a href="/about" class="text-decoration-none text-secondary">О проекте</a></li>
+                            <li class="mb-2"><a href="/recipes" class="text-decoration-none text-secondary">Все рецепты</a></li>
+                            <li class="mb-2"><a href="/categories" class="text-decoration-none text-secondary">Категории</a></li>
+                            <li class="mb-2"><a href="/contact" class="text-decoration-none text-secondary">Контакты</a></li>
                         </ul>
                     </div>
 
                     <div class="col-4">
-                        <h6 class="footer-heading">Legal</h6>
-                        <ul class="list-unstyled footer-links">
-                            <li><a href="/terms">Terms</a></li>
-                            <li><a href="/conditions">Conditions</a></li>
-                            <li><a href="/cookies">Cookies</a></li>
-                            <li><a href="/copyright">Copyright</a></li>
+                        <h6 class="footer-heading fw-bold text-dark mb-3">Информация</h6>
+                        <ul class="list-unstyled footer-links text-muted small">
+                            <li class="mb-2"><a href="/terms" class="text-decoration-none text-secondary">Условия использования</a></li>
+                            <li class="mb-2"><a href="/privacy" class="text-decoration-none text-secondary">Конфиденциальность</a></li>
+                            <li class="mb-2"><a href="/cookies" class="text-decoration-none text-secondary">Файлы Cookie</a></li>
                         </ul>
                     </div>
 
                     <div class="col-4">
-                        <h6 class="footer-heading">Follow</h6>
-                        <ul class="list-unstyled footer-links">
-                            <li><a href="https://facebook.com" target="_blank" rel="noopener">Facebook</a></li>
-                            <li><a href="https://twitter.com" target="_blank" rel="noopener">Twitter</a></li>
-                            <li><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></li>
-                            <li><a href="https://youtube.com" target="_blank" rel="noopener">Youtube</a></li>
+                        <h6 class="footer-heading fw-bold text-dark mb-3">Сообщество</h6>
+                        <ul class="list-unstyled footer-links text-muted small">
+                            <li class="mb-2"><a href="https://telegram.org" target="_blank" rel="noopener" class="text-decoration-none text-secondary">Telegram</a></li>
+                            <li class="mb-2"><a href="https://vk.com" target="_blank" rel="noopener" class="text-decoration-none text-secondary">ВКонтакте</a></li>
+                            <li class="mb-2"><a href="https://youtube.com" target="_blank" rel="noopener" class="text-decoration-none text-secondary">YouTube</a></li>
                         </ul>
                     </div>
                 </div>
@@ -51,17 +49,16 @@
 
         </div>
 
-        <hr class="footer-divider">
+        <hr class="footer-divider my-4 border-secondary border-opacity-25">
 
-        <div class="footer-bottom d-flex flex-column flex-sm-row justify-content-between align-items-center pt-2 pb-2">
-            <p class="copyright-text m-0 mb-3 mb-sm-0">
-                &copy; 2020 Tastebite - All rights reserved
+        <div class="footer-bottom d-flex flex-column flex-sm-row justify-content-between align-items-center pt-2">
+            <p class="copyright-text small text-muted m-0 mb-3 mb-sm-0">
+                &copy; 2026 NutriBite Organic. Все права защищены.
             </p>
-            <div class="footer-social-icons d-flex gap-4">
-                <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="bi bi-twitter"></i></a>
-                <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                <a href="https://youtube.com" target="_blank" aria-label="Youtube"><i class="bi bi-youtube"></i></a>
+            <div class="footer-social-icons d-flex gap-3 fs-5 text-secondary">
+                <a href="https://telegram.org" target="_blank" aria-label="Telegram" class="text-secondary"><i class="bi bi-telegram"></i></a>
+                <a href="https://vk.com" target="_blank" aria-label="VK" class="text-secondary"><i class="bi bi-arrow-up-right-circle"></i></a>
+                <a href="https://youtube.com" target="_blank" aria-label="Youtube" class="text-secondary"><i class="bi bi-youtube"></i></a>
             </div>
         </div>
     </div>
@@ -72,7 +69,7 @@
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title d-flex align-items-center" id="banModalLabel">
-                    <i class="bi bi-shield-slash-fill me-2 fs-4"></i> Action Restricted
+                    <i class="bi bi-shield-slash-fill me-2 fs-4"></i> Действие ограничено
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -80,16 +77,16 @@
                 <div class="mb-3 text-danger">
                     <i class="bi bi-exclamation-triangle-fill display-3"></i>
                 </div>
-                <h5 class="fw-bold mb-3">Your account is restricted</h5>
+                <h5 class="fw-bold mb-3">Ваш аккаунт временно заблокирован</h5>
                 <p class="text-muted">
-                    You cannot perform this action because your account is currently suspended.
+                    Вы не можете выполнять это действие из-за временных ограничений.
                 </p>
                 <div class="alert alert-light border border-danger text-danger fw-bold d-inline-block px-4 py-2 my-2">
-                    Ban time remaining: <span id="banModalRemainingTime">0 days</span>
+                    Осталось времени блокировки: <span id="banModalRemainingTime">0 дней</span>
                 </div>
             </div>
             <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Understand</button>
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Понятно</button>
             </div>
         </div>
     </div>
@@ -129,18 +126,18 @@
             const response = await fetch('/ban-status');
 
             if (response.status === 401) {
-                const loginModalElement = document.getElementById('loginModal');
-                if (loginModalElement) {
-                    const loginModal = new bootstrap.Modal(loginModalElement);
-                    loginModal.show();
-                } else {
-                    window.location.href = '/login';
-                }
+                showLoginModal();
                 return;
             }
 
             if (!response.ok) {
-                throw new Error('Server error during ban check');
+                throw new Error('Ошибка сервера при проверке статуса');
+            }
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                showLoginModal();
+                return;
             }
 
             const data = await response.json();
@@ -156,7 +153,7 @@
                     const banModal = new bootstrap.Modal(banModalElement);
                     banModal.show();
                 } else {
-                    alert(`Your account are banned. Remaining time: ${data.remainingTime}`);
+                    alert(`Ваш аккаунт заблокирован. Оставшееся время: ${data.remainingTime}`);
                 }
                 return;
             }
@@ -166,7 +163,17 @@
             }
 
         } catch (error) {
-            console.error('Error checking user status:', error);
+            console.error('Ошибка проверки статуса пользователя:', error);
+        }
+    }
+
+    function showLoginModal() {
+        const loginModalElement = document.getElementById('loginModal');
+        if (loginModalElement) {
+            const loginModal = bootstrap.Modal.getInstance(loginModalElement) || new bootstrap.Modal(loginModalElement);
+            loginModal.show();
+        } else {
+            window.location.href = '/login';
         }
     }
 </script>

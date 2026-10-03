@@ -25,9 +25,12 @@
                 <h1 class="recipe-title" th:text="${recipe.title}"></h1>
 
                 <div class="recipe-meta flex-wrap">
-                    <span><i class="bi bi-person me-1"></i> <span
+                    <span><img th:src="${!#strings.isEmpty(recipe.author?.avatarPath)} ? @{${recipe.author.avatarPath}} : @{/icons/avatar.png}"
+                               alt="Avatar"
+                               class="rounded-circle object-fit-cover"
+                               style="width: 24px; height: 24px;"> <span
                             th:text="${!#strings.isEmpty(recipe.author?.fullName)} ? ${recipe.author.fullName} : ${recipe.author?.name}"></span></span>
-                    <span><i class="bi bi-calendar3 me-1"></i> <span th:text="${recipe.date}"></span></span>
+                    <span><i class="bi bi-calendar3 me-1"></i> <span th:text="${#temporals.format(recipe.date, 'dd.MM.yyyy')}"></span></span>
                     <span><i class="bi bi-chat-left me-1"></i> <span th:text="${#lists.size(recipe.comments)}"></span></span>
                     <div class="d-inline-flex align-items-center gap-1" th:with="ratingPercent=${(recipe.averageRating / 5.0) * 100}">
                         <div class="stars-outer fs-5">
@@ -48,6 +51,22 @@
                     </i>
                 </button>
             </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 my-3"
+             th:if="${(recipe.mealType != null and !recipe.mealType.isEmpty()) or (recipe.dietaryRestrictions != null and !recipe.dietaryRestrictions.isEmpty())}">
+
+            <span th:each="meal : ${recipe.mealType}"
+                  class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2 fs-6">
+                <i class="bi bi-clock me-1"></i>
+                <span th:text="${meal.title}">Завтрак</span>
+            </span>
+
+            <span th:each="restriction : ${recipe.dietaryRestrictions}"
+                  class="badge bg-info-subtle text-info-emphasis border border-info-subtle rounded-pill px-3 py-2 fs-6">
+                <i class="bi bi-shield-check me-1"></i>
+                <span th:text="${restriction.title}">Без глютена</span>
+            </span>
         </div>
 
         <p class="recipe-description" th:text="${recipe.description}"></p>
@@ -95,26 +114,48 @@
                 </div>
             </div>
 
-            <!-- Блок Nutrition Facts (справа, занимает 5/12 ширины) -->
             <div class="col-lg-5">
                 <div class="nutrition-card">
                     <h2 class="nutrition-title">Nutrition Facts</h2>
 
                     <div class="nutrition-row">
                         <span class="nutrition-label">Calories</span>
-                        <span class="nutrition-value" th:text="${recipe.nutrition.calories}"></span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.calories + ' kcal'}">0 kcal</span>
                     </div>
-                    <div class="nutrition-row">
-                        <span class="nutrition-label">Carbs</span>
-                        <span class="nutrition-value" th:text="${recipe.nutrition.carbs}"></span>
-                    </div>
-                    <div class="nutrition-row">
-                        <span class="nutrition-label">Fat</span>
-                        <span class="nutrition-value" th:text="${recipe.nutrition.fat}"></span>
-                    </div>
+
                     <div class="nutrition-row">
                         <span class="nutrition-label">Protein</span>
-                        <span class="nutrition-value" th:text="${recipe.nutrition.protein}"></span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.protein + ' g'}">0 g</span>
+                    </div>
+
+                    <div class="nutrition-row">
+                        <span class="nutrition-label">Fat</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.fat + ' g'}">0 g</span>
+                    </div>
+
+                    <div class="nutrition-row th-subrow" th:if="${recipe.nutrition.saturatedFat != null}">
+                        <span class="nutrition-label text-muted ms-3">— Saturated Fat</span>
+                        <span class="nutrition-value text-muted" th:text="${recipe.nutrition.saturatedFat + ' g'}">0 g</span>
+                    </div>
+
+                    <div class="nutrition-row">
+                        <span class="nutrition-label">Carbs</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.carbs + ' g'}">0 g</span>
+                    </div>
+
+                    <div class="nutrition-row th-subrow" th:if="${recipe.nutrition.sugar != null}">
+                        <span class="nutrition-label text-muted ms-3">— Sugar</span>
+                        <span class="nutrition-value text-muted" th:text="${recipe.nutrition.sugar + ' g'}">0 g</span>
+                    </div>
+
+                    <div class="nutrition-row" th:if="${recipe.nutrition.fiber != null}">
+                        <span class="nutrition-label">Dietary Fiber</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.fiber + ' g'}">0 g</span>
+                    </div>
+
+                    <div class="nutrition-row" th:if="${recipe.nutrition.sodium != null}">
+                        <span class="nutrition-label">Sodium</span>
+                        <span class="nutrition-value" th:text="${recipe.nutrition.sodium + ' mg'}">0 mg</span>
                     </div>
                 </div>
             </div>
@@ -137,6 +178,24 @@
         </div>
 
     </div>
+
+    <section class="rating-section my-4">
+        <div class="container">
+            <div class="card p-4 text-center border-0 shadow-sm">
+                <h4 class="mb-2">Rate this recipe</h4>
+                <p class="text-muted small mb-3">Leave your rating to help others!</p>
+
+                <div class="user-rating-stars d-flex justify-content-center gap-2 fs-3 text-warning cursor-pointer"
+                     th:data-recipe-id="${recipe.id}">
+                    <i class="bi bi-star js-star" data-score="1"></i>
+                    <i class="bi bi-star js-star" data-score="2"></i>
+                    <i class="bi bi-star js-star" data-score="3"></i>
+                    <i class="bi bi-star js-star" data-score="4"></i>
+                    <i class="bi bi-star js-star" data-score="5"></i>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <section class="comments-section">
         <div class="container">
@@ -310,24 +369,6 @@
 
         </div>
 
-        <section class="rating-section my-4">
-            <div class="container">
-                <div class="card p-4 text-center border-0 shadow-sm">
-                    <h4 class="mb-2">Rate this recipe</h4>
-                    <p class="text-muted small mb-3">Leave your rating to help others!</p>
-
-                    <div class="user-rating-stars d-flex justify-content-center gap-2 fs-3 text-warning cursor-pointer"
-                         th:data-recipe-id="${recipe.id}">
-                        <i class="bi bi-star js-star" data-score="1"></i>
-                        <i class="bi bi-star js-star" data-score="2"></i>
-                        <i class="bi bi-star js-star" data-score="3"></i>
-                        <i class="bi bi-star js-star" data-score="4"></i>
-                        <i class="bi bi-star js-star" data-score="5"></i>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <section class="write-comment-section">
             <div class="container">
 
@@ -428,15 +469,11 @@
 <div th:replace="~{fragments/header :: modalSignUp}"></div>
 
 <div th:replace="~{fragments/header :: modalRegister}"></div>
-
 <div th:replace="~{fragments/header :: modalForgot}"></div>
-
 <div th:replace="~{fragments/header :: modalForgot}"></div>
-
 <div th:replace="~{fragments/footer :: modalBanned}"></div>
 
 <script th:replace="~{fragments/footer :: bannedScript}"></script>
-
 <script th:replace="~{fragments/header :: openLoginScript}"></script>
 
 <!-- likes -->
@@ -836,10 +873,10 @@
     });
 </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const recipeId = 0;
+<script th:inline="javascript">
+    const recipeId = /*[[${recipe.id}]]*/ 0;
 
+    document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
             const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");

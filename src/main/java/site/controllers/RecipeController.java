@@ -285,10 +285,14 @@ public class RecipeController {
             @RequestParam("imageFile") MultipartFile imageFile,
             @RequestParam(value = "videoFile", required = false) MultipartFile videoFile,
 
-            @RequestParam(value = "calories", required = false) String calories,
-            @RequestParam(value = "carbs", required = false) String carbs,
-            @RequestParam(value = "protein", required = false) String protein,
-            @RequestParam(value = "fat", required = false) String fat,
+            @RequestParam(value = "calories", required = false) Integer calories,
+            @RequestParam(value = "carbs", required = false) Double carbs,
+            @RequestParam(value = "protein", required = false) Double protein,
+            @RequestParam(value = "fat", required = false) Double fat,
+            @RequestParam(value = "fiber", required = false) Double fiber,
+            @RequestParam(value = "sugar", required = false) Double sugar,
+            @RequestParam(value = "saturatedFat", required = false) Double saturatedFat,
+            @RequestParam(value = "sodium", required = false) Double sodium,
 
             @ModelAttribute RecipeForm recipeForm,
             @RequestParam("stepDescriptions") List<String> stepDescriptions,
@@ -304,7 +308,7 @@ public class RecipeController {
         }
 
         ProposedRecipe proposedRecipe = new ProposedRecipe(title, description, prepTime, cookTime,
-                servings, user, LocalDateTime.now(), new Nutrition(calories, carbs, fat, protein));
+                servings, user, LocalDateTime.now(), new Nutrition(calories, carbs, fat, protein, fiber, sugar, saturatedFat, sodium));
 
         if (imageFile.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Empty file!");

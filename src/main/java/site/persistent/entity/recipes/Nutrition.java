@@ -10,27 +10,44 @@ public class Nutrition {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private Integer calories;
+
+    @Column(nullable = false)
+    private Double protein;
+
+    @Column(nullable = false)
+    private Double fat;
+
+    @Column(nullable = false)
+    private Double carbs;
+
     @Column
-    private String calories;
-    
-    @Column()
-    private String carbs;
-
-    @Column()
-    private String fat;
-
+    private Double fiber;
 
     @Column
-    private String protein;
+    private Double sugar;
+
+    @Column(name = "saturated_fat")
+    private Double saturatedFat;
+
+    @Column
+    private Double sodium;
 
     public Nutrition() {
     }
 
-    public Nutrition(String calories, String carbs, String fat, String protein) {
+
+
+    public Nutrition(Integer calories, Double carbs, Double fat, Double protein, Double fiber, Double sugar, Double saturatedFat, Double sodium) {
         this.calories = calories;
         this.carbs = carbs;
         this.fat = fat;
         this.protein = protein;
+        this.fiber = fiber;
+        this.sugar = sugar;
+        this.saturatedFat = saturatedFat;
+        this.sodium = sodium;
     }
 
     public Long getId() {
@@ -41,35 +58,67 @@ public class Nutrition {
         this.id = id;
     }
 
-    public String getCalories() {
+    public Integer getCalories() {
         return calories;
     }
 
-    public void setCalories(String calories) {
+    public void setCalories(Integer calories) {
         this.calories = calories;
     }
 
-    public String getCarbs() {
+    public Double getCarbs() {
         return carbs;
     }
 
-    public void setCarbs(String carbs) {
+    public void setCarbs(Double carbs) {
         this.carbs = carbs;
     }
 
-    public String getFat() {
+    public Double getFat() {
         return fat;
     }
 
-    public void setFat(String fat) {
+    public void setFat(Double fat) {
         this.fat = fat;
     }
 
-    public String getProtein() {
+    public Double getProtein() {
         return protein;
     }
 
-    public void setProtein(String protein) {
+    public void setProtein(Double protein) {
         this.protein = protein;
+    }
+
+    public Double getFiber() {
+        return fiber;
+    }
+
+    public Double getSugar() {
+        return sugar;
+    }
+
+    public Double getSaturatedFat() {
+        return saturatedFat;
+    }
+
+    public Double getSodium() {
+        return sodium;
+    }
+
+    public void setFiber(Double fiber) {
+        this.fiber = fiber;
+    }
+
+    public void setSugar(Double sugar) {
+        this.sugar = sugar;
+    }
+
+    public void setSaturatedFat(Double saturatedFat) {
+        this.saturatedFat = saturatedFat;
+    }
+
+    public void setSodium(Double sodium) {
+        this.sodium = sodium;
     }
 }
