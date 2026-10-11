@@ -54,18 +54,12 @@
         </div>
 
         <div class="d-flex flex-wrap gap-2 my-3"
-             th:if="${(recipe.mealType != null and !recipe.mealType.isEmpty()) or (recipe.dietaryRestrictions != null and !recipe.dietaryRestrictions.isEmpty())}">
+             th:if="${recipe.mealType != null and !recipe.mealType.isEmpty()}">
 
             <span th:each="meal : ${recipe.mealType}"
                   class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2 fs-6">
                 <i class="bi bi-clock me-1"></i>
                 <span th:text="${meal.title}">Завтрак</span>
-            </span>
-
-            <span th:each="restriction : ${recipe.dietaryRestrictions}"
-                  class="badge bg-info-subtle text-info-emphasis border border-info-subtle rounded-pill px-3 py-2 fs-6">
-                <i class="bi bi-shield-check me-1"></i>
-                <span th:text="${restriction.title}">Без глютена</span>
             </span>
         </div>
 

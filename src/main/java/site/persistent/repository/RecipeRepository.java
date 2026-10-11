@@ -1,5 +1,6 @@
 package site.persistent.repository;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import site.persistent.entity.recipes.Category;
@@ -19,6 +20,8 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
     Page<Recipe> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 
+    Page<Recipe> findByTitleContainingIgnoreCaseAndCategoryId(String title, Long categoryId, Pageable pageable);
+
     @Query(value = """
         SELECT r.* 
         FROM recipes r
@@ -34,5 +37,49 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
             "ORDER BY (COALESCE(r.prepTime, 0) + COALESCE(r.cookTime, 0)) ASC")
     List<Recipe> findTop8ByTotalTimeLessThanEqual(@Param("maxTime") Integer maxTime);
 
-    boolean existsById(long id);
+    @Query("""
+        SELECT r 
+        FROM Recipe r 
+        LEFT JOIN r.ratings rt 
+        WHERE LOWER(r.title) LIKE LOWER(CONCAT('%', :title, '%'))
+        GROUP BY r
+        ORDER BY COALESCE(AVG(rt.score), 0) DESC, r.id ASC
+    """)
+    Page<Recipe> findByTitleSortedByRating(@Param("title") String title, Pageable pageable);
+
+    @Query("""
+        SELECT r 
+        FROM Recipe r 
+        LEFT JOIN r.ratings rt 
+        WHERE LOWER(r.title) LIKE LOWER(CONCAT('%', :title, '%')) 
+          AND r.category.id = :categoryId
+        GROUP BY r
+        ORDER BY COALESCE(AVG(rt.score), 0) DESC, r.id ASC
+    """)
+    Page<Recipe> findByTitleAndCategorySortedByRating(@Param("title") String title,
+                                                      @Param("categoryId") Long categoryId,
+                                                      Pageable pageable);
+
+    @Query(value = """
+        SELECT r.* 
+        FROM recipes r
+        LEFT JOIN recipe_views rv ON rv.recipe_id = r.id
+        WHERE LOWER(r.title) LIKE LOWER(CONCAT('%', :title, '%'))
+        GROUP BY r
+        ORDER BY COUNT(rv.id) DESC, r.id ASC
+    """, nativeQuery = true)
+    Page<Recipe> findByTitleSortedByPopularity(@Param("title") String title,
+                                               Pageable pageable);
+
+    @Query(value = """
+        SELECT r.* 
+        FROM recipes r
+        LEFT JOIN recipe_views rv ON rv.recipe_id = r.id
+        WHERE LOWER(r.title) LIKE LOWER(CONCAT('%', :title, '%')) AND r.category_id = :categoryId
+        GROUP BY r
+        ORDER BY COUNT(rv.id) DESC, r.id ASC
+    """, nativeQuery = true)
+    Page<Recipe> findByTitleAndCategorySortedByPopularity(@Param("title") String title,
+                                                          @Param("categoryId") Long categoryId,
+                                                          Pageable pageable);
 }

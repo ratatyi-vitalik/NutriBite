@@ -57,7 +57,7 @@ public class ProfileController {
     public ModelAndView favourites(@AuthenticationPrincipal User user) {
         ModelAndView model = new ModelAndView("favourites");
         model.addObject("user", user);
-        model.addObject("recipes", user.getSaved());
+        model.addObject("recipes", userRepository.findUserWithSavedById(user.getId()).get().getSaved());
         return model;
     }
 

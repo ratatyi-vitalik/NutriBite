@@ -3,13 +3,16 @@ package site.controllers;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+import site.persistent.dto.RecipeDto;
 import site.persistent.dto.RecipeForm;
 import site.persistent.entity.Notification;
 import site.persistent.entity.ProposedRecipe;
@@ -23,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.ModelAndView;
 import site.service.IpUtils;
+import site.service.RecipeService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,6 +48,8 @@ public class RecipeController {
     private final ReplyRepository replyRepository;
     private final NotificationRepository notificationRepository;
     private final RecipeViewRepository recipeViewRepository;
+    private final CategoryRepository categoryRepository;
+    private final RecipeService recipeService;
 
     public RecipeController(RecipeRepository recipeRepository, UserRepository userRepository,
                             CommentRepository commentRepository, RatingRepository ratingRepository,
@@ -51,7 +57,9 @@ public class RecipeController {
                             ReportRepository reportRepository,
                             ReplyRepository replyRepository,
                             NotificationRepository notificationRepository,
-                            RecipeViewRepository recipeViewRepository) {
+                            RecipeViewRepository recipeViewRepository,
+                            CategoryRepository categoryRepository,
+                            RecipeService recipeService) {
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
@@ -61,13 +69,40 @@ public class RecipeController {
         this.replyRepository = replyRepository;
         this.notificationRepository = notificationRepository;
         this.recipeViewRepository = recipeViewRepository;
+        this.categoryRepository = categoryRepository;
+        this.recipeService = recipeService;
     }
 
     @GetMapping("/recipes")
-    public ModelAndView showRecipesPage(@RequestParam(defaultValue = "0") int page) {
+    public ModelAndView showRecipesPage(@RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(required = false, defaultValue = "") String query,
+                                        @RequestParam(required = false, defaultValue = "0") Long categoryId,
+                                        @RequestParam(required = false, defaultValue = "newest") String sortBy) {
         ModelAndView model = new ModelAndView("recipes");
-        model.addObject("recipesPage", recipeRepository.findAll(PageRequest.of(page, 12)));
+
+        model.addObject("recipesPage", recipeService.getRecipes(page, query, categoryId, sortBy));
+        model.addObject("categories", categoryRepository.findAll());
+        model.addObject("query", query);
+        model.addObject("selectedCategory", categoryId);
+        model.addObject("sortBy", sortBy);
+
         return model;
+    }
+
+    @GetMapping("/recipes/filters")
+    public ResponseEntity<Page<RecipeDto>> getRecipes(@RequestParam(defaultValue = "0") int page,
+                                                      @RequestParam(required = false, defaultValue = "") String query,
+                                                      @RequestParam(required = false, defaultValue = "0") Long categoryId,
+                                                      @RequestParam(required = false, defaultValue = "") String sortBy) {
+        return ResponseEntity.ok(recipeService.getRecipes(page, query, categoryId, sortBy).map(recipe -> new RecipeDto(
+                recipe.getId(),
+                recipe.getTitle(),
+                recipe.getDescription(),
+                recipe.getImagePath(),
+                recipe.getAverageRating(),
+                recipe.getCategory() != null ? recipe.getCategory().getName() : null,
+                recipe.getAuthor() != null ? recipe.getAuthor().getName() : null
+        )));
     }
 
     @GetMapping("/recipe")

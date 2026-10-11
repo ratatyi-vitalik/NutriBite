@@ -55,11 +55,9 @@
                 </div>
             </div>
 
-            <!-- Категории и Ограничения (MealTypes & DietaryRestrictions) -->
             <div class="card p-4 mb-4 border-0 shadow-sm rounded-3 bg-white">
-                <h4 class="mb-4 fw-bold text-success border-bottom pb-2">Категории и диетические особенности</h4>
+                <h4 class="mb-4 fw-bold text-success border-bottom pb-2">Тип</h4>
 
-                <!-- Приёмы пищи -->
                 <div class="mb-4">
                     <label class="form-label fw-semibold text-dark d-block">Приём пищи</label>
                     <div class="d-flex flex-wrap gap-3">
@@ -69,20 +67,8 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Пищевые ограничения -->
-                <div>
-                    <label class="form-label fw-semibold text-dark d-block">Пищевые ограничения / Особенности</label>
-                    <div class="d-flex flex-wrap gap-3">
-                        <div class="form-check" th:each="restriction : ${T(site.persistent.entity.recipes.Recipe.DietaryRestriction).values()}">
-                            <input class="form-check-input" type="checkbox" name="dietaryRestrictions" th:value="${restriction}" th:id="${'rest-' + restriction}">
-                            <label class="form-check-label" th:for="${'rest-' + restriction}" th:text="${restriction.title}">Без глютена</label>
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            <!-- Загрузка Медиа -->
             <div class="card p-4 mb-4 border-0 shadow-sm rounded-3 bg-white">
                 <h4 class="mb-4 fw-bold text-success border-bottom pb-2">Медиафайлы</h4>
 

@@ -1,5 +1,8 @@
 package site.persistent.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import site.persistent.entity.recipes.Category;
@@ -24,5 +27,4 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
         LIMIT 6
     """, nativeQuery = true)
     List<Category> findTop6PopularOrFirstById(@Param("since") LocalDateTime since);
-
 }
