@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proposed Recipes | Tastebite Admin</title>
+    <title>Предложенные рецепты | Nutribite</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -23,7 +23,7 @@
             </div>
             <div class="col text-end">
                 <a th:href="@{/admin}" class="btn btn-tb-outline btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i> Dashboard
+                    <i class="bi bi-arrow-left me-1"></i> Назад
                 </a>
             </div>
         </div>
@@ -33,23 +33,20 @@
 <main class="admin-section flex-grow-1">
     <div class="container">
 
-        <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
             <div>
-                <h1 class="font-serif fw-bold m-0" style="font-size: 32px;">Proposed Recipes</h1>
+                <h1 class="font-serif fw-bold m-0" style="font-size: 32px;">Предложенные рецепты</h1>
                 <p class="text-muted small m-0 mt-1">
-                    Pending approval: <span class="fw-bold" th:text="${totalProposedRecipes != null ? totalProposedRecipes : '0'}">0</span>
+                    Ожидают одобрения: <span class="fw-bold" th:text="${totalProposedRecipes != null ? totalProposedRecipes : '0'}">0</span>
                 </p>
             </div>
         </div>
 
-        <!-- Empty State -->
         <div th:if="${proposedRecipes == null or #lists.isEmpty(proposedRecipes.content)}" class="text-center py-5">
             <i class="bi bi-inbox fs-1 text-muted"></i>
-            <p class="text-muted fs-5 mt-2">No proposed recipes found.</p>
+            <p class="text-muted fs-5 mt-2">Предложенных рецептов не найдено.</p>
         </div>
 
-        <!-- Grid with 12 items (3 rows x 4 cols) -->
         <div th:unless="${proposedRecipes == null or #lists.isEmpty(proposedRecipes.content)}">
 
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
@@ -65,52 +62,49 @@
                             </div>
 
                             <div class="admin-recipe-body">
-                                <h2 class="admin-recipe-title" th:text="${recipe.title}">Recipe Title</h2>
+                                <h2 class="admin-recipe-title" th:text="${recipe.title}">Название рецепта</h2>
                                 <div class="text-muted small mt-auto" th:if="${recipe.author != null}">
                                     <i class="bi bi-person me-1"></i>
-                                    <span th:text="${!#strings.isEmpty(recipe.author?.fullName)} ? ${recipe.author.fullName} : ${recipe.author?.name}">Author</span>
+                                    <span th:text="${!#strings.isEmpty(recipe.author?.fullName)} ? ${recipe.author.fullName} : ${recipe.author?.name}">Автор</span>
                                 </div>
                             </div>
                         </a>
 
-                        <!-- Actions: Accept / Decline -->
                         <div class="p-2 border-top bg-light d-flex gap-2">
-                            <!-- Accept Form -->
+                            <!-- Форма принятия -->
                             <form th:action="@{/admin/proposed/accept}" method="post" class="w-50">
                                 <input type="hidden" name="proposedRecipeId" th:value="${recipe.id}">
                                 <button type="submit" class="btn btn-sm btn-success w-100">
-                                    <i class="bi bi-check-lg me-1"></i> Accept
+                                    <i class="bi bi-check-lg me-1"></i> Принять
                                 </button>
                             </form>
 
-                            <!-- Decline Modal Trigger Button -->
                             <button type="button"
                                     class="btn btn-sm btn-outline-danger w-50"
                                     data-bs-toggle="modal"
                                     th:data-bs-target="'#declineModal-' + ${recipe.id}">
-                                <i class="bi bi-x-lg me-1"></i> Decline
+                                <i class="bi bi-x-lg me-1"></i> Отклонить
                             </button>
                         </div>
 
                     </div>
 
-                    <!-- Modal for Decline Confirmation -->
                     <div class="modal fade" th:aria-labelledby="'declineModalLabel-' + ${recipe.id}" tabindex="-1" aria-hidden="true" th:id="'declineModal-' + ${recipe.id}">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <div class="modal-header border-0">
-                                    <h5 class="modal-title font-serif fw-bold">Confirm Decline</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <h5 class="modal-title font-serif fw-bold">Подтверждение отклонения</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                                 </div>
                                 <div class="modal-body">
-                                    Are you sure you want to decline the recipe <strong th:text="${recipe.title}"></strong>?
-                                    <p class="text-danger small mt-2 m-0">This operation cannot be undone.</p>
+                                    Вы уверены, что хотите отклонить рецепт <strong th:text="${recipe.title}"></strong>?
+                                    <p class="text-danger small mt-2 m-0">Это действие нельзя будет отменить.</p>
                                 </div>
                                 <div class="modal-footer border-0">
-                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Отмена</button>
                                     <form th:action="@{/admin/proposed/decline}" method="post">
                                         <input type="hidden" name="proposedRecipeId" th:value="${recipe.id}">
-                                        <button type="submit" class="btn btn-danger">Decline</button>
+                                        <button type="submit" class="btn btn-danger">Отклонить</button>
                                     </form>
                                 </div>
                             </div>
@@ -121,12 +115,11 @@
 
             </div>
 
-            <!-- Pagination -->
-            <nav th:if="${proposedRecipes.totalPages > 1}" aria-label="Proposed recipes navigation">
+            <nav th:if="${proposedRecipes.totalPages > 1}" aria-label="Навигация по предложенным рецептам">
                 <ul class="pagination justify-content-center">
 
                     <li class="page-item" th:classappend="${proposedRecipes.first} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/proposed(page=${proposedRecipes.number - 1})}" aria-label="Previous">
+                        <a class="page-link" th:href="@{/admin/proposed(page=${proposedRecipes.number - 1})}" aria-label="Предыдущая">
                             <i class="bi bi-chevron-left"></i>
                         </a>
                     </li>
@@ -140,7 +133,7 @@
                     </li>
 
                     <li class="page-item" th:classappend="${proposedRecipes.last} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/proposed(page=${proposedRecipes.number + 1})}" aria-label="Next">
+                        <a class="page-link" th:href="@{/admin/proposed(page=${proposedRecipes.number + 1})}" aria-label="Следующая">
                             <i class="bi bi-chevron-right"></i>
                         </a>
                     </li>

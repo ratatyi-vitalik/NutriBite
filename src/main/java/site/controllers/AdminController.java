@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.parameters.P;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -39,6 +40,7 @@ public class AdminController {
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
+    private final DietRepository dietRepository;
 
     public AdminController(RecipeRepository recipeRepository,
                            ProposedRecipeRepository proposedRecipeRepository,
@@ -49,7 +51,8 @@ public class AdminController {
                            ReplyRepository replyRepository,
                            ReportRepository reportRepository,
                            UserRepository userRepository,
-                           NotificationRepository notificationRepository) {
+                           NotificationRepository notificationRepository,
+                           DietRepository dietRepository) {
         this.recipeRepository = recipeRepository;
         this.proposedRecipeRepository = proposedRecipeRepository;
         this.categoryRepository = categoryRepository;
@@ -60,6 +63,7 @@ public class AdminController {
         this.reportRepository = reportRepository;
         this.userRepository = userRepository;
         this.notificationRepository = notificationRepository;
+        this.dietRepository = dietRepository;
     }
 
     @GetMapping("/admin")
@@ -69,6 +73,7 @@ public class AdminController {
         model.addObject("proposedRecipesCount", proposedRecipeRepository.count());
         model.addObject("categoriesCount", categoryRepository.count());
         model.addObject("usersCount", userRepository.count());
+        model.addObject("dietsCount", dietRepository.count());
         return model;
     }
 
@@ -286,6 +291,109 @@ public class AdminController {
         model.addObject("recipePage", recipeRepository.findAll(PageRequest.of(page, 12)));
         model.addObject("totalRecipes", recipeRepository.count());
         return model;
+    }
+
+    @GetMapping("/admin/recipes/edit")
+    public ModelAndView editRecipe(@RequestParam long recipeId) {
+        ModelAndView model = new ModelAndView("Admin/adminEditRecipe");
+
+        if (recipeRepository.existsById(recipeId)) {
+            model.addObject("recipe", recipeRepository.findById(recipeId).get());
+        } else {
+            return new ModelAndView("redirect:/admin");
+        }
+
+        return model;
+    }
+
+    @PostMapping("/admin/recipes/save")
+    public ResponseEntity<?> saveRecipe(@ModelAttribute Recipe recipe,
+                                        @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                                        @RequestParam(value = "videoFile", required = false) MultipartFile videoFile) {
+       Optional<Recipe> recipeOpt = recipeRepository.findById(recipe.getId());
+       if (recipeOpt.isPresent()) {
+           Recipe existingRecipe = recipeOpt.get();
+
+           existingRecipe.setTitle(recipe.getTitle());
+           existingRecipe.setDescription(recipe.getDescription());
+           existingRecipe.setImagePath(recipe.getImagePath());
+           existingRecipe.setPrepTime(recipe.getPrepTime());
+           existingRecipe.setCookTime(recipe.getCookTime());
+           existingRecipe.setServings(recipe.getServings());
+
+           if (imageFile != null && !imageFile.isEmpty()) {
+               String contentType = imageFile.getContentType();
+               if (contentType == null || !(contentType.equals("image/png") || contentType.equals("image/jpeg"))) {
+                   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Некорректное расширение изображения");
+               }
+
+               try {
+                   String originalFilename = imageFile.getOriginalFilename();
+                   String extension = "";
+
+                   if (originalFilename != null && originalFilename.contains(".")) {
+                       extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                   }
+
+                   String newFileName = "recipe" + existingRecipe.getId() + extension;
+                   Path physicalPath = Paths.get("uploads/recipes/" + newFileName);
+                   Files.write(physicalPath, imageFile.getBytes());
+
+                   String webPath = "/uploads/recipes/" + newFileName;
+                   existingRecipe.setImagePath(webPath);
+               } catch (IOException e) {
+                   e.printStackTrace();
+                   return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при сохранении изображении");
+               }
+           }
+
+           if (videoFile != null && !videoFile.isEmpty()) {
+               String contentType = videoFile.getContentType();
+               if (contentType == null || !(contentType.equals("video/mp4") || contentType.equals("video/webm"))) {
+                   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Некорректное расширение видео");
+               }
+
+               try {
+                   String originalFilename = videoFile.getOriginalFilename();
+                   String extension = "";
+
+                   if (originalFilename != null && originalFilename.contains(".")) {
+                       extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                   }
+
+                   String newFileName = "recipe" + existingRecipe.getId() + extension;
+                   Path physicalPath = Paths.get("uploads/recipes/" + newFileName);
+                   Files.write(physicalPath, videoFile.getBytes());
+
+                   String webPath = "/uploads/recipes/" + newFileName;
+                   existingRecipe.setVideoPath(webPath);
+               } catch (IOException e) {
+                   e.printStackTrace();
+                   return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при сохранении видео");
+               }
+           }
+
+           if (existingRecipe.getNutrition() != null && recipe.getNutrition() != null) {
+               Nutrition existingNutr = existingRecipe.getNutrition();
+               Nutrition newNutr = recipe.getNutrition();
+               existingNutr.setCalories(newNutr.getCalories());
+               existingNutr.setProtein(newNutr.getProtein());
+               existingNutr.setFat(newNutr.getFat());
+               existingNutr.setSaturatedFat(newNutr.getSaturatedFat());
+               existingNutr.setCarbs(newNutr.getCarbs());
+               existingNutr.setSugar(newNutr.getSugar());
+               existingNutr.setFiber(newNutr.getFiber());
+               existingNutr.setSodium(newNutr.getSodium());
+           }
+
+           existingRecipe.setIngredientSections(recipe.getIngredientSections());
+           existingRecipe.setInstructions(recipe.getInstructions());
+
+           recipeRepository.save(existingRecipe);
+           return ResponseEntity.ok().build();
+       } else {
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Рецепт не найден");
+       }
     }
 
     @PostMapping("/admin/recipes/delete")
@@ -546,5 +654,76 @@ public class AdminController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @GetMapping("/admin/diets")
+    public ModelAndView showDietsPage(@RequestParam(required = false, defaultValue = "0") int page) {
+        ModelAndView model = new ModelAndView("Admin/dietsList");
+
+        model.addObject("diets", dietRepository.findAll(PageRequest.of(page, 10)));
+
+        return model;
+    }
+
+    @GetMapping("/admin/diets/add")
+    public ModelAndView showAddDietsPage() {
+        ModelAndView model = new ModelAndView("Admin/addDiet");
+        model.addObject("diet", new Diet());
+        return model;
+    }
+
+    @GetMapping("/admin/diets/edit")
+    public ModelAndView showEditDietsPage(@RequestParam long dietId) {
+        ModelAndView model = new ModelAndView("Admin/addDiet");
+
+        if (dietRepository.existsById(dietId)) {
+            model.addObject("diet", dietRepository.findById(dietId).get());
+        } else {
+            return new ModelAndView("redirect:/admin");
+        }
+
+        return model;
+    }
+
+    @PostMapping("/admin/diets/save")
+    public ResponseEntity<?> saveDiet(@ModelAttribute Diet diet, @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String contentType = imageFile.getContentType();
+            if (contentType == null || !(contentType.equals("image/png") || contentType.equals("image/jpeg"))) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Неверный формат");
+            }
+
+            try {
+                String originalFilename = imageFile.getOriginalFilename();
+                String extension = "";
+
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                }
+
+                String newFileName = "diet" + diet.getSlug() + "pfp" + extension;
+                Path physicalPath = Paths.get("uploads/diets/" + newFileName);
+                Files.write(physicalPath, imageFile.getBytes());
+
+                String webPath = "/uploads/diets/" + newFileName;
+                diet.setImagePath(webPath);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+
+        return ResponseEntity.ok(dietRepository.save(diet));
+    }
+
+    @PostMapping("/admin/diets/delete")
+    public ResponseEntity<?> deleteDiet(@RequestParam long dietId) {
+        if (dietRepository.existsById(dietId)) {
+            dietRepository.deleteById(dietId);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 }

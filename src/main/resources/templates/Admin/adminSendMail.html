@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Newsletter | Tastebite Admin</title>
+    <title>Отправка рассылки | Nutribite</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -23,7 +23,7 @@
             </div>
             <div class="col text-end">
                 <a th:href="@{/admin}" class="btn btn-tb-outline btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i> Dashboard
+                    <i class="bi bi-arrow-left me-1"></i> Назад
                 </a>
             </div>
         </div>
@@ -35,8 +35,8 @@
 
         <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
             <div>
-                <h1 class="font-serif fw-bold m-0" style="font-size: 32px;">Send Newsletter</h1>
-                <p class="text-muted small m-0 mt-1">Create and send updates or news to your subscribers</p>
+                <h1 class="font-serif fw-bold m-0" style="font-size: 32px;">Отправка рассылки</h1>
+                <p class="text-muted small m-0 mt-1">Создавайте и отправляйте обновления или новости подписчикам</p>
             </div>
             <div>
                 <button type="button"
@@ -44,7 +44,7 @@
                         data-bs-toggle="modal"
                         data-bs-target="#subscribersModal">
                     <i class="bi bi-people-fill me-1"></i>
-                    Subscribers: <strong id="subscribersCountText" th:text="${subscribersCount ?: 0}">0</strong>
+                    Подписчики: <strong id="subscribersCountText" th:text="${subscribersCount ?: 0}">0</strong>
                     <i class="bi bi-gear-fill ms-1 text-muted fs-6"></i>
                 </button>
             </div>
@@ -53,32 +53,32 @@
         <div class="row g-4">
             <div class="col-lg-7">
                 <div class="newsletter-card">
-                    <h4 class="font-serif fw-bold mb-4">Email Details</h4>
+                    <h4 class="font-serif fw-bold mb-4">Детали письма</h4>
 
                     <form th:action="@{/admin/mail/send}" method="post" enctype="multipart/form-data">
 
                         <div class="mb-3">
-                            <label for="title" class="form-label fw-semibold">Category / Badge Tag</label>
+                            <label for="title" class="form-label fw-semibold">Категория / Тэг значка</label>
                             <input type="text"
                                    class="form-control form-control-tb"
                                    id="title"
                                    name="title"
-                                   placeholder="e.g. Weekly News, Special Edition"
+                                   placeholder="например, Еженедельные новости, Спецвыпуск"
                                    required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="subject" class="form-label fw-semibold">Email Subject (Headline)</label>
+                            <label for="subject" class="form-label fw-semibold">Тема письма (Заголовок)</label>
                             <input type="text"
                                    class="form-control form-control-tb"
                                    id="subject"
                                    name="subject"
-                                   placeholder="Enter email subject line..."
+                                   placeholder="Введите тему письма..."
                                    required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="content" class="form-label fw-semibold">Message / Content</label>
+                            <label for="content" class="form-label fw-semibold">Сообщение / Содержание</label>
                             <textarea class="form-control form-control-tb"
                                       id="content"
                                       name="content"
@@ -88,15 +88,15 @@
 
                         <div class="row g-2 mb-4">
                             <div class="col-md-6">
-                                <label for="ctaText" class="form-label fw-semibold">Button Text (CTA)</label>
+                                <label for="ctaText" class="form-label fw-semibold">Текст кнопки (CTA)</label>
                                 <input type="text"
                                        class="form-control form-control-tb"
                                        id="ctaText"
                                        name="ctaText"
-                                       placeholder="Visit Website">
+                                       placeholder="Перейти на сайт">
                             </div>
                             <div class="col-md-6">
-                                <label for="ctaUrl" class="form-label fw-semibold">Button Link URL</label>
+                                <label for="ctaUrl" class="form-label fw-semibold">Ссылка для кнопки (URL)</label>
                                 <input type="url"
                                        class="form-control form-control-tb"
                                        id="ctaUrl"
@@ -105,12 +105,12 @@
                             </div>
                         </div>
 
-                        <div class="d-flex gap-2 justify-content-end pt-3 border-top">
+                        <div class="d-flex gap-2 justify-content-between pt-3 border-top">
                             <button type="button" class="btn btn-tb-outline" onclick="updatePreview()">
-                                <i class="bi bi-eye me-1"></i> Preview
+                                <i class="bi bi-eye me-1"></i> Предпросмотр
                             </button>
                             <button type="submit" class="btn btn-tb-orange">
-                                <i class="bi bi-send me-1"></i> Send Newsletter
+                                <i class="bi bi-send me-1"></i> Отправить рассылку
                             </button>
                         </div>
                     </form>
@@ -119,16 +119,16 @@
 
             <div class="col-lg-5">
                 <div class="newsletter-card">
-                    <h4 class="font-serif fw-bold mb-3">Live Preview</h4>
-                    <p class="text-muted small mb-3">This is how the email card will appear to subscribers.</p>
+                    <h4 class="font-serif fw-bold mb-3">Интерактивный предпросмотр</h4>
+                    <p class="text-muted small mb-3">Так карточка письма будет выглядеть у подписчиков.</p>
 
                     <div class="preview-box" id="previewArea">
-                        <span class="badge bg-warning text-dark mb-2" id="prevBadge">SPECIAL EDITION</span>
-                        <h4 class="font-serif fw-bold text-dark" id="prevSubject">Your Headline Here</h4>
+                        <span class="badge bg-warning text-dark mb-2" id="prevBadge">СПЕЦВЫПУСК</span>
+                        <h4 class="font-serif fw-bold text-dark" id="prevSubject">Ваш заголовок</h4>
                         <hr>
-                        <p class="text-secondary small" id="prevContent">Your message content will appear here as you fill out the form...</p>
+                        <p class="text-secondary small" id="prevContent">Текст вашего сообщения появится здесь по мере заполнения формы...</p>
                         <div class="text-center mt-4">
-                            <span class="btn btn-tb-orange btn-sm disabled" id="prevBtn">Visit Website</span>
+                            <span class="btn btn-tb-orange btn-sm disabled" id="prevBtn">Перейти на сайт</span>
                         </div>
                     </div>
                 </div>
@@ -145,8 +145,8 @@
         <div class="modal-content">
 
             <div class="modal-header d-flex justify-content-between align-items-center">
-                <h3 class="modal-title" id="subscribersModalLabel">Newsletter Subscribers</h3>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h3 class="modal-title" id="subscribersModalLabel">Подписчики рассылки</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
 
             <div class="modal-body">
@@ -155,7 +155,7 @@
                     <input type="text"
                            id="subscriberSearchInput"
                            class="form-control-custom"
-                           placeholder="Search subscriber by email...">
+                           placeholder="Поиск подписчика по email...">
                 </div>
 
                 <div class="subscribers-list-container" style="max-height: 350px; overflow-y: auto;">
@@ -164,15 +164,15 @@
 
                     <div id="noSubscribersFound" class="text-center py-4 text-muted d-none">
                         <i class="bi bi-envelope-x fs-3 d-block mb-2"></i>
-                        No subscribers found matching your search.
+                        Подписчиков по вашему запросу не найдено.
                     </div>
                 </div>
             </div>
 
             <div class="modal-footer border-0 pt-3">
                 <div class="w-100 d-flex justify-content-between align-items-center text-muted small">
-                    <span>Total count: <strong id="modalTotalCount">0</strong></span>
-                    <button type="button" class="btn btn-tb-outline btn-sm" data-bs-dismiss="modal">Close</button>
+                    <span>Всего подписчиков: <strong id="modalTotalCount">0</strong></span>
+                    <button type="button" class="btn btn-tb-outline btn-sm" data-bs-dismiss="modal">Закрыть</button>
                 </div>
             </div>
 
@@ -216,8 +216,8 @@
                     renderSubscribers(subscribersData);
                 })
                 .catch(err => {
-                    console.error('Failed to load subscribers:', err);
-                    subscribersList.innerHTML = `<li class="list-group-item text-danger text-center py-3">Error loading subscribers list</li>`;
+                    console.error('Не удалось загрузить подписчиков:', err);
+                    subscribersList.innerHTML = `<li class="list-group-item text-danger text-center py-3">Ошибка загрузки списка подписчиков</li>`;
                 });
         }
 
@@ -243,7 +243,7 @@
                 <span class="fw-medium text-dark">${escapeHtml(email)}</span>
                 <button type="button"
                         class="btn btn-sm text-danger btn-link p-1 text-decoration-none delete-btn"
-                        title="Delete subscriber"
+                        title="Удалить подписчика"
                         onclick="removeSubscriber('${escapeHtml(email)}', this)">
                     <i class="bi bi-trash3 fs-6"></i>
                 </button>
@@ -252,7 +252,6 @@
             });
         }
 
-        // 3. Серверный поиск с задержкой 300мс (Debounce)
         if (searchInput) {
             searchInput.addEventListener('input', function (e) {
                 clearTimeout(searchDebounceTimeout);
@@ -266,7 +265,7 @@
 
         // 4. Удаление подписчика
         window.removeSubscriber = function (email, btnElement) {
-            if (!confirm(`Are you sure you want to remove ${email} from subscribers?`)) return;
+            if (!confirm(`Вы уверены, что хотите удалить ${email} из подписчиков?`)) return;
 
             btnElement.disabled = true;
 
@@ -298,13 +297,13 @@
                             }, 300);
                         }
                     } else {
-                        alert('Failed to delete subscriber.');
+                        alert('Не удалось удалить подписчика.');
                         btnElement.disabled = false;
                     }
                 })
                 .catch(err => {
-                    console.error('Error deleting subscriber:', err);
-                    alert('An error occurred while deleting.');
+                    console.error('Ошибка при удалении подписчика:', err);
+                    alert('Произошла ошибка при удалении.');
                     btnElement.disabled = false;
                 });
         };
@@ -326,10 +325,10 @@
 
 <script>
     function updatePreview() {
-        const category = document.getElementById('title').value || 'SPECIAL EDITION';
-        const subject = document.getElementById('subject').value || 'Your Headline Here';
-        const content = document.getElementById('content').value || 'Your message content will appear here...';
-        const ctaText = document.getElementById('ctaText').value || 'Visit Website';
+        const category = document.getElementById('title').value || 'СПЕЦВЫПУСК';
+        const subject = document.getElementById('subject').value || 'Ваш заголовок';
+        const content = document.getElementById('content').value || 'Текст вашего сообщения появится здесь...';
+        const ctaText = document.getElementById('ctaText').value || 'Перейти на сайт';
 
         document.getElementById('prevBadge').innerText = category.toUpperCase();
         document.getElementById('prevSubject').innerText = subject;
@@ -337,11 +336,11 @@
         document.getElementById('prevBtn').innerText = ctaText;
     }
 
-    // Input listeners for real-time preview updates
     document.getElementById('title').addEventListener('input', updatePreview);
     document.getElementById('subject').addEventListener('input', updatePreview);
     document.getElementById('content').addEventListener('input', updatePreview);
     document.getElementById('ctaText').addEventListener('input', updatePreview);
 </script>
+
 </body>
 </html>

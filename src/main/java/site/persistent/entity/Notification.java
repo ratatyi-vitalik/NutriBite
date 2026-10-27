@@ -18,14 +18,19 @@ public class Notification {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false)
     private String title;
-    
+
+    @Column(nullable = false)
     private String message;
 
+    @Column
     private String link;
 
+    @Column(nullable = false)
     private boolean isRead;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

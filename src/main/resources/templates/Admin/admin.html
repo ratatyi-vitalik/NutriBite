@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Tastebite</title>
+    <title>Admin Dashboard | Nutribite</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -32,7 +32,7 @@
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="actionsGrid">
 
-            <!-- 1. Recipe Management -->
+            <!-- 1. Управление рецептами -->
             <div class="col action-item">
                 <div class="admin-card">
                     <div>
@@ -42,21 +42,21 @@
                             </div>
                             <span class="badge-counter" th:text="${totalRecipesCount != null ? totalRecipesCount : '0'}"></span>
                         </div>
-                        <h3 class="admin-card-title">Recipes</h3>
-                        <p class="admin-card-desc">Add new recipes, edit existing ones, or remove them from the catalog.</p>
+                        <h3 class="admin-card-title">Рецепты</h3>
+                        <p class="admin-card-desc">Добавляйте новые рецепты, редактируйте существующие или удаляйте их из каталога.</p>
                     </div>
                     <div class="d-flex gap-3">
                         <a th:href="@{/admin/recipes/add}" class="btn btn-tb-orange btn-sm flex-grow-1 text-center">
-                            <i class="bi bi-plus-lg me-1"></i> Add New
+                            <i class="bi bi-plus-lg me-1"></i> Добавить
                         </a>
                         <a th:href="@{/admin/recipes}" class="btn btn-tb-outline btn-sm flex-grow-1 text-center">
-                            View All
+                            Смотреть все
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. Submitted Recipes -->
+            <!-- 2. Предложенные рецепты -->
             <div class="col action-item">
                 <div class="admin-card">
                     <div>
@@ -66,16 +66,16 @@
                             </div>
                             <span class="badge bg-danger rounded-pill fs-6" th:if="${proposedRecipesCount > 0}" th:text="${proposedRecipesCount}"></span>
                         </div>
-                        <h3 class="admin-card-title">Submitted Recipes</h3>
-                        <p class="admin-card-desc">Review and moderate recipe submissions sent in by site users.</p>
+                        <h3 class="admin-card-title">Предложенные рецепты</h3>
+                        <p class="admin-card-desc">Просматривайте и модерируйте рецепты, отправленные пользователями сайта.</p>
                     </div>
                     <a th:href="@{/admin/proposed}" class="action-link">
-                        Go to moderation <i class="bi bi-arrow-right"></i>
+                        Перейти к модерации <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
 
-            <!-- 3. Categories -->
+            <!-- 3. Категории -->
             <div class="col action-item">
                 <div class="admin-card">
                     <div>
@@ -85,16 +85,16 @@
                             </div>
                             <span class="badge-counter" th:text="${categoriesCount != null ? categoriesCount : '0'}">20</span>
                         </div>
-                        <h3 class="admin-card-title">Categories</h3>
-                        <p class="admin-card-desc">Create new culinary categories, update icons, and delete outdated entries.</p>
+                        <h3 class="admin-card-title">Категории</h3>
+                        <p class="admin-card-desc">Создавайте кулинарные категории, обновляйте иконки и удаляйте устаревшие записи.</p>
                     </div>
                     <a th:href="@{/admin/categories}" class="action-link">
-                        Manage categories <i class="bi bi-arrow-right"></i>
+                        Управление категориями <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
 
-            <!-- 4. Reports & Moderation -->
+            <!-- 4. Жалобы и модерация -->
             <div class="col action-item">
                 <div class="admin-card">
                     <div>
@@ -106,16 +106,16 @@
                                   th:if="${pendingReportsCount != null and pendingReportsCount > 0}"
                                   th:text="${pendingReportsCount}"></span>
                         </div>
-                        <h3 class="admin-card-title">Reports & Moderation</h3>
-                        <p class="admin-card-desc">Handle user reports regarding comments, recipes, and policy violations.</p>
+                        <h3 class="admin-card-title">Жалобы и модерация</h3>
+                        <p class="admin-card-desc">Обрабатывайте жалобы пользователей на комментарии, рецепты и нарушения правил.</p>
                     </div>
                     <a th:href="@{/admin/reports}" class="action-link">
-                        View reports <i class="bi bi-arrow-right"></i>
+                        Просмотр жалоб <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
 
-            <!-- 5. Email Newsletter -->
+            <!-- 5. Email-рассылка -->
             <div class="col action-item">
                 <div class="admin-card">
                     <div>
@@ -124,16 +124,16 @@
                                 <i class="bi bi-send-fill"></i>
                             </div>
                         </div>
-                        <h3 class="admin-card-title">Email Newsletter</h3>
-                        <p class="admin-card-desc">Create and send newsletters and recipe roundups to all Tastebite subscribers.</p>
+                        <h3 class="admin-card-title">Email-рассылка</h3>
+                        <p class="admin-card-desc">Создавайте и отправляйте новостные рассылки и подборки рецептов подписчикам Tastebite.</p>
                     </div>
-                    <a th:href="@{/admin/newsletter}" class="action-link">
-                        Send newsletter <i class="bi bi-arrow-right"></i>
+                    <a th:href="@{/admin/mail}" class="action-link">
+                        Отправить рассылку <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
 
-            <!-- 6. Users -->
+            <!-- 6. Пользователи -->
             <div class="col action-item">
                 <div class="admin-card">
                     <div>
@@ -143,12 +143,36 @@
                             </div>
                             <span class="badge-counter" th:text="${usersCount != null ? usersCount : '0'}">0</span>
                         </div>
-                        <h3 class="admin-card-title">Users</h3>
-                        <p class="admin-card-desc">Manage user accounts, assign roles, and suspend policy violators.</p>
+                        <h3 class="admin-card-title">Пользователи</h3>
+                        <p class="admin-card-desc">Управляйте учетными записями пользователей, назначайте роли и заблокируйте нарушителей.</p>
                     </div>
                     <a th:href="@{/admin/users}" class="action-link">
-                        Manage users <i class="bi bi-arrow-right"></i>
+                        Управление пользователями <i class="bi bi-arrow-right"></i>
                     </a>
+                </div>
+            </div>
+
+            <!-- 7. Диеты -->
+            <div class="col action-item">
+                <div class="admin-card">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="admin-icon-wrapper" style="background-color: #EFEBE9; color: #5D4037;">
+                                <i class="bi bi-heart-pulse-fill"></i>
+                            </div>
+                            <span class="badge-counter" th:text="${dietsCount != null ? dietsCount : '0'}">0</span>
+                        </div>
+                        <h3 class="admin-card-title">Диеты</h3>
+                        <p class="admin-card-desc">Управляйте диетическими программами, соотношением БЖУ и пищевыми ограничениями.</p>
+                    </div>
+                    <div class="d-flex gap-3">
+                        <a th:href="@{/admin/diets/add}" class="btn btn-tb-orange btn-sm flex-grow-1 text-center">
+                            <i class="bi bi-plus-lg me-1"></i> Добавить
+                        </a>
+                        <a th:href="@{/admin/diets}" class="btn btn-tb-outline btn-sm flex-grow-1 text-center">
+                            Смотреть все
+                        </a>
+                    </div>
                 </div>
             </div>
 

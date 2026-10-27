@@ -20,25 +20,25 @@ public class Diet {
     @Column(nullable = false, unique = true)
     private String slug;
 
-    @Column(name = "short_description", length = 500)
+    @Column(nullable = false, name = "short_description", length = 500)
     private String shortDescription;
 
-    @Column(name = "full_description", columnDefinition = "TEXT")
+    @Column(nullable = false, name = "full_description", columnDefinition = "TEXT")
     private String fullDescription;
 
-    @Column(name = "allowed_foods", columnDefinition = "TEXT")
+    @Column(nullable = false, name = "allowed_foods", columnDefinition = "TEXT")
     private String allowedFoods;
 
-    @Column(name = "forbidden_foods", columnDefinition = "TEXT")
+    @Column(nullable = false, name = "forbidden_foods", columnDefinition = "TEXT")
     private String forbiddenFoods;
 
-    @Column(name = "contraindications", columnDefinition = "TEXT")
+    @Column(nullable = false, name = "contraindications", columnDefinition = "TEXT")
     private String contraindications;
 
-    @Column(name = "macronutrient_ratio")
+    @Column(nullable = false, name = "macronutrient_ratio")
     private String macronutrientRatio;
 
-    @Column(name = "image_path")
+    @Column(nullable = false, name = "image_path")
     private String imagePath;
 
     @ManyToMany(mappedBy = "diets")
