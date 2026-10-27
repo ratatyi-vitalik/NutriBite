@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>Manage Reports | Tastebite Admin</title>
+    <title>Управление жалобами | Nutribite</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -14,7 +14,6 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
     <style>
-        /* Custom styles tailored to Tastebite design */
         .report-card {
             background: #ffffff;
             border: 1px solid #E8E8E8;
@@ -106,7 +105,7 @@
             </div>
             <div class="col text-end">
                 <a th:href="@{/admin}" class="btn btn-tb-outline btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i> Dashboard
+                    <i class="bi bi-arrow-left me-1"></i> Назад
                 </a>
             </div>
         </div>
@@ -118,14 +117,13 @@
 
         <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom flex-wrap gap-3">
             <div>
-                <h1 class="font-serif fw-bold m-0" style="font-size: 32px;">Reports & Moderation</h1>
+                <h1 class="font-serif fw-bold m-0" style="font-size: 32px;">Жалобы и модерация</h1>
                 <p class="text-muted small m-0 mt-1">
-                    Manage user reports and review community rule violations
+                    Управление жалобами пользователей и проверка нарушений правил сообщества
                 </p>
             </div>
         </div>
 
-        <!-- Statistics Widgets -->
         <div class="row g-3 mb-4">
             <div class="col-12 col-sm-6 col-md-4">
                 <div class="stat-widget">
@@ -133,7 +131,7 @@
                         <i class="bi bi-inbox-fill"></i>
                     </div>
                     <div>
-                        <div class="text-muted small">Total Reports</div>
+                        <div class="text-muted small">Всего жалоб</div>
                         <div class="fs-4 fw-bold" th:text="${totalReports != null ? totalReports : '0'}">0</div>
                     </div>
                 </div>
@@ -144,7 +142,7 @@
                         <i class="bi bi-clock-history"></i>
                     </div>
                     <div>
-                        <div class="text-muted small">Pending</div>
+                        <div class="text-muted small">В ожидании</div>
                         <div class="fs-4 fw-bold" th:text="${pendingCount != null ? pendingCount : '0'}">0</div>
                     </div>
                 </div>
@@ -155,7 +153,7 @@
                         <i class="bi bi-check-circle-fill"></i>
                     </div>
                     <div>
-                        <div class="text-muted small">Resolved (This Month)</div>
+                        <div class="text-muted small">Решено (За этот месяц)</div>
                         <div class="fs-4 fw-bold" th:text="${resolvedCount != null ? resolvedCount : '0'}">0</div>
                     </div>
                 </div>
@@ -166,29 +164,27 @@
             <ul class="nav nav-pills nav-pills-tb gap-2">
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${currentStatus == 'PENDING' or currentStatus == null} ? 'active'" th:href="@{/admin/reports(status='PENDING')}">
-                        <i class="bi bi-hourglass-split me-1"></i> Pending
+                        <i class="bi bi-hourglass-split me-1"></i> В ожидании
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${currentStatus == 'RESOLVED'} ? 'active'" th:href="@{/admin/reports(status='RESOLVED')}">
-                        <i class="bi bi-check2-all me-1"></i> Resolved
+                        <i class="bi bi-check2-all me-1"></i> Решенные
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${currentStatus == 'REJECTED'} ? 'active'" th:href="@{/admin/reports(status='REJECTED')}">
-                        <i class="bi bi-x-circle me-1"></i> Rejected
+                        <i class="bi bi-x-circle me-1"></i> Отклоненные
                     </a>
                 </li>
             </ul>
         </div>
 
-        <!-- Empty State -->
         <div th:if="${reports == null or #lists.isEmpty(reports)}" class="text-center py-5 bg-white rounded-3 border">
             <i class="bi bi-shield-check fs-1 text-muted"></i>
-            <p class="text-muted fs-5 mt-2 mb-0">No reports found in this section.</p>
+            <p class="text-muted fs-5 mt-2 mb-0">В этом разделе жалоб не найдено.</p>
         </div>
 
-        <!-- Reports List -->
         <div th:unless="${reports == null or #lists.isEmpty(reports)}" class="d-flex flex-column gap-3 mb-5">
 
             <div class="report-card" th:each="report : ${reports}" th:id="'report-card-' + ${report.id}">
@@ -196,8 +192,8 @@
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge px-2 py-1"
                               th:classappend="${report.status.name() == 'PENDING'} ? 'badge-pending' : (${report.status.name() == 'RESOLVED'} ? 'badge-resolved' : 'badge-dismissed')"
-                              th:text="${report.status.name()}">
-                            PENDING
+                              th:text="${report.status.name() == 'PENDING' ? 'В ОЖИДАНИИ' : (report.status.name() == 'RESOLVED' ? 'РЕШЕНО' : 'ОТКЛОНЕНО')}">
+                            В ОЖИДАНИИ
                         </span>
 
                         <span class="text-muted small ms-2">
@@ -207,83 +203,77 @@
                     </div>
 
                     <span class="text-muted small">
-                        Report ID: <strong th:text="'#' + ${report.id}">#1024</strong>
+                        ID жалобы: <strong th:text="'#' + ${report.id}">#1024</strong>
                     </span>
                 </div>
 
                 <div class="row g-3">
-                    <!-- Left Column: Reporter Info & Reason -->
                     <div class="col-md-5">
                         <div class="mb-2">
-                            <span class="text-muted small d-block mb-1">Reported by:</span>
+                            <span class="text-muted small d-block mb-1">Отправитель жалобы:</span>
                             <div class="d-flex align-items-center gap-2">
                                 <i class="bi bi-person-circle fs-5 text-secondary"></i>
                                 <span class="fw-semibold text-dark"
-                                      th:text="${report.user != null ? (!#strings.isEmpty(report.user.fullName) ? report.user.fullName : report.user.name) : 'Anonymous'}">
-                                    John Doe
+                                      th:text="${report.user != null ? (!#strings.isEmpty(report.user.fullName) ? report.user.fullName : report.user.name) : 'Аноним'}">
+                                    Иван Иванов
                                 </span>
                             </div>
                         </div>
 
                         <div>
-                            <span class="text-muted small d-block mb-1">Reason for report:</span>
+                            <span class="text-muted small d-block mb-1">Причина жалобы:</span>
                             <span class="badge bg-light text-danger border border-danger-subtle fw-medium mb-1" th:text="${report.reason}">
-                                Spam / Harassment
+                                Спам / Оскорбление
                             </span>
                             <p class="small text-dark mt-1 mb-0" th:text="${report.details}">
-                                This comment contains offensive language targeting the recipe author.
+                                Данный комментарий содержит оскорбительные выражения в адрес автора рецепта.
                             </p>
                         </div>
                     </div>
 
-                    <!-- Right Column: Target Preview -->
                     <div class="col-md-7">
-                        <span class="text-muted small d-block mb-1">Reported content preview:</span>
+                        <span class="text-muted small d-block mb-1">Предпросмотр контента:</span>
                         <div class="report-target-preview">
 
-                            <!-- Comment Preview -->
                             <div th:if="${report.comment != null}">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <span class="fw-bold text-dark small"
-                                          th:text="'Type: Comment | Author: ' + (${report.comment.author != null ? (!#strings.isEmpty(report.comment.author.fullName) ? report.comment.author.fullName : report.comment.author.name) : 'Unknown'})">
-                                        Type: Comment | Author: Jane Smith
+                                          th:text="'Тип: Комментарий | Автор: ' + (${report.comment.author != null ? (!#strings.isEmpty(report.comment.author.fullName) ? report.comment.author.fullName : report.comment.author.name) : 'Неизвестно'})">
+                                        Тип: Комментарий | Автор: Анна Петрова
                                     </span>
                                 </div>
                                 <p class="mb-0 text-muted fst-italic" th:text="${report.comment.text}">
-                                    "Comment text goes here..."
+                                    "Текст комментария..."
                                 </p>
                             </div>
 
-                            <!-- Reply Preview -->
                             <div th:if="${report.reply != null}">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <span class="fw-bold text-dark small"
-                                          th:text="'Type: Reply | Author: ' + (${report.reply.author != null ? (!#strings.isEmpty(report.reply.author.fullName) ? report.reply.author.fullName : report.reply.author.name) : 'Unknown'})">
-                                        Type: Reply | Author: Jane Smith
+                                          th:text="'Тип: Ответ | Автор: ' + (${report.reply.author != null ? (!#strings.isEmpty(report.reply.author.fullName) ? report.reply.author.fullName : report.reply.author.name) : 'Неизвестно'})">
+                                        Тип: Ответ | Автор: Анна Петрова
                                     </span>
                                 </div>
                                 <p class="mb-0 text-muted fst-italic" th:text="${report.reply.text}">
-                                    "Reply text goes here..."
+                                    "Текст ответа..."
                                 </p>
                             </div>
 
-                            <!-- Fallback if Target Deleted -->
                             <div th:if="${report.comment == null and report.reply == null}">
-                                <p class="mb-0 text-muted fst-italic">Content has been removed or is unavailable.</p>
+                                <p class="mb-0 text-muted fst-italic">Контент был удален или недоступен.</p>
                             </div>
 
                         </div>
                     </div>
                 </div>
 
-                <!-- Action Controls (PENDING Status Only) -->
                 <div th:if="${report.status.name() == 'PENDING'}" class="d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
                     <button type="button"
                             class="btn btn-tb-outline btn-sm btn-open-dismiss"
                             th:data-report-id="${report.id}"
                             data-bs-toggle="modal"
                             data-bs-target="#dismissModal">
-                        <i class="bi bi-x-lg me-1"></i> Reject
+                        <i class="bi bi-x-lg me-1"></i> Отклонить
                     </button>
 
                     <button type="button"
@@ -291,7 +281,7 @@
                             th:data-report-id="${report.id}"
                             data-bs-toggle="modal"
                             data-bs-target="#resolveModal">
-                        <i class="bi bi-shield-x me-1"></i> Take Action
+                        <i class="bi bi-shield-x me-1"></i> Принять меры
                     </button>
                 </div>
 
@@ -299,12 +289,11 @@
 
         </div>
 
-        <!-- Pagination -->
-        <nav th:if="${reports != null and totalPages > 1}" aria-label="Reports navigation">
+        <nav th:if="${reports != null and totalPages > 1}" aria-label="Навигация по жалобам">
             <ul class="pagination justify-content-center">
 
                 <li class="page-item" th:classappend="${reports.first} ? 'disabled'">
-                    <a class="page-link" th:href="@{/admin/reports(page=${reports.number - 1}, status=${currentStatus})}" aria-label="Previous">
+                    <a class="page-link" th:href="@{/admin/reports(page=${reports.number - 1}, status=${currentStatus})}" aria-label="Предыдущая">
                         <i class="bi bi-chevron-left"></i>
                     </a>
                 </li>
@@ -318,7 +307,7 @@
                 </li>
 
                 <li class="page-item" th:classappend="${reports.last} ? 'disabled'">
-                    <a class="page-link" th:href="@{/admin/reports(page=${reports.number + 1}, status=${currentStatus})}" aria-label="Next">
+                    <a class="page-link" th:href="@{/admin/reports(page=${reports.number + 1}, status=${currentStatus})}" aria-label="Следующая">
                         <i class="bi bi-chevron-right"></i>
                     </a>
                 </li>
@@ -331,77 +320,75 @@
 
 <div th:replace="~{fragments/footer :: footer}"></div>
 
-<!-- Single Resolve Modal -->
 <div class="modal fade" id="resolveModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content custom-modal p-4">
             <div class="modal-header">
-                <h5 class="modal-title">Moderation Action</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Действия модератора</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
             <form id="resolveForm">
                 <input type="hidden" id="resolveReportId" name="reportId">
                 <div class="modal-body">
-                    <p class="mb-3">Select an enforcement action for the reported item:</p>
+                    <p class="mb-3">Выберите мерe воздействия для указанного объекта:</p>
                     <div class="mb-3">
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio" name="actionType" id="act1" value="DELETE_COMMENT" checked>
-                            <label class="form-check-label fw-semibold" for="act1">Remove content (comment / recipe)</label>
+                            <label class="form-check-label fw-semibold" for="act1">Удалить контент (комментарий / рецепт)</label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="actionType" id="act3" value="BAN_USER">
-                            <label class="form-check-label fw-semibold text-danger" for="act3">Ban user account</label>
+                            <label class="form-check-label fw-semibold text-danger" for="act3">Заблокировать аккаунт пользователя</label>
                         </div>
                     </div>
 
                     <div id="banDurationFields" class="d-none mb-3 p-3 bg-light rounded border">
-                        <label class="form-label text-dark fw-semibold small mb-2">Ban Duration:</label>
+                        <label class="form-label text-dark fw-semibold small mb-2">Длительность блокировки:</label>
                         <div class="row g-2">
                             <div class="col-4">
-                                <label class="form-label text-muted extra-small mb-1">Days</label>
+                                <label class="form-label text-muted extra-small mb-1">Дни</label>
                                 <input type="number" name="days" id="banDays" class="form-control form-control-sm" value="7" min="0">
                             </div>
                             <div class="col-4">
-                                <label class="form-label text-muted extra-small mb-1">Hours</label>
+                                <label class="form-label text-muted extra-small mb-1">Часы</label>
                                 <input type="number" name="hours" id="banHours" class="form-control form-control-sm" value="0" min="0" max="23">
                             </div>
                             <div class="col-4">
-                                <label class="form-label text-muted extra-small mb-1">Minutes</label>
+                                <label class="form-label text-muted extra-small mb-1">Минуты</label>
                                 <input type="number" name="minutes" id="banMinutes" class="form-control form-control-sm" value="0" min="0" max="59">
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-2">
-                        <label class="form-label text-muted small">Moderator Note (Optional):</label>
-                        <textarea name="adminNote" class="form-control form-control-tb" rows="2" placeholder="State reason for this decision..."></textarea>
+                        <label class="form-label text-muted small">Примечание модератора (Необязательно):</label>
+                        <textarea name="adminNote" class="form-control form-control-tb" rows="2" placeholder="Укажите причину решения..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-0 mt-3 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-tb-orange m-0">Confirm Action</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-tb-orange m-0">Подтвердить действие</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Single Reject Modal -->
 <div class="modal fade" id="dismissModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content custom-modal p-4">
             <div class="modal-header">
-                <h5 class="modal-title">Reject Report</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Отклонить жалобу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
             <form id="dismissForm">
                 <input type="hidden" id="dismissReportId" name="reportId">
                 <div class="modal-body">
-                    <p>Are you sure you want to Reject this report? No violation will be recorded.</p>
+                    <p>Вы уверены, что хотите отклонить эту жалобу? Нарушение зафиксировано не будет.</p>
                 </div>
                 <div class="modal-footer border-0 p-0 mt-2 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-secondary">Reject Report</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-secondary">Отклонить жалобу</button>
                 </div>
             </form>
         </div>
@@ -429,7 +416,6 @@
 
         actionRadios.forEach(radio => radio.addEventListener('change', toggleBanFields));
 
-        // Сброс полей к дефолту (7 дней) при закрытии модального окна
         resolveModalEl.addEventListener('hidden.bs.modal', () => {
             document.getElementById('resolveForm').reset();
             document.getElementById('banDays').value = 7;
@@ -451,7 +437,6 @@
             });
         });
 
-        // Отправка формы (FormData автоматически соберет days, hours, minutes)
         const handleFormSubmit = (formId, modalId, url) => {
             const form = document.getElementById(formId);
             const modalElement = document.getElementById(modalId);
@@ -461,7 +446,6 @@
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                // Получаем существующий экземпляр или создаем новый прямо перед отправкой
                 const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
 
                 const formData = new FormData(form);
@@ -470,7 +454,6 @@
                 const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
                 const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
 
-                // Отправляем параметры в виде URLSearchParams для корректного чтения Spring Controller
                 const searchParams = new URLSearchParams(formData);
 
                 try {
@@ -499,10 +482,10 @@
                         form.reset();
                         toggleBanFields();
                     } else {
-                        alert('An error occurred while processing the request.');
+                        alert('Произошла ошибка при обработке запроса.');
                     }
                 } catch (err) {
-                    console.error('Network error:', err);
+                    console.error('Ошибка сети:', err);
                 }
             });
         };

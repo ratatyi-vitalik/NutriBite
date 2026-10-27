@@ -24,29 +24,29 @@ public class Recipe {
     private String title;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "author_id", referencedColumnName = "id")
+    @JoinColumn(nullable = false, name = "author_id", referencedColumnName = "id")
     private User author;
 
     @Column(nullable = false)
     private LocalDateTime date;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(nullable = false, name = "category_id")
     private Category category;
 
-    @Column(name = "image_path")
+    @Column(nullable = false, name = "image_path")
     private String imagePath;
 
-    @Column(name = "prep_time")
+    @Column(nullable = false, name = "prep_time")
     private Integer prepTime;
 
-    @Column(name = "cook_time")
+    @Column(nullable = false, name = "cook_time")
     private Integer cookTime;
 
-    @Column
+    @Column(nullable = false)
     private String servings;
 
     @Column(name = "video_path")

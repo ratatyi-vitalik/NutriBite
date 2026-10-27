@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create New Recipe - Tastebite</title>
+    <title>Создание нового рецепта - Nutribite</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -23,7 +23,7 @@
             </div>
             <div class="col text-end">
                 <a th:href="@{/admin}" class="btn btn-tb-outline btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i> Dashboard
+                    <i class="bi bi-arrow-left me-1"></i> Назад
                 </a>
             </div>
         </div>
@@ -34,84 +34,84 @@
     <div class="container" style="max-width: 800px;">
 
         <div class="text-center mb-5">
-            <h1 class="profile-header-title">Create New Recipe</h1>
+            <h1 class="profile-header-title">Создать новый рецепт</h1>
         </div>
 
         <form th:action="@{/admin/recipes/add}" method="POST" enctype="multipart/form-data" class="profile-form">
 
             <div class="card p-4 mb-4 border-0 rounded-3 bg-tb-light">
-                <h4 class="mb-4 fw-bold font-serif">Basic Information</h4>
+                <h4 class="mb-4 fw-bold font-serif">Основная информация</h4>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Recipe Title *</label>
-                    <input name="title" type="text" class="form-control form-control-tb" required placeholder="e.g. Classic Creamy Carbonara">
+                    <label class="form-label fw-semibold">Название рецепта *</label>
+                    <input name="title" type="text" class="form-control form-control-tb" required placeholder="Например, Классическая сливочная Карбонара">
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Description</label>
-                    <textarea name="description" class="form-control form-control-tb" rows="4" placeholder="Briefly describe your dish..."></textarea>
+                    <label class="form-label fw-semibold">Описание</label>
+                    <textarea name="description" class="form-control form-control-tb" rows="4" placeholder="Кратко опишите ваше блюдо..."></textarea>
                 </div>
 
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label fw-semibold">Prep Time</label>
-                        <input name="prepTime" type="text" class="form-control form-control-tb" placeholder="15 mins">
+                        <label class="form-label fw-semibold">Время подготовки</label>
+                        <input name="prepTime" type="text" class="form-control form-control-tb" placeholder="15 мин">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-semibold">Cook Time</label>
-                        <input name="cookTime" type="text" class="form-control form-control-tb" placeholder="20 mins">
+                        <label class="form-label fw-semibold">Время приготовления</label>
+                        <input name="cookTime" type="text" class="form-control form-control-tb" placeholder="20 мин">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-semibold">Servings</label>
-                        <input name="servings" type="text" class="form-control form-control-tb" placeholder="4 servings">
+                        <label class="form-label fw-semibold">Порции</label>
+                        <input name="servings" type="text" class="form-control form-control-tb" placeholder="4 порции">
                     </div>
                 </div>
             </div>
 
             <div class="card p-4 mb-4 border-0 rounded-3 bg-tb-light">
-                <h4 class="mb-4 fw-bold font-serif">Media Files</h4>
+                <h4 class="mb-4 fw-bold font-serif">Медиафайлы</h4>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Recipe Photo *</label>
+                    <label class="form-label fw-semibold">Фотография рецепта *</label>
                     <input type="file" class="form-control form-control-tb" name="imageFile" accept="image/*" required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Recipe Video (Optional)</label>
+                    <label class="form-label fw-semibold">Видео рецепта (Необязательно)</label>
                     <input type="file" class="form-control form-control-tb" name="videoFile"
                            accept="video/mp4,video/webm,.mp4,.webm">
-                    <div class="form-text">Supported formats: MP4, WebM</div>
+                    <div class="form-text">Поддерживаемые форматы: MP4, WebM</div>
                 </div>
             </div>
 
             <div class="card p-4 mb-4 border-0 rounded-3 bg-tb-light">
-                <h4 class="mb-4 fw-bold font-serif">Nutrition Facts (Per Serving)</h4>
+                <h4 class="mb-4 fw-bold font-serif">Пищевая ценность (на порцию)</h4>
 
                 <div class="row g-3">
                     <div class="col-6 col-md-3">
-                        <label class="form-label fw-semibold">Calories</label>
-                        <input type="text" class="form-control form-control-tb" name="calories" placeholder="450 kcal">
+                        <label class="form-label fw-semibold">Калории</label>
+                        <input type="text" class="form-control form-control-tb" name="calories" placeholder="450 ккал">
                     </div>
                     <div class="col-6 col-md-3">
-                        <label class="form-label fw-semibold">Carbs</label>
-                        <input type="text" class="form-control form-control-tb" name="carbs" placeholder="25g">
+                        <label class="form-label fw-semibold">Углеводы</label>
+                        <input type="text" class="form-control form-control-tb" name="carbs" placeholder="25 г">
                     </div>
                     <div class="col-6 col-md-3">
-                        <label class="form-label fw-semibold">Protein</label>
-                        <input type="text" class="form-control form-control-tb" name="protein" placeholder="18g">
+                        <label class="form-label fw-semibold">Белки</label>
+                        <input type="text" class="form-control form-control-tb" name="protein" placeholder="18 г">
                     </div>
                     <div class="col-6 col-md-3">
-                        <label class="form-label fw-semibold">Fat</label>
-                        <input type="text" class="form-control form-control-tb" name="fat" placeholder="12g">
+                        <label class="form-label fw-semibold">Жиры</label>
+                        <input type="text" class="form-control form-control-tb" name="fat" placeholder="12 г">
                     </div>
                 </div>
             </div>
 
             <div class="card p-4 mb-4 border-0 rounded-3 bg-tb-light">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="fw-bold font-serif m-0">Ingredients</h4>
+                    <h4 class="fw-bold font-serif m-0">Ингредиенты</h4>
                     <button type="button" class="btn btn-tb-outline btn-sm rounded-pill" onclick="addSection()">
-                        <i class="bi bi-plus-lg me-1"></i> Add Section
+                        <i class="bi bi-plus-lg me-1"></i> Добавить раздел
                     </button>
                 </div>
 
@@ -119,7 +119,7 @@
                     <div class="card p-3 mb-3 border ingredient-section" data-section-index="0">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <input type="text" class="form-control form-control-tb me-2 fw-bold"
-                                   name="sections[0].title" placeholder="Section Title" value="Main Ingredients" required>
+                                   name="sections[0].title" placeholder="Заголовок раздела" value="Основные ингредиенты" required>
                             <button type="button" class="btn btn-link text-danger p-0" onclick="removeSection(this)">
                                 <i class="bi bi-trash fs-5"></i>
                             </button>
@@ -129,11 +129,11 @@
                             <div class="row g-2 mb-2 ingredient-row align-items-center">
                                 <div class="col-4">
                                     <input type="text" class="form-control form-control-tb"
-                                           name="sections[0].ingredients[0].amount" placeholder="200g">
+                                           name="sections[0].ingredients[0].amount" placeholder="200 г">
                                 </div>
                                 <div class="col-7">
                                     <input type="text" class="form-control form-control-tb"
-                                           name="sections[0].ingredients[0].name" placeholder="Spaghetti" required>
+                                           name="sections[0].ingredients[0].name" placeholder="Спагетти" required>
                                 </div>
                                 <div class="col-1 text-end">
                                     <button type="button" class="btn btn-link text-danger p-0" onclick="removeIngredient(this)">
@@ -144,7 +144,7 @@
                         </div>
 
                         <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addIngredientToSection(this)">
-                            + Add Ingredient
+                            + Добавить ингредиент
                         </button>
                     </div>
                 </div>
@@ -152,17 +152,17 @@
 
             <div class="card p-4 mb-4 border-0 rounded-3 bg-tb-light">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="fw-bold font-serif m-0">Instructions</h4>
+                    <h4 class="fw-bold font-serif m-0">Инструкция по приготовлению</h4>
                     <button type="button" class="btn btn-tb-outline btn-sm rounded-pill" onclick="addStep()">
-                        <i class="bi bi-plus-lg me-1"></i> Add Step
+                        <i class="bi bi-plus-lg me-1"></i> Добавить шаг
                     </button>
                 </div>
 
                 <div id="instructions-container">
                     <div class="mb-3 instruction-step">
-                        <label class="form-label fw-semibold step-title">Step 1</label>
+                        <label class="form-label fw-semibold step-title">Шаг 1</label>
                         <div class="d-flex gap-2">
-                            <textarea class="form-control form-control-tb" name="stepDescriptions" rows="2" placeholder="Describe this step..." required></textarea>
+                            <textarea class="form-control form-control-tb" name="stepDescriptions" rows="2" placeholder="Опишите этот шаг..." required></textarea>
                             <button type="button" class="btn btn-link text-danger align-self-start p-1" onclick="removeStep(this)">
                                 <i class="bi bi-trash fs-5"></i>
                             </button>
@@ -172,7 +172,7 @@
             </div>
 
             <div class="d-flex justify-content-end gap-3 mt-4">
-                <button type="submit" class="btn btn-tb-orange px-5 py-2">Publish Recipe</button>
+                <button type="submit" class="btn btn-tb-orange px-5 py-2">Опубликовать рецепт</button>
             </div>
 
         </form>
@@ -187,8 +187,6 @@
 
 <script th:replace="~{fragments/footer :: toastScript}"></script>
 
-<script th:replace="~{fragments/header :: searchScript}"></script>
-
 <script>
     let sectionCounter = 1;
 
@@ -202,7 +200,7 @@
         div.innerHTML = `
         <div class="d-flex justify-content-between align-items-center mb-2">
             <input type="text" class="form-control form-control-tb me-2 fw-bold"
-                   name="sections[${sectionIndex}].title" placeholder="Section Title (e.g. For Sauce)" required>
+                   name="sections[${sectionIndex}].title" placeholder="Название раздела (например, Для соуса)" required>
             <button type="button" class="btn btn-link text-danger p-0" onclick="removeSection(this)">
                 <i class="bi bi-trash fs-5"></i>
             </button>
@@ -212,11 +210,11 @@
             <div class="row g-2 mb-2 ingredient-row align-items-center">
                 <div class="col-4">
                     <input type="text" class="form-control form-control-tb"
-                           name="sections[${sectionIndex}].ingredients[0].amount" placeholder="e.g. 2 tbsp">
+                           name="sections[${sectionIndex}].ingredients[0].amount" placeholder="например, 2 ст. л.">
                 </div>
                 <div class="col-7">
                     <input type="text" class="form-control form-control-tb"
-                           name="sections[${sectionIndex}].ingredients[0].name" placeholder="e.g. Olive oil" required>
+                           name="sections[${sectionIndex}].ingredients[0].name" placeholder="например, Оливковое масло" required>
                 </div>
                 <div class="col-1 text-end">
                     <button type="button" class="btn btn-link text-danger p-0" onclick="removeIngredient(this)">
@@ -227,7 +225,7 @@
         </div>
 
         <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addIngredientToSection(this)">
-            + Add Ingredient
+            + Добавить ингредиент
         </button>
     `;
         container.appendChild(div);
@@ -244,11 +242,11 @@
         div.innerHTML = `
         <div class="col-4">
             <input type="text" class="form-control form-control-tb"
-                   name="sections[${sectionIndex}].ingredients[${ingredientIndex}].amount" placeholder="Amount">
+                   name="sections[${sectionIndex}].ingredients[${ingredientIndex}].amount" placeholder="Количество">
         </div>
         <div class="col-7">
             <input type="text" class="form-control form-control-tb"
-                   name="sections[${sectionIndex}].ingredients[${ingredientIndex}].name" placeholder="Ingredient name" required>
+                   name="sections[${sectionIndex}].ingredients[${ingredientIndex}].name" placeholder="Название ингредиента" required>
         </div>
         <div class="col-1 text-end">
             <button type="button" class="btn btn-link text-danger p-0" onclick="removeIngredient(this)">
@@ -280,9 +278,9 @@
         const div = document.createElement('div');
         div.className = 'mb-3 instruction-step';
         div.innerHTML = `
-            <label class="form-label fw-semibold step-title">Step ${stepCount}</label>
+            <label class="form-label fw-semibold step-title">Шаг ${stepCount}</label>
             <div class="d-flex gap-2">
-                <textarea class="form-control" name="stepDescriptions" rows="2" placeholder="Describe this step..." required></textarea>
+                <textarea class="form-control" name="stepDescriptions" rows="2" placeholder="Опишите этот шаг..." required></textarea>
                 <button type="button" class="btn btn-link text-danger align-self-start p-1" onclick="removeStep(this)">
                     <i class="bi bi-trash fs-5"></i>
                 </button>

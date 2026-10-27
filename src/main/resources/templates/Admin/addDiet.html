@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title th:text="${diet.id != null ? 'Редактировать диету' : 'Новая диета'} + ' — NutriBite'">Диета —
+        NutriBite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap"
+          rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<header class="custom-navbar">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-3 col-lg-2">
+                <a href="/">
+                    <img th:src="@{/icons/Logo.svg}" alt="logo">
+                </a>
+            </div>
+            <div class="col text-end">
+                <a th:href="@{/admin}" class="btn btn-tb-outline btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Назад
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="flex-grow-1 py-5">
+    <div class="container">
+
+        <!-- Основная форма, повторяющая структуру пользовательской страницы диеты -->
+        <form id="dietForm" th:action="@{/admin/diets/save}" th:object="${diet}" method="post"
+              enctype="multipart/form-data">
+            <input type="hidden" th:field="*{id}">
+            <input type="hidden" th:field="*{imagePath}">
+
+            <div class="row align-items-center g-4 mb-5">
+                <div class="col-lg-7">
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-semibold">Название диеты</label>
+                        <input type="text" th:field="*{name}" class="form-control form-control-lg fw-bold text-dark"
+                               required placeholder="Например, Кетогенная диета">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-semibold">Краткое описание</label>
+                        <textarea th:field="*{shortDescription}" class="form-control" rows="2" maxlength="500"
+                                  placeholder="Краткая суть диеты..."></textarea>
+                    </div>
+
+                    <div class="md-3">
+                        <label class="form-label text-muted small fw-semibold">URL</label>
+                        <input type="text" th:field="*{slug}" class="form-control" placeholder="keto-diet">
+                    </div>
+
+                    <div class="md-3">
+                        <label class="form-label text-muted small fw-semibold">Рекомендуемое БЖУ</label>
+                        <input type="text" th:field="*{macronutrientRatio}" class="form-control"
+                               placeholder="Б: 20% | Ж: 75% | У: 5%">
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="p-3 bg-white rounded-4 border shadow-sm">
+                        <label class="form-label fw-bold mb-2">Изображение диеты</label>
+                        <div class="rounded-3 overflow-hidden mb-3" style="max-height: 200px;"
+                             th:if="${diet.imagePath != null}">
+                            <img th:src="@{{path}(path=${diet.imagePath})}" alt="Превью"
+                                 class="w-100 h-100 object-fit-cover">
+                        </div>
+                        <input type="file" name="imageFile" class="form-control" accept="image/*">
+                        <div class="form-text mt-1" th:if="${diet.imagePath != null}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <!-- Основное описание и списки продуктов -->
+                <div class="col-lg-8">
+                    <div class="bg-white p-4 p-md-5 rounded-3 border shadow-sm mb-4">
+                        <h2 class="h4 fw-bold text-dark mb-3">Особенности диеты (Полное описание)</h2>
+                        <textarea th:field="*{fullDescription}" class="form-control" rows="6"
+                                  placeholder="Подробное описание механизмов..."></textarea>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-4 bg-success-subtle bg-opacity-25 rounded-3 border border-success-subtle h-100">
+                                <h3 class="h6 fw-bold text-success mb-3">
+                                    <i class="bi bi-check-circle-fill me-2"></i> Что можно есть
+                                </h3>
+                                <textarea th:field="*{allowedFoods}"
+                                          class="form-control bg-transparent border-0 p-0 shadow-none" rows="4"
+                                          placeholder="Список разрешенных продуктов..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-4 bg-danger-subtle bg-opacity-25 rounded-3 border border-danger-subtle h-100">
+                                <h3 class="h6 fw-bold text-danger mb-3">
+                                    <i class="bi bi-x-circle-fill me-2"></i> Чего следует избегать
+                                </h3>
+                                <textarea th:field="*{forbiddenFoods}"
+                                          class="form-control bg-transparent border-0 p-0 shadow-none" rows="4"
+                                          placeholder="Список запрещенных продуктов..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="p-4 bg-white rounded-3 border shadow-sm mb-4">
+                        <h3 class="h6 fw-bold text-dark mb-3">
+                            Противопоказания
+                        </h3>
+                        <textarea th:field="*{contraindications}" class="form-control" rows="4"
+                                  placeholder="Кому противопоказана диета..."></textarea>
+                    </div>
+
+                    <div class="p-4 bg-white rounded-3 border shadow-sm text-center">
+                        <button type="submit" class="btn btn-tb-orange w-100 py-3 fw-bold mb-2 shadow-sm">
+                            <i class="bi bi-check-lg me-1"></i> Сохранить диету
+                        </button>
+                        <a th:href="@{/admin/diets}" class="btn btn-outline-secondary w-100 btn-sm">
+                            Отменить и вернуться к списку
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<div th:replace="~{fragments/footer :: successToast}"></div>
+<div th:replace="~{fragments/footer :: errorToast}"></div>
+<script th:replace="~{fragments/footer :: toastScript}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dietForm = document.getElementById('dietForm');
+
+        function showToast(message, isSuccess = true) {
+            const toastEl = document.getElementById(isSuccess ? 'successToast' : 'ErrorToast');
+            if (!toastEl) return;
+
+            const textSpan = toastEl.querySelector('.alert span');
+            if (textSpan) {
+                textSpan.textContent = message;
+            }
+
+            const toast = bootstrap.Toast.getOrCreateInstance(toastEl, {delay: 4000});
+            toast.show();
+        }
+
+        if (dietForm) {
+            dietForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData(dietForm);
+
+                try {
+                    const response = await fetch(dietForm.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        showToast('Диета успешно сохранена!', true);
+                        setTimeout(() => {
+                            window.location.href = '/admin/diets';
+                        }, 1200);
+                    } else {
+                        const errorMessage = await response.text();
+                        showToast(errorMessage || 'Ошибка при сохранении диеты', false);
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    showToast('Ошибка сети при отправке данных', false);
+                }
+            });
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

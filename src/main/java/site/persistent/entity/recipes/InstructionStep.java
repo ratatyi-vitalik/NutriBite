@@ -13,15 +13,12 @@ public class InstructionStep {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String text;
 
-    // Конструктор по умолчанию
     public InstructionStep() {
     }
 
     public InstructionStep(String text) {
         this.text = text;
     }
-
-    // Геттеры и Сеттеры
 
     public Long getId() {
         return id;

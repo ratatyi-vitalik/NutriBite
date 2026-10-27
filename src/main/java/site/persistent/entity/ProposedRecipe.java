@@ -19,16 +19,16 @@ public class ProposedRecipe {
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "prep_time")
+    @Column(nullable = false, name = "prep_time")
     private Integer prepTime;
 
-    @Column(name = "cook_time")
+    @Column(nullable = false, name = "cook_time")
     private Integer cookTime;
 
-    @Column
+    @Column(nullable = false)
     private String servings;
 
     @Column(name = "image_path", nullable = false)
@@ -38,7 +38,7 @@ public class ProposedRecipe {
     private String videoPath;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
+    @JoinColumn(nullable = false, name = "author_id")
     private User author;
 
     @Column(nullable = false)

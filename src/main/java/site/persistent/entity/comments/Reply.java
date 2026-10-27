@@ -16,14 +16,14 @@ public class Reply {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String text;
 
-    @Column
+    @Column(nullable = false)
     private LocalDateTime date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", referencedColumnName = "id")
+    @JoinColumn(nullable = false, name = "author_id", referencedColumnName = "id")
     private User author;
 
     @ManyToMany
@@ -38,7 +38,7 @@ public class Reply {
     private boolean hidden = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id")
+    @JoinColumn(nullable = false, name = "comment_id")
     private Comment comment;
 
     public Reply() {

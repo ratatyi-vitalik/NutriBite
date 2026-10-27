@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title th:text="'Редактирование: ' + ${recipe.title} + ' — NutriBite'">Редактирование рецепта — NutriBite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<header class="custom-navbar">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-3 col-lg-2">
+                <a href="/">
+                    <img th:src="@{/icons/Logo.svg}" alt="logo">
+                </a>
+            </div>
+            <div class="col text-end">
+                <a th:href="@{/admin}" class="btn btn-tb-outline btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Назад
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="flex-grow-1 py-5">
+    <div class="container">
+
+        <!-- Обязательно enctype для загрузки файлов -->
+        <form id="recipeEditForm" th:action="@{/admin/recipes/save}" th:object="${recipe}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:field="*{id}">
+            <input type="hidden" th:field="*{imagePath}">
+            <input type="hidden" th:field="*{videoPath}">
+            <input type="hidden" th:field="*{date}">
+
+            <!-- Название -->
+            <div class="mb-4">
+                <label class="form-label text-muted small fw-semibold">Название рецепта</label>
+                <input type="text" th:field="*{title}" class="form-control form-control-lg fw-bold text-dark" required>
+            </div>
+
+            <!-- Описание -->
+            <div class="mb-4">
+                <label class="form-label text-muted small fw-semibold">Описание рецепта</label>
+                <textarea th:field="*{description}" class="form-control" rows="3" required></textarea>
+            </div>
+
+            <!-- Блок загрузки файлов: Картинка и Видео -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-6">
+                    <div class="p-3 bg-white rounded-4 border shadow-sm h-100">
+                        <label class="form-label fw-bold mb-2">Изображение рецепта</label>
+                        <div class="rounded-3 overflow-hidden mb-3" style="max-height: 150px;" th:if="${recipe.imagePath != null}">
+                            <img th:src="@{${recipe.imagePath}}" alt="Превью" class="w-100 h-100 object-fit-cover">
+                        </div>
+                        <input type="file" name="imageFile" class="form-control" accept="image/*">
+                        <div class="form-text">Загрузите новое изображение для замены текущего</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="p-3 bg-white rounded-4 border shadow-sm h-100">
+                        <label class="form-label fw-bold mb-2">Видео рецепта</label>
+                        <div class="mb-3" th:if="${recipe.videoPath != null}">
+                            <video controls class="w-100 rounded" style="max-height: 150px;" th:src="@{${recipe.videoPath}}"></video>
+                        </div>
+                        <input type="file" name="videoFile" class="form-control" accept="video/*">
+                        <div class="form-text">Загрузите или замените видеофайл</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Время и порции -->
+            <div class="d-flex align-items-center mb-5 border-bottom pb-4 gap-3 flex-wrap">
+                <div class="recipe-time-card flex-grow-1">
+                    <div class="recipe-time-label">Подготовка (минут)</div>
+                    <input type="number" th:field="*{prepTime}" class="form-control mt-1" min="0" required>
+                </div>
+                <div class="recipe-time-card flex-grow-1">
+                    <div class="recipe-time-label">Готовка (минут)</div>
+                    <input type="number" th:field="*{cookTime}" class="form-control mt-1" min="0" required>
+                </div>
+                <div class="recipe-time-card flex-grow-1">
+                    <div class="recipe-time-label">Порции</div>
+                    <input type="text" th:field="*{servings}" class="form-control mt-1" required>
+                </div>
+            </div>
+
+            <!-- Ингредиенты -->
+            <div class="row g-5 mb-5">
+                <div class="col-lg-7">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="recipe-subtitle m-0">Ингредиенты</h2>
+                        <button type="button" class="btn btn-sm btn-outline-success" id="add-section-btn">
+                            <i class="bi bi-plus-lg"></i> Добавить секцию
+                        </button>
+                    </div>
+
+                    <div id="sections-container">
+                        <div th:each="section, secStat : *{ingredientSections}" class="mb-4 p-3 bg-white rounded-3 border section-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <input type="text" th:field="*{ingredientSections[__${secStat.index}__].title}" class="form-control fw-bold w-75" placeholder="Название секции (например, Для теста)" required>
+                                <button type="button" class="btn btn-outline-danger btn-sm remove-section-btn"><i class="bi bi-trash"></i></button>
+                            </div>
+
+                            <div class="ingredients-list">
+                                <div th:each="ingredient, ingStat : *{ingredientSections[__${secStat.index}__].ingredients}" class="d-flex gap-2 mb-2 align-items-center ingredient-row">
+                                    <input type="text" th:field="*{ingredientSections[__${secStat.index}__].ingredients[__${ingStat.index}__].amount}" class="form-control" style="width: 120px;" placeholder="Кол-во">
+                                    <input type="text" th:field="*{ingredientSections[__${secStat.index}__].ingredients[__${ingStat.index}__].name}" class="form-control" placeholder="Продукт" required>
+                                    <button type="button" class="btn btn-outline-danger btn-sm remove-ingredient-btn"><i class="bi bi-x"></i></button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2 add-ingredient-btn">+ Добавить ингредиент</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Пищевая ценность -->
+                <div class="col-lg-5">
+                    <div class="nutrition-card p-4 bg-white rounded-3 border shadow-sm" th:object="${recipe.nutrition}">
+                        <input type="hidden" th:field="*{id}">
+                        <h2 class="nutrition-title mb-3">Пищевая ценность</h2>
+
+                        <div class="mb-2"><label class="form-label small text-muted">Калории (kcal)</label><input type="number" th:field="*{calories}" class="form-control" required></div>
+                        <div class="mb-2"><label class="form-label small text-muted">Белки (g)</label><input type="number" step="0.1" th:field="*{protein}" class="form-control" required></div>
+                        <div class="mb-2"><label class="form-label small text-muted">Жиры (g)</label><input type="number" step="0.1" th:field="*{fat}" class="form-control" required></div>
+                        <div class="mb-2"><label class="form-label small text-muted">Углеводы (g)</label><input type="number" step="0.1" th:field="*{carbs}" class="form-control" required></div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-5" style="color: #E8E8E8;">
+
+            <!-- Шаги приготовления -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="recipe-subtitle m-0">Шаги приготовления</h2>
+                        <button type="button" class="btn btn-sm btn-outline-success" id="add-step-btn">
+                            <i class="bi bi-plus-lg"></i> Добавить шаг
+                        </button>
+                    </div>
+
+                    <div id="steps-container" class="instructions-list">
+                        <div class="instruction-step mb-3 p-3 bg-white rounded-3 border d-flex gap-3 align-items-center step-item" th:each="step, iterStat : *{instructions}">
+                            <div class="step-number fw-bold" th:text="${iterStat.count}">1</div>
+                            <textarea th:field="*{instructions[__${iterStat.index}__].text}" class="form-control" rows="2" required></textarea>
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-step-btn"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопка сохранения -->
+            <div class="p-4 bg-white rounded-3 border shadow-sm text-center">
+                <button type="submit" class="btn btn-tb-orange w-100 py-3 fw-bold mb-2 shadow-sm">
+                    <i class="bi bi-check-lg me-1"></i> Сохранить изменения
+                </button>
+                <a th:href="@{/admin}" class="btn btn-outline-secondary w-100 btn-sm">Отменить</a>
+            </div>
+        </form>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/footer :: successToast}"></div>
+<div th:replace="~{fragments/footer :: errorToast}"></div>
+<script th:replace="~{fragments/footer :: toastScript}"></script>
+
+<!-- Скрипт динамического добавления элементов и AJAX отправки -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Добавление шага
+        const stepsContainer = document.getElementById('steps-container');
+        document.getElementById('add-step-btn').addEventListener('click', () => {
+            const index = stepsContainer.querySelectorAll('.step-item').length;
+            const div = document.createElement('div');
+            div.className = 'instruction-step mb-3 p-3 bg-white rounded-3 border d-flex gap-3 align-items-center step-item';
+            div.innerHTML = `
+                <div class="step-number fw-bold">${index + 1}</div>
+                <textarea name="instructions[${index}].text" class="form-control" rows="2" required placeholder="Описание шага..."></textarea>
+                <button type="button" class="btn btn-outline-danger btn-sm remove-step-btn"><i class="bi bi-trash"></i></button>
+            `;
+            stepsContainer.appendChild(div);
+        });
+
+        // Удаление шагов и динамическое обновление нумерации
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-step-btn')) {
+                e.target.closest('.step-item').remove();
+                document.querySelectorAll('#steps-container .step-item').forEach((item, idx) => {
+                    item.querySelector('.step-number').textContent = idx + 1;
+                    item.querySelectorAll('textarea').forEach(input => {
+                        input.name = `instructions[${idx}].text`;
+                    });
+                });
+            }
+        });
+
+        // Добавление секции ингредиентов
+        const sectionsContainer = document.getElementById('sections-container');
+        document.getElementById('add-section-btn').addEventListener('click', () => {
+            const secIndex = sectionsContainer.querySelectorAll('.section-item').length;
+            const div = document.createElement('div');
+            div.className = 'mb-4 p-3 bg-white rounded-3 border section-item';
+            div.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <input type="text" name="ingredientSections[${secIndex}].title" class="form-control fw-bold w-75" placeholder="Название секции" required>
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-section-btn"><i class="bi bi-trash"></i></button>
+                </div>
+                <div class="ingredients-list">
+                    <div class="d-flex gap-2 mb-2 align-items-center ingredient-row">
+                        <input type="text" name="ingredientSections[${secIndex}].ingredients[0].amount" class="form-control" style="width: 120px;" placeholder="Кол-во">
+                        <input type="text" name="ingredientSections[${secIndex}].ingredients[0].name" class="form-control" placeholder="Продукт" required>
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-ingredient-btn"><i class="bi bi-x"></i></button>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary mt-2 add-ingredient-btn">+ Добавить ингредиент</button>
+            `;
+            sectionsContainer.appendChild(div);
+        });
+
+        // Добавление ингредиента в секцию
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.add-ingredient-btn')) {
+                const section = e.target.closest('.section-item');
+                const secIndex = Array.from(sectionsContainer.querySelectorAll('.section-item')).indexOf(section);
+                const list = section.querySelector('.ingredients-list');
+                const ingIndex = list.querySelectorAll('.ingredient-row').length;
+
+                const div = document.createElement('div');
+                div.className = 'd-flex gap-2 mb-2 align-items-center ingredient-row';
+                div.innerHTML = `
+                    <input type="text" name="ingredientSections[${secIndex}].ingredients[${ingIndex}].amount" class="form-control" style="width: 120px;" placeholder="Кол-во">
+                    <input type="text" name="ingredientSections[${secIndex}].ingredients[${ingIndex}].name" class="form-control" placeholder="Продукт" required>
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-ingredient-btn"><i class="bi bi-x"></i></button>
+                `;
+                list.appendChild(div);
+            }
+        });
+
+        // Удаление ингредиента
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-ingredient-btn')) {
+                const row = e.target.closest('.ingredient-row');
+                const list = row.parentElement;
+                row.remove();
+                // Переиндексация внутри секции
+                const section = list.closest('.section-item');
+                const secIndex = Array.from(sectionsContainer.querySelectorAll('.section-item')).indexOf(section);
+                list.querySelectorAll('.ingredient-row').forEach((r, rIdx) => {
+                    r.querySelector('input:nth-child(1)').name = `ingredientSections[${secIndex}].ingredients[${rIdx}].amount`;
+                    r.querySelector('input:nth-child(2)').name = `ingredientSections[${secIndex}].ingredients[${rIdx}].name`;
+                });
+            }
+        });
+
+        // Удаление секции
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-section-btn')) {
+                e.target.closest('.section-item').remove();
+            }
+        });
+
+        // AJAX отправка формы без перезагрузки
+        const form = document.getElementById('recipeEditForm');
+        function showToast(message, isSuccess = true) {
+            const toastEl = document.getElementById(isSuccess ? 'successToast' : 'ErrorToast');
+            if (!toastEl) return;
+            toastEl.querySelector('.alert span').textContent = message;
+            bootstrap.Toast.getOrCreateInstance(toastEl, {delay: 4000}).show();
+        }
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+            const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+
+            const headers = {};
+            if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
+
+            try {
+                const response = await fetch(form.action, { method: 'POST', headers: headers, body: formData });
+                if (response.ok) {
+                    showToast('Рецепт успешно обновлен!', true);
+                } else {
+                    const errText = await response.text();
+                    showToast(errText || 'Ошибка при сохранении', false);
+                }
+            } catch (err) {
+                showToast('Ошибка сети', false);
+            }
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
